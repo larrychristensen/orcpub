@@ -43,3312 +43,2999 @@
 
 (def challenge-ratings {0 10, (/ 1 8) 25, (/ 1 4) 50, (/ 1 2) 100, 1 200, 2 450, 3 700, 4 1100, 5 1800, 6 2300, 7 2900, 8 3900, 9 5000, 10 5900, 11 7200, 12 8400, 13 10000, 14 11500, 15 13000, 16 15000, 17 18000, 18 20000, 19 22000, 20 25000, 21 33000, 22 41000, 23 50000, 24 62000, 25 75000, 26 90000, 27 105000, 28 120000, 29 135000, 30 155000})
 
-(def monsters-raw [{
-:name "Aboleth"
-:size :large
-:type :aberration
-:alignment "lawful evil"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 135 :die-count 18 :die 10 :modifier 36}
-:speed "10 ft., swim 40 ft."
+(def monsters-raw [
+{
+ :name "Aboleth"
+ :size :large
+ :type :aberration
+ :alignment "lawful evil"
+ :armor-class 17
+ :armor-notes "natural armor"
+ :hit-points {:mean 135 :die-count 18 :die 10 :modifier 36}
+ :speed "10 ft., swim 40 ft."
 
-:str 21
-:dex 9
-:con 15
-:int 18
-:wis 15
-:cha 18
+ :str 21
+ :dex 9
+ :con 15
+ :int 18
+ :wis 15
+ :cha 18
 
-:saving-throws {:con 6, :int 8, :wis 6}
+ :saving-throws {:con 6, :int 8, :wis 6}
 
-:skills {:history 12, :perception 10}
-:senses "darkvision 120 ft., passive Perception 20"
-:languages "Deep Speech, telepathy 120 ft."
-:challenge 10
+ :skills {:history 12, :perception 10}
+ :senses "darkvision 120 ft., passive Perception 20"
+ :languages "Deep Speech, telepathy 120 ft."
+ :challenge 10
 
-:traits [{:name "Amphibious" :description "The aboleth can breathe air and water."}
-{:name "Mucous Cloud" :description "While underwater, the aboleth is surrounded by transformative mucus. A creature that touches the aboleth or that hits it with a melee attack while within 5 feet of it must make a DC 14 Constitution saving throw. On a failure, the creature is diseased for 1d4 hours. The diseased creature can breathe only underwater."}
-{:name "Probing Telepathy" :description "If a creature communicates telepathically with the aboleth, the aboleth learns the creature's greatest desires if the aboleth can see the creature."}]
+ :traits [{:name "Amphibious" :description "The aboleth can breathe air and water."}
+          {:name "Mucous Cloud" :description "While underwater, the aboleth is surrounded by transformative mucus. A creature that touches the aboleth or that hits it with a melee attack while within 5 feet of it must make a DC 14 Constitution saving throw. On a failure, the creature is diseased for 1d4 hours. The diseased creature can breathe only underwater."}
+          {:name "Probing Telepathy" :description "If a creature communicates telepathically with the aboleth, the aboleth learns the creature's greatest desires if the aboleth can see the creature."}]
 
-:actions [{:name "Multiattack" :description "The aboleth makes three tentacle attacks."}
-{:name "Tentacle" :description "Melee Weapon Attack: +9 to hit, reach 10 ft., one target. Hit: 12 (2d6 + 5) bludgeoning damage. If the target is a creature, it must succeed on a DC 14 Constitution saving throw or become diseased. The disease has no effect for 1 minute and can be removed by any magic that cures disease. After 1 minute, the diseased creature's skin becomes translucent and slimy, the creature can't regain hit points unless it is underwater, and the disease can be removed only by heal or another disease-curing spell of 6th level or higher. When the creature is outside a body of water, it takes 6 (1d12) acid damage every 10 minutes unless moisture is applied to the skin before 10 minutes have passed."}
-{:name "Tail" :description "Melee Weapon Attack: +9 to hit, reach 10 ft. one target. Hit: 15 (3d6 + 5) bludgeoning damage."}
-{:name "Enslave " :notes "3/Day" :description "The aboleth targets one creature it can see within 30 feet of it. The target must succeed on a DC 14 Wisdom saving throw or be magically charmed by the aboleth until the aboleth dies or until it is on a different plane of existence from the target. The charmed target is under the aboleth's control and can't take reactions, and the aboleth and the target can communicate telepathically with each other over any distance.
+ :actions [{:name "Multiattack" :description "The aboleth makes three tentacle attacks."}
+           {:name "Tentacle" :description "Melee Weapon Attack: +9 to hit, reach 10 ft., one target. Hit: 12 (2d6 + 5) bludgeoning damage. If the target is a creature, it must succeed on a DC 14 Constitution saving throw or become diseased. The disease has no effect for 1 minute and can be removed by any magic that cures disease. After 1 minute, the diseased creature's skin becomes translucent and slimy, the creature can't regain hit points unless it is underwater, and the disease can be removed only by heal or another disease-curing spell of 6th level or higher. When the creature is outside a body of water, it takes 6 (1d12) acid damage every 10 minutes unless moisture is applied to the skin before 10 minutes have passed."}
+           {:name "Tail" :description "Melee Weapon Attack: +9 to hit, reach 10 ft. one target. Hit: 15 (3d6 + 5) bludgeoning damage."}
+           {:name "Enslave " :notes "3/Day" :description "The aboleth targets one creature it can see within 30 feet of it. The target must succeed on a DC 14 Wisdom saving throw or be magically charmed by the aboleth until the aboleth dies or until it is on a different plane of existence from the target. The charmed target is under the aboleth's control and can't take reactions, and the aboleth and the target can communicate telepathically with each other over any distance.
 Whenever the charmed target takes damage, the target can repeat the saving throw. On a success, the effect ends. No more than once every 24 hours, the target can also repeat the saving throw when it is at least 1 mile away from the aboleth."}]
 
-:legendary-actions {
-:description "The aboleth can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The aboleth regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The aboleth makes a Wisdom (Perception) check."}
-{:name "Tail Swipe" :description "The aboleth makes one tail attack."}
-{:name "Psychic Drain " :notes "Costs 2 Actions" :description "One creature charmed by the aboleth takes 10 (3d6) psychic damage, and the aboleth regains hit points equal to the damage the creature takes.
-"}]}
+ :legendary-actions {:description "The aboleth can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The aboleth regains spent legendary actions at the start of its turn."
+                     :actions [{:name "Detect" :description "The aboleth makes a Wisdom (Perception) check."}
+                               {:name "Tail Swipe" :description "The aboleth makes one tail attack."}
+                               {:name "Psychic Drain " :notes "Costs 2 Actions" :description "One creature charmed by the aboleth takes 10 (3d6) psychic damage, and the aboleth regains hit points equal to the damage the creature takes."}]}}{
+  :name "Deva"
+  :size :medium
+  :type :celestial
+  :alignment "lawful good"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 136 :die-count 16 :die 8 :modifier 64}
+  :speed "30 ft., fly 90 ft."
 
-}{
-:name "Deva"
-:size :medium
-:type :celestial
-:alignment "lawful good"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 136 :die-count 16 :die 8 :modifier 64}
-:speed "30 ft., fly 90 ft."
+  :str 18
+  :dex 18
+  :con 18
+  :int 17
+  :wis 20
+  :cha 20
 
-:str 18
-:dex 18
-:con 18
-:int 17
-:wis 20
-:cha 20
+  :saving-throws {:wis 9, :cha 9}
 
-:saving-throws {:wis 9, :cha 9}
+  :skills {:insight 9, :perception 9}
+  :damage-resistances "radiant; bludgeoning, piercing, and slashing from nonmagical attacks"
+  :condition-immunities "charmed, exhaustion, frightened"
+  :senses "darkvision 120 ft., passive Perception 19"
+  :languages "all, telepathy 120 ft."
+  :challenge 10
 
-:skills {:insight 9, :perception 9}
-:damage-resistances "radiant; bludgeoning, piercing, and slashing from nonmagical attacks"
-:condition-immunities "charmed, exhaustion, frightened"
-:senses "darkvision 120 ft., passive Perception 19"
-:languages "all, telepathy 120 ft."
-:challenge 10
-
-:traits [{:name "Angelic Weapons" :description "The deva's weapon attacks are magical. When the deva hits with any weapon, the weapon deals an extra 4d8 radiant damage (included in the attack)."}
-{:name "Innate Spellcasting" :description "The deva's spellcasting ability is Charisma (spell save DC 17). The deva can innately cast the following spells, requiring only verbal components:
+  :traits [{:name "Angelic Weapons" :description "The deva's weapon attacks are magical. When the deva hits with any weapon, the weapon deals an extra 4d8 radiant damage (included in the attack)."}
+           {:name "Innate Spellcasting" :description "The deva's spellcasting ability is Charisma (spell save DC 17). The deva can innately cast the following spells, requiring only verbal components:
 At will: detect evil and good
 1/day each: commune, raise dead"}
-{:name "Magic Resistance" :description "The deva has advantage on saving throws against spells and other magical effects."}]
+           {:name "Magic Resistance" :description "The deva has advantage on saving throws against spells and other magical effects."}]
 
-:actions [{:name "Multiattack" :description "The deva makes two melee attacks."}
-{:name "Mace" :description "Melee Weapon Attack: +8 to hit, reach 5 ft., one target. Hit: 7 (1d6 + 4) bludgeoning damage plus 18 (4d8) radiant damage."}
-{:name "Healing Touch " :notes "3/Day" :description "The deva touches another creature. The target magically regains 20 (4d8 + 2) hit points and is freed from any curse, disease, poison, blindness, or deafness."}
-{:name "Change Shape" :description "The deva magically polymorphs into a humanoid or beast that has a challenge rating equal to or less than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the deva's choice).
-In a new form, the deva retains its game statistics and ability to speak, but its AC, movement modes, Strength, Dexterity, and special senses are replaced by those of the new form, and it gains any statistics and capabilities (except class features, legendary actions, and lair actions) that the new form has but that it lacks."}]
+  :actions [{:name "Multiattack" :description "The deva makes two melee attacks."}
+            {:name "Mace" :description "Melee Weapon Attack: +8 to hit, reach 5 ft., one target. Hit: 7 (1d6 + 4) bludgeoning damage plus 18 (4d8) radiant damage."}
+            {:name "Healing Touch " :notes "3/Day" :description "The deva touches another creature. The target magically regains 20 (4d8 + 2) hit points and is freed from any curse, disease, poison, blindness, or deafness."}
+            {:name "Change Shape" :description "The deva magically polymorphs into a humanoid or beast that has a challenge rating equal to or less than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the deva's choice).
+In a new form, the deva retains its game statistics and ability to speak, but its AC, movement modes, Strength, Dexterity, and special senses are replaced by those of the new form, and it gains any statistics and capabilities (except class features, legendary actions, and lair actions) that the new form has but that it lacks."}]}{
+  :name "Planetar"
+  :size :large
+  :type :celestial
+  :alignment "lawful good"
+  :armor-class 19
+  :armor-notes "natural armor"
+  :hit-points {:mean 200 :die-count 16 :die 10 :modifier 112}
+  :speed "40 ft., fly 120 ft."
 
-}{
-:name "Planetar"
-:size :large
-:type :celestial
-:alignment "lawful good"
-:armor-class 19
-:armor-notes "natural armor"
-:hit-points {:mean 200 :die-count 16 :die 10 :modifier 112}
-:speed "40 ft., fly 120 ft."
+  :str 24
+  :dex 20
+  :con 24
+  :int 19
+  :wis 22
+  :cha 25
 
-:str 24
-:dex 20
-:con 24
-:int 19
-:wis 22
-:cha 25
+  :saving-throws {:con 12, :wis 11, :cha 12}
 
-:saving-throws {:con 12, :wis 11, :cha 12}
+  :skills {:perception 11}
+  :damage-resistances "radiant; bludgeoning, piercing, and slashing from nonmagical attacks"
+  :condition-immunities "charmed, exhaustion, frightened"
+  :senses "truesight 120 ft., passive Perception 21"
+  :languages "all, telepathy 120 ft."
+  :challenge 16
 
-:skills {:perception 11}
-:damage-resistances "radiant; bludgeoning, piercing, and slashing from nonmagical attacks"
-:condition-immunities "charmed, exhaustion, frightened"
-:senses "truesight 120 ft., passive Perception 21"
-:languages "all, telepathy 120 ft."
-:challenge 16
-
-:traits [{:name "Angelic Weapons" :description "The planetar's weapon attacks are magical. When the planetar hits with any weapon, the weapon deals an extra 5d8 radiant damage (included in the attack)."}
-{:name "Divine Awareness" :description "The planetar knows if it hears a lie."}
-{:name "Innate Spellcasting" :description "The planetar's spellcasting ability is Charisma (spell save DC 20). The planetar can innately cast the following spells, requiring no material components:
-At will: detect evil and good, invisibility (self only) 3/day each: blade barrier, dispel evil and good, flame
-strike, raise dead
+  :traits [{:name "Angelic Weapons" :description "The planetar's weapon attacks are magical. When the planetar hits with any weapon, the weapon deals an extra 5d8 radiant damage (included in the attack)."}
+           {:name "Divine Awareness" :description "The planetar knows if it hears a lie."}
+           {:name "Innate Spellcasting" :description "The planetar's spellcasting ability is Charisma (spell save DC 20). The planetar can innately cast the following spells, requiring no material components:
+At will: detect evil and good, invisibility (self only) 3/day each: blade barrier, dispel evil and good, flame strike, raise dead
 1/day each: commune, control weather, insect plague"}
-{:name "Magic Resistance" :description "The planetar has advantage on saving throws against spells and other magical effects."}]
+           {:name "Magic Resistance" :description "The planetar has advantage on saving throws against spells and other magical effects."}]
 
-:actions [{:name "Multiattack" :description "The planetar makes two melee attacks."}
-{:name "Greatsword" :description "Melee Weapon Attack: +12 to hit, reach 5 ft., one target. Hit: 21 (4d6 + 7) slashing damage plus 22 (5d8) radiant damage."}
-{:name "Healing Touch " :notes "4/Day" :description "The planetar touches another creature. The target magically regains 30 (6d8 + 3) hit points and is freed from any curse, disease, poison, blindness, or deafness.
-"}]
+  :actions [{:name "Multiattack" :description "The planetar makes two melee attacks."}
+            {:name "Greatsword" :description "Melee Weapon Attack: +12 to hit, reach 5 ft., one target. Hit: 21 (4d6 + 7) slashing damage plus 22 (5d8) radiant damage."}
+            {:name "Healing Touch" :notes "4/Day" :description "The planetar touches another creature. The target magically regains 30 (6d8 + 3) hit points and is freed from any curse, disease, poison, blindness, or deafness."}]}{
+  :name "Solar"
+  :size :large
+  :type :celestial
+  :alignment "lawful good"
+  :armor-class 21
+  :armor-notes "natural armor"
+  :hit-points {:mean 243 :die-count 18 :die 10 :modifier 144}
+  :speed "50 ft., fly 150 ft."
 
-}{
-:name "Solar"
-:size :large
-:type :celestial
-:alignment "lawful good"
-:armor-class 21
-:armor-notes "natural armor"
-:hit-points {:mean 243 :die-count 18 :die 10 :modifier 144}
-:speed "50 ft., fly 150 ft."
+  :str 26
+  :dex 22
+  :con 26
+  :int 25
+  :wis 25
+  :cha 30
 
-:str 26
-:dex 22
-:con 26
-:int 25
-:wis 25
-:cha 30
+  :saving-throws {:int 14, :wis 14, :cha 17}
 
-:saving-throws {:int 14, :wis 14, :cha 17}
+  :skills {:perception 14}
+  :damage-resistances "radiant; bludgeoning, piercing, and slashing from nonmagical attacks"
+  :damage-immunities "necrotic, poison"
+  :condition-immunities "charmed, exhaustion, frightened, poisoned"
+  :senses "truesight 120 ft., passive Perception 24"
+  :languages "all, telepathy 120 ft."
+  :challenge 21
 
-:skills {:perception 14}
-:damage-resistances "radiant; bludgeoning, piercing, and slashing from nonmagical attacks"
-:damage-immunities "necrotic, poison"
-:condition-immunities "charmed, exhaustion, frightened, poisoned"
-:senses "truesight 120 ft., passive Perception 24"
-:languages "all, telepathy 120 ft."
-:challenge 21
-
-:traits [{:name "Angelic Weapons" :description "The solar's weapon attacks are magical. When the solar hits with any weapon, the weapon deals an extra 6d8 radiant damage (included in the attack)."}
-{:name "Divine Awareness" :description "The solar knows if it hears a lie."}
-{:name "Innate Spellcasting" :description "The solar's spellcasting ability is Charisma (spell save DC 25). It can innately cast the following spells, requiring no material components:
-At will: detect evil and good, invisibility (self only) 3/day each: blade barrier, dispel evil and good,
-resurrection
+  :traits [{:name "Angelic Weapons" :description "The solar's weapon attacks are magical. When the solar hits with any weapon, the weapon deals an extra 6d8 radiant damage (included in the attack)."}
+           {:name "Divine Awareness" :description "The solar knows if it hears a lie."}
+           {:name "Innate Spellcasting" :description "The solar's spellcasting ability is Charisma (spell save DC 25). It can innately cast the following spells, requiring no material components:
+At will: detect evil and good, invisibility (self only) 
+3/day each: blade barrier, dispel evil and good, resurrection
 1/day each: commune, control weather"}
-{:name "Magic Resistance" :description "The solar has advantage on saving throws against spells and other magical effects."}]
+           {:name "Magic Resistance" :description "The solar has advantage on saving throws against spells and other magical effects."}]
 
-:actions [{:name "Multiattack" :description "The solar makes two greatsword attacks."}
-{:name "Greatsword" :description "Melee Weapon Attack: +15 to hit, reach 5 ft., one target. Hit: 22 (4d6 + 8) slashing damage plus 27 (6d8) radiant damage."}
-{:name "Slaying Longbow" :description "Ranged Weapon Attack: +13 to hit, range 150/600 ft., one target. Hit: 15 (2d8 + 6) piercing damage plus 27 (6d8) radiant damage. If the target is a creature that has 100 hit points or fewer, it must succeed on a DC 15 Constitution saving throw or die."}
-{:name "Flying Sword" :description "The solar releases its greatsword to hover magically in an unoccupied space within 5 feet of it. If the solar can see the sword, the solar can mentally command it as a bonus action to fly up to 50 feet and either make one attack against a target or return to the solar's hands. If the hovering sword is targeted by any effect, the solar is considered to be holding it. The hovering sword falls if the solar dies."}
-{:name "Healing Touch " :notes "4/Day" :description "The solar touches another creature. The target magically regains 40 (8d8 + 4) hit
-points and is freed from any curse, disease, poison, blindness, or deafness.
-"}]
+  :actions [{:name "Multiattack" :description "The solar makes two greatsword attacks."}
+            {:name "Greatsword" :description "Melee Weapon Attack: +15 to hit, reach 5 ft., one target. Hit: 22 (4d6 + 8) slashing damage plus 27 (6d8) radiant damage."}
+            {:name "Slaying Longbow" :description "Ranged Weapon Attack: +13 to hit, range 150/600 ft., one target. Hit: 15 (2d8 + 6) piercing damage plus 27 (6d8) radiant damage. If the target is a creature that has 100 hit points or fewer, it must succeed on a DC 15 Constitution saving throw or die."}
+            {:name "Flying Sword" :description "The solar releases its greatsword to hover magically in an unoccupied space within 5 feet of it. If the solar can see the sword, the solar can mentally command it as a bonus action to fly up to 50 feet and either make one attack against a target or return to the solar's hands. If the hovering sword is targeted by any effect, the solar is considered to be holding it. The hovering sword falls if the solar dies."}
+            {:name "Healing Touch " :notes "4/Day" :description "The solar touches another creature. The target magically regains 40 (8d8 + 4) hit points and is freed from any curse, disease, poison, blindness, or deafness."}]
 
-:legendary-actions {
-:description "The solar can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The solar regains spent legendary actions at the start of its turn."
-:actions [{:name "Teleport" :description "The solar magically teleports, along with any equipment it is wearing or carrying, up to 120 feet to an unoccupied space it can see."}
-{:name "Searing Burst " :notes "Costs 2 Actions" :description "The solar emits magical, divine energy. Each creature of its choice in a 10-foot radius must make a DC 23 Dexterity saving throw, taking 14 (4d6) fire damage plus 14 (4d6) radiant damage on a failed save, or half as much damage on a successful one."}
-{:name "Blinding Gaze " :notes "Costs 3 Actions" :description "The solar targets one creature it can see within 30 feet of it. If the target can see it, the target must succeed on a DC 15 Constitution saving throw or be blinded until magic such as the lesser restoration spell removes the blindness."}]}
+  :legendary-actions {:description "The solar can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The solar regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Teleport" :description "The solar magically teleports, along with any equipment it is wearing or carrying, up to 120 feet to an unoccupied space it can see."}
+                                {:name "Searing Burst " :notes "Costs 2 Actions" :description "The solar emits magical, divine energy. Each creature of its choice in a 10-foot radius must make a DC 23 Dexterity saving throw, taking 14 (4d6) fire damage plus 14 (4d6) radiant damage on a failed save, or half as much damage on a successful one."}
+                                {:name "Blinding Gaze " :notes "Costs 3 Actions" :description "The solar targets one creature it can see within 30 feet of it. If the target can see it, the target must succeed on a DC 15 Constitution saving throw or be blinded until magic such as the lesser restoration spell removes the blindness."}]}}{
+  :name "Animated Armor"
+  :size :medium
+  :type :construct
+  :alignment "unaligned"
+  :armor-class 18
+  :armor-notes "natural armor"
+  :hit-points {:mean 33 :die-count 6 :die 8 :modifier 6}
+  :speed "25 ft."
 
-}{
+  :str 14
+  :dex 11
+  :con 13
+  :int 1
+  :wis 3
+  :cha 1
 
-:name "Animated Armor"
-:size :medium
-:type :construct
-:alignment "unaligned"
-:armor-class 18
-:armor-notes "natural armor"
-:hit-points {:mean 33 :die-count 6 :die 8 :modifier 6}
-:speed "25 ft."
+  :damage-immunities "poison, psychic"
+  :condition-immunities "blinded, charmed, deafened, exhaustion, frightened, paralyzed, petrified, poisoned"
+  :senses "blindsight 60 ft. (blind beyond this radius), passive Perception 6"
+  :challenge 1
 
-:str 14
-:dex 11
-:con 13
-:int 1
-:wis 3
-:cha 1
+  :traits [{:name "Antimagic Susceptibility" :description "The armor is incapacitated while in the area of an antimagic field. If targeted by dispel magic, the armor must succeed on a Constitution saving throw against the caster's spell save DC or fall unconscious for 1 minute."}
+           {:name "False Appearance" :description "While the armor remains motionless, it is indistinguishable from a normal suit of armor."}]
 
-:damage-immunities "poison, psychic"
-:condition-immunities "blinded, charmed, deafened, exhaustion, frightened, paralyzed, petrified, poisoned"
-:senses "blindsight 60 ft. (blind beyond this radius), passive Perception 6"
-:challenge 1
+  :actions [{:name "Multiattack" :description "The armor makes two melee attacks."}
+            {:name "Slam" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) bludgeoning damage."}]}{
+  :name "Flying Sword"
+  :size :small
+  :type :construct
+  :alignment "unaligned"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 17 :die-count 5 :die 6}
+  :speed "0 ft., fly 50 ft. (hover)"
 
-:traits [{:name "Antimagic Susceptibility" :description "The armor is incapacitated while in the area of an antimagic field. If targeted by dispel magic, the armor must succeed on a
-Constitution saving throw against the caster's spell save DC or fall unconscious for 1 minute."}
-{:name "False Appearance" :description "While the armor remains motionless, it is indistinguishable from a normal suit of armor."}]
+  :str 12
+  :dex 15
+  :con 11
+  :int 1
+  :wis 5
+  :cha 1
 
-:actions [{:name "Multiattack" :description "The armor makes two melee attacks."}
-{:name "Slam" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) bludgeoning damage."}]
+  :saving-throws {:dex 4}
+  :damage-immunities "poison, psychic"
+  :condition-immunities "blinded, charmed, deafened, frightened, paralyzed, petrified, poisoned"
+  :senses "blindsight 60 ft. (blind beyond this radius), passive Perception 7"
+  :challenge (/ 1 4)
 
-}{
-:name "Flying Sword"
-:size :small
-:type :construct
-:alignment "unaligned"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 17 :die-count 5 :die 6}
-:speed "0 ft., fly 50 ft. (hover)"
+  :traits [{:name "Antimagic Susceptibility" :description "The sword is incapacitated while in the area of an antimagic field. If targeted by dispel magic, the sword must succeed on a Constitution saving throw against the caster's spell save DC or fall unconscious for 1 minute."}
+           {:name "False Appearance" :description "While the sword remains motionless and isn't flying, it is indistinguishable from a normal sword."}]
 
-:str 12
-:dex 15
-:con 11
-:int 1
-:wis 5
-:cha 1
+  :actions [{:name "Longsword" :description "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 5 (1d8 + 1) slashing damage."}]}{
+  :name "Rug of Smothering"
+  :size :large
+  :type :construct
+  :alignment "unaligned"
+  :armor-class 12
+  :hit-points {:mean 33 :die-count 6 :die 10}
+  :speed "10 ft."
 
-:saving-throws {:dex 4}
-:damage-immunities "poison, psychic"
-:condition-immunities "blinded, charmed, deafened, frightened, paralyzed, petrified, poisoned"
-:senses "blindsight 60 ft. (blind beyond this radius), passive Perception 7"
-:challenge (/ 1 4)
+  :str 17
+  :dex 14
+  :con 10
+  :int 1
+  :wis 3
+  :cha 1
 
-:traits [{:name "Antimagic Susceptibility" :description "The sword is incapacitated while in the area of an antimagic field. If targeted by dispel magic, the sword must succeed on a Constitution saving throw against the caster's spell save DC or fall unconscious for 1 minute."}
-{:name "False Appearance" :description "While the sword remains motionless and isn't flying, it is indistinguishable from a normal sword."}]
+  :damage-immunities "poison, psychic"
+  :condition-immunities "blinded, charmed, deafened, frightened, paralyzed, petrified, poisoned"
+  :senses "blindsight 60 ft. (blind beyond this radius), passive Perception 6"
+  :challenge 2
 
-:actions [{:name "Longsword" :description "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 5 (1d8 + 1) slashing damage.
-"}]
+  :traits [{:name "Antimagic Susceptibility" :description "The rug is incapacitated while in the area of an antimagic field. If targeted by dispel magic, the rug must succeed on a Constitution saving throw against the caster's spell save DC or fall unconscious for 1 minute."}
+           {:name "Damage Transfer" :description "While it is grappling a creature, the rug takes only half the damage dealt to it, and the creature grappled by the rug takes the other half."}
+           {:name "False Appearance" :description "While the rug remains motionless, it is indistinguishable from a normal rug."}]
 
-}{
-:name "Rug of Smothering"
-:size :large
-:type :construct
-:alignment "unaligned"
-:armor-class 12
-:hit-points {:mean 33 :die-count 6 :die 10}
-:speed "10 ft."
+  :actions [{:name "Smother" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one Medium or smaller creature. Hit: The creature is grappled (escape DC 13). Until this grapple ends, the target is restrained, blinded, and at risk of suffocating, and the rug can't smother another target. In addition, at the start of each of the target's turns, the target takes 10 (2d6 + 3) bludgeoning damage."}]}{
+  :name "Ankheg"
+  :size :large
+  :type :monstrosity
+  :alignment "unaligned"
+  :armor-class 14
+  :armor-notes "natural armor, 11 while prone"
+  :hit-points {:mean 39 :die-count 6 :die 10 :modifier 6}
+  :speed "30 ft., burrow 10 ft."
 
-:str 17
-:dex 14
-:con 10
-:int 1
-:wis 3
-:cha 1
+  :str 17
+  :dex 11
+  :con 13
+  :int 1
+  :wis 13
+  :cha 6
 
-:damage-immunities "poison, psychic"
-:condition-immunities "blinded, charmed, deafened, frightened, paralyzed, petrified, poisoned"
-:senses "blindsight 60 ft. (blind beyond this radius), passive Perception 6"
-:challenge 2
+  :senses "darkvision 60 ft., tremorsense 60 ft., passive Perception 11"
+  :challenge 2
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 10 (2d6 + 3) slashing damage plus 3 (1d6) acid damage. If the target is a Large or smaller creature, it is grappled (escape DC 13). Until this grapple ends, the ankheg can bite only the grappled creature and has advantage on attack rolls to do so."}
+            {:name "Acid Spray" :notes "Recharge 6" :description "The ankheg spits acid in a line that is 30 feet long and 5 feet wide, provided that it has no creature grappled. Each creature in that line must make a DC 13 Dexterity saving throw, taking 10 (3d6) acid damage on a failed save, or half as much damage on a successful one."}]}{
+  :name "Azer"
+  :size :medium
+  :type :elemental
+  :alignment "lawful neutral"
+  :armor-class 17
+  :armor-notes "(natural armor, shield)"
+  :hit-points {:mean 39 :die-count 6 :die 8 :modifier 12}
+  :speed "30 ft."
 
-:traits [{:name "Antimagic Susceptibility" :description "The rug is incapacitated while in the area of an antimagic field. If targeted by dispel magic, the rug must succeed on a Constitution saving throw against the caster's spell save DC or fall unconscious for 1 minute."}
-{:name "Damage Transfer" :description "While it is grappling a creature, the rug takes only half the damage dealt to it, and the creature grappled by the rug takes the other half."}
-{:name "False Appearance" :description "While the rug remains motionless, it is indistinguishable from a normal rug."}]
+  :str 17
+  :dex 12
+  :con 15
+  :int 12
+  :wis 13
+  :cha 10
 
-:actions [{:name "Smother" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one Medium or smaller creature. Hit: The creature is grappled (escape DC 13). Until this grapple ends, the target is restrained, blinded, and at risk of suffocating, and the rug can't smother another target. In addition, at the start of each of the target's turns, the target takes 10 (2d6 + 3) bludgeoning damage.
-"}]
+  :saving-throws {:con 4}
+  :damage-immunities "fire, poison"
+  :condition-immunities "poisoned"
+  :senses "passive Perception 11"
+  :languages "Ignan"
+  :challenge 2
 
-}{
-:name "Ankheg"
-:size :large
-:type :monstrosity
-:alignment "unaligned"
-:armor-class 14
-:armor-notes "natural armor, 11 while prone"
-:hit-points {:mean 39 :die-count 6 :die 10 :modifier 6}
-:speed "30 ft., burrow 10 ft."
+  :traits [{:name "Heated Body" :description "A creature that touches the azer or hits it with a melee attack while within 5 feet of it takes 5 (1d10) fire damage."}
+           {:name "Heated Weapons" :description "When the azer hits with a metal melee weapon, it deals an extra 3 (1d6) fire damage (included in the attack)."}
+           {:name "Illumination" :description "The azer sheds bright light in a 10-foot radius and dim light for an additional 10 feet."}]
 
-:str 17
-:dex 11
-:con 13
-:int 1
-:wis 13
-:cha 6
+  :actions [{:name "Warhammer" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 7 (1d8 + 3) bludgeoning damage, or 8 (1d10 + 3) bludgeoning damage if used with two hands to make a melee attack, plus 3 (1d6) fire damage."}]}{
+  :name "Basilisk"
+  :size :medium
+  :type :monstrosity
+  :alignment "unaligned"
+  :armor-class 15
+  :armor-notes "natural armor"
+  :hit-points {:mean 52 :die-count 8 :die 8 :modifier 16}
+  :speed "20 ft."
 
-:senses "darkvision 60 ft., tremorsense 60 ft., passive Perception 11"
-:challenge 2
-:actions [{:name "Bite" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 10 (2d6 + 3) slashing damage plus 3 (1d6) acid damage. If the target is a Large or smaller creature, it is grappled (escape DC 13). Until this grapple ends, the ankheg can bite only the grappled creature and has advantage on attack rolls to do so."}
-{:name "Acid Spray " :notes "Recharge 6" :description "The ankheg spits acid in a line that is 30 feet long and 5 feet wide, provided that it has no creature grappled. Each creature in that line must make a DC 13 Dexterity saving throw, taking 10 (3d6) acid damage on a failed save, or half as much damage on a successful one."}]
+  :str 16
+  :dex 8
+  :con 15
+  :int 2
+  :wis 8
+  :cha 7
 
-}{
-:name "Azer"
-:size :medium
-:type :elemental
-:alignment "lawful neutral"
-:armor-class 17
-:armor-notes "(natural armor, shield)"
-:hit-points {:mean 39 :die-count 6 :die 8 :modifier 12}
-:speed "30 ft."
+  :senses "darkvision 60 ft., passive Perception 9"
+  :challenge 3
 
-:str 17
-:dex 12
-:con 15
-:int 12
-:wis 13
-:cha 10
-
-:saving-throws {:con 4}
-:damage-immunities "fire, poison"
-:condition-immunities "poisoned"
-:senses "passive Perception 11"
-:languages "Ignan"
-:challenge 2
-
-:traits [{:name "Heated Body" :description "A creature that touches the azer or hits it with a melee attack while within 5 feet of it takes 5 (1d10) fire damage."}
-{:name "Heated Weapons" :description "When the azer hits with a metal melee weapon, it deals an extra 3 (1d6) fire damage (included in the attack)."}
-{:name "Illumination" :description "The azer sheds bright light in a 10-foot radius and dim light for an additional 10 feet."}]
-
-:actions [{:name "Warhammer" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 7 (1d8 + 3) bludgeoning damage, or 8 (1d10 + 3) bludgeoning damage if used with two hands to make a melee attack, plus 3 (1d6) fire damage."}]
-
-}{
-:name "Basilisk"
-:size :medium
-:type :monstrosity
-:alignment "unaligned"
-:armor-class 15
-:armor-notes "natural armor"
-:hit-points {:mean 52 :die-count 8 :die 8 :modifier 16}
-:speed "20 ft."
-
-:str 16
-:dex 8
-:con 15
-:int 2
-:wis 8
-:cha 7
-:senses "darkvision 60 ft., passive Perception 9"
-:challenge 3
-
-:traits [{:name "Petrifying Gaze" :description "If a creature starts its turn within 30 feet of the basilisk and the two of them can see each other, the basilisk can force the creature to make a DC 12 Constitution saving throw if the basilisk isn't incapacitated. On a failed save, the creature magically begins to turn to stone and is restrained. It must repeat the saving throw at the end of its next turn. On a success, the effect ends. On a failure, the creature is petrified until freed by the greater restoration spell or other magic.
+  :traits [{:name "Petrifying Gaze" :description "If a creature starts its turn within 30 feet of the basilisk and the two of them can see each other, the basilisk can force the creature to make a DC 12 Constitution saving throw if the basilisk isn't incapacitated. On a failed save, the creature magically begins to turn to stone and is restrained. It must repeat the saving throw at the end of its next turn. On a success, the effect ends. On a failure, the creature is petrified until freed by the greater restoration spell or other magic.
 A creature that isn't surprised can avert its eyes to avoid the saving throw at the start of its turn. If it does so, it can't see the basilisk until the start of its next turn, when it can avert its eyes again. If it looks at the
 basilisk in the meantime, it must immediately make the save.
 If the basilisk sees its reflection within 30 feet of it in bright light, it mistakes itself for a rival and targets itself with its gaze."}]
 
-:actions [{:name "Bite" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 10 (2d6 + 3) piercing damage plus 7 (2d6) poison damage."}]
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 10 (2d6 + 3) piercing damage plus 7 (2d6) poison damage."}]}{
+  :name "Behir"
+  :size :huge
+  :type :monstrosity
+  :alignment "neutral evil"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 168 :die-count 16 :die 12 :modifier 64}
+  :speed "50 ft., climb 40 ft."
 
-}{
-:name "Behir"
-:size :huge
-:type :monstrosity
-:alignment "neutral evil"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 168 :die-count 16 :die 12 :modifier 64}
-:speed "50 ft., climb 40 ft."
+  :str 23
+  :dex 16
+  :con 18
+  :int 7
+  :wis 14
+  :cha 12
 
-:str 23
-:dex 16
-:con 18
-:int 7
-:wis 14
-:cha 12
+  :skills {:perception 6, :stealth 7}
+  :damage-immunities "lightning"
+  :senses "darkvision 90 ft., passive Perception 16"
+  :languages "Draconic"
+  :challenge 11
 
-:skills {:perception 6, :stealth 7}
-:damage-immunities "lightning"
-:senses "darkvision 90 ft., passive Perception 16"
-:languages "Draconic"
-:challenge 11
+  :actions [{:name "Multiattack" :description "The behir makes two attacks: one with its bite and one to constrict."}
+            {:name "Bite" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 22 (3d10 + 6) piercing damage."}
+            {:name "Constrict" :description "Melee Weapon Attack: +10 to hit, reach 5 ft., one Large or smaller creature. Hit: 17 (2d10 + 6) bludgeoning damage plus 17 (2d10 + 6) slashing damage. The target is grappled (escape DC 16) if the behir isn't already constricting a creature, and the target is restrained until this grapple ends."}
+            {:name "Lightning Breath " :notes "Recharge 5–6" :description "The behir exhales a line of lightning that is 20 feet long and 5 feet wide. Each creature in that line must make a DC 16 Dexterity saving throw, taking 66 (12d10) lightning damage on a failed save, or half as much damage on a successful one."}
+            {:name "Swallow" :description "The behir makes one bite attack against a Medium or smaller target it is grappling. If the attack hits, the target is also swallowed, and the grapple ends. While swallowed, the target is blinded and restrained, While swallowed, the target is blinded and restrained, it has total cover against attacks and other effects outside the behir, and it takes 21 (6d6) acid damage at the start of each of the behir's turns. A behir can have only one creature swallowed at a time. 
+If the behir takes 30 damage or more on a single turn from the swallowed creature, the behir must succeed on a DC 14 Constitution saving throw at the end of that turn or regurgitate the creature, which falls prone in a space within 10 feet of the behir. If the behir dies, a swallowed creature is no longer restrained by it and can escape from the corpse by using 15 feet of movement, exiting prone."}]}{
+  :name "Bugbear"
+  :size :medium
+  :type :humanoid
+  :subtypes #{:goblinoid}
+  :alignment "chaotic evil"
+  :armor-class 16
+  :armor-notes "(hide armor, shield)"
+  :hit-points {:mean 27 :die-count 5 :die 8 :modifier 5}
+  :speed "30 ft."
 
-:actions [{:name "Multiattack" :description "The behir makes two attacks: one with its bite and one to constrict."}
-{:name "Bite" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 22 (3d10 + 6) piercing damage."}
-{:name "Constrict" :description "Melee Weapon Attack: +10 to hit, reach 5 ft., one Large or smaller creature. Hit: 17 (2d10 + 6) bludgeoning damage plus 17 (2d10 + 6) slashing damage. The target is grappled (escape DC 16) if the behir isn't already constricting a creature, and the target is restrained until this grapple ends."}
-{:name "Lightning Breath " :notes "Recharge 5–6" :description "The behir exhales a line of lightning that is 20 feet long and 5 feet wide. Each creature in that line must make a DC 16 Dexterity saving throw, taking 66 (12d10) lightning damage on a failed save, or half as much damage on a successful one."}
-{:name "Swallow" :description "The behir makes one bite attack against a Medium or smaller target it is grappling. If the attack hits, the target is also swallowed, and the grapple ends. While swallowed, the target is blinded and restrained, While swallowed, the target is blinded and restrained, it has total cover against attacks and other effects outside the behir, and it takes 21 (6d6) acid damage at the start of each of the behir's turns. A behir can have only one creature swallowed at a time. 
-If the behir takes 30 damage or more on a single turn from the swallowed creature, the behir must succeed on a DC 14 Constitution saving throw at the end of that turn or regurgitate the creature, which falls prone in a space within 10 feet of the behir. If the behir dies, a swallowed creature is no longer restrained by it and can escape from the corpse by using 15 feet of movement, exiting prone."}]
-}{
-:name "Bugbear"
-:size :medium
-:type :humanoid
-:subtypes #{:goblinoid}
-:alignment "chaotic evil"
-:armor-class 16
-:armor-notes "(hide armor, shield)"
-:hit-points {:mean 27 :die-count 5 :die 8 :modifier 5}
-:speed "30 ft."
+  :str 15
+  :dex 14
+  :con 13
+  :int 8
+  :wis 11
+  :cha 9
 
-:str 15
-:dex 14
-:con 13
-:int 8
-:wis 11
-:cha 9
+  :skills {:stealth 6, :survival 2}
+  :senses "darkvision 60 ft., passive Perception 10"
+  :languages "Common, Goblin"
+  :challenge 1
 
-:skills {:stealth 6, :survival 2}
-:senses "darkvision 60 ft., passive Perception 10"
-:languages "Common, Goblin"
-:challenge 1
+  :traits [{:name "Brute" :description "A melee weapon deals one extra die of its damage when the bugbear hits with it (included in the attack)."}
+           {:name "Surprise Attack" :description "If the bugbear surprises a creature and hits it with an attack during the first round of combat, the target takes an extra 7 (2d6) damage from the attack."}]
 
-:traits [{:name "Brute" :description "A melee weapon deals one extra die of its damage when the bugbear hits with it (included in the attack)."}
-{:name "Surprise Attack" :description "If the bugbear surprises a creature and hits it with an attack during the first round of combat, the target takes an extra 7 (2d6) damage from the attack."}]
+  :actions [{:name "Morningstar" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 11 (2d8 + 2) piercing damage."}
+            {:name "Javelin" :description "Melee or Ranged Weapon Attack: +4 to hit, reach 5 ft. or range 30/120 ft., one target. Hit: 9 (2d6 +2) piercing damage in melee or 5 (1d6 + 2) piercing damage at range."}]}{
+  :name "Bulette"
+  :size :large
+  :type :monstrosity
+  :alignment "unaligned"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 94 :die-count 9 :die 10 :modifier 45}
+  :speed "40 ft., burrow 40 ft."
 
-:actions [{:name "Morningstar" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 11 (2d8 + 2) piercing damage."}
-{:name "Javelin" :description "Melee or Ranged Weapon Attack: +4 to hit, reach 5 ft. or range 30/120 ft., one target. Hit: 9 (2d6 +
-2) piercing damage in melee or 5 (1d6 + 2) piercing damage at range.
-"}]
+  :str 19
+  :dex 11
+  :con 21
+  :int 2
+  :wis 10
+  :cha 5
 
-}{
-:name "Bulette"
-:size :large
-:type :monstrosity
-:alignment "unaligned"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 94 :die-count 9 :die 10 :modifier 45}
-:speed "40 ft., burrow 40 ft."
+  :skills {:perception 6}
+  :senses "darkvision 60 ft., tremorsense 60 ft., passive Perception 16"
+  :challenge 5
 
-:str 19
-:dex 11
-:con 21
-:int 2
-:wis 10
-:cha 5
+  :traits [{:name "Standing Leap" :description "The bulette's long jump is up to 30 feet and its high jump is up to 15 feet, with or without a running start."}]
 
-:skills {:perception 6}
-:senses "darkvision 60 ft., tremorsense 60 ft., passive Perception 16"
-:challenge 5
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 30 (4d12 + 4) piercing damage."}
+            {:name "Deadly Leap" :description "If the bulette jumps at least 15 feet as part of its movement, it can then use this action to land on its feet in a space that contains one or more other creatures. Each of those creatures must succeed on a DC 16 Strength or Dexterity saving throw (target's choice) or be knocked prone and take 14 (3d6 + 4) bludgeoning damage plus 14 (3d6 + 4) slashing damage. On a successful save, the creature takes only half the damage, isn't knocked prone, and is pushed 5 feet out of the bulette's space into an unoccupied space of the creature's choice. If no unoccupied space is within range, the creature instead falls prone in the bulette's space."}]}{
+  :name "Centaur"
+  :size :large
+  :type :monstrosity
+  :alignment "neutral good"
+  :armor-class 12
+  :hit-points {:mean 45 :die-count 6 :die 10 :modifier 12}
+  :speed "50 ft."
 
-:traits [{:name "Standing Leap" :description "The bulette's long jump is up to 30 feet and its high jump is up to 15 feet, with or without a running start."}]
+  :str 18
+  :dex 14
+  :con 14
+  :int 9
+  :wis 13
+  :cha 11
 
-:actions [{:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 30 (4d12 + 4) piercing damage."}
-{:name "Deadly Leap" :description "If the bulette jumps at least 15 feet as part of its movement, it can then use this action to land on its feet in a space that contains one or more other creatures. Each of those creatures must succeed on a DC 16 Strength or Dexterity saving throw (target's choice) or be knocked prone and take 14 (3d6 + 4) bludgeoning damage plus 14 (3d6 + 4) slashing damage. On a successful save, the creature takes only half the damage, isn't knocked prone, and is pushed 5 feet out of the bulette's space into an unoccupied space of the creature's choice. If no unoccupied space is within range, the creature instead falls prone in the bulette's space."}]
-}{
-:name "Centaur"
-:size :large
-:type :monstrosity
-:alignment "neutral good"
-:armor-class 12
-:hit-points {:mean 45 :die-count 6 :die 10 :modifier 12}
-:speed "50 ft."
+  :skills {:athletics 6, :perception 3, :survival 3}
+  :senses "passive Perception 13"
+  :languages "Elvish, Sylvan"
+  :challenge 2
 
-:str 18
-:dex 14
-:con 14
-:int 9
-:wis 13
-:cha 11
+  :traits [{:name "Charge" :description "If the centaur moves at least 30 feet straight toward a target and then hits it with a pike attack on the same turn, the target takes an extra 10 (3d6) piercing damage."}]
 
-:skills {:athletics 6, :perception 3, :survival 3}
-:senses "passive Perception 13"
-:languages "Elvish, Sylvan"
-:challenge 2
+  :actions [{:name "Multiattack" :description "The centaur makes two attacks: one with its pike and one with its hooves or two with its longbow."}
+            {:name "Pike" :description "Melee Weapon Attack: +6 to hit, reach 10 ft., one target. Hit: 9 (1d10 + 4) piercing damage."}
+            {:name "Hooves" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) bludgeoning damage."}
+            {:name "Longbow" :description "Ranged Weapon Attack: +4 to hit, range 150/600 ft., one target. Hit: 6 (1d8 + 2) piercing damage."}]}{
+  :name "Chimera"
+  :size :large
+  :type :monstrosity
+  :alignment "chaotic evil"
+  :armor-class 14
+  :armor-notes "natural armor"
+  :hit-points {:mean 114 :die-count 12 :die 10 :modifier 48}
+  :speed "30 ft., fly 60 ft."
 
-:traits [{:name "Charge" :description "If the centaur moves at least 30 feet straight toward a target and then hits it with a pike attack on the same turn, the target takes an extra 10 (3d6) piercing damage."}]
+  :str 19
+  :dex 11
+  :con 19
+  :int 3
+  :wis 14
+  :cha 10
 
-:actions [{:name "Multiattack" :description "The centaur makes two attacks: one with its pike and one with its hooves or two with its longbow."}
-{:name "Pike" :description "Melee Weapon Attack: +6 to hit, reach 10 ft., one target. Hit: 9 (1d10 + 4) piercing damage."}
-{:name "Hooves" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) bludgeoning damage."}
-{:name "Longbow" :description "Ranged Weapon Attack: +4 to hit, range 150/600 ft., one target. Hit: 6 (1d8 + 2) piercing damage."}]
-}{
-:name "Chimera"
-:size :large
-:type :monstrosity
-:alignment "chaotic evil"
-:armor-class 14
-:armor-notes "natural armor"
-:hit-points {:mean 114 :die-count 12 :die 10 :modifier 48}
-:speed "30 ft., fly 60 ft."
+  :skills {:perception 8}
+  :senses "darkvision 60 ft., passive Perception 18"
+  :languages "understands Draconic but can't speak"
+  :challenge 6
 
-:str 19
-:dex 11
-:con 19
-:int 3
-:wis 14
-:cha 10
+  :actions [{:name "Multiattack" :description "The chimera makes three attacks: one with its bite, one with its horns, and one with its claws. When its fire breath is available, it can use the breath in place of its bite or horns."}
+            {:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) piercing damage."}
+            {:name "Horns" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 10 (1d12 + 4) bludgeoning damage."}
+            {:name "Claws" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) slashing damage."}
+            {:name "Fire Breath " :notes "Recharge 5–6" :description "The dragon head exhales fire in a 15-foot cone. Each creature in that area must make a DC 15 Dexterity saving throw, taking 31 (7d8) fire damage on a failed save, or half as much damage on a successful one."}]}{
+  :name "Chuul"
+  :size :large
+  :type :aberration
+  :alignment "chaotic evil"
+  :armor-class 16
+  :armor-notes "natural armor"
+  :hit-points {:mean 93 :die-count 11 :die 10 :modifier 33}
+  :speed "30 ft., swim 30 ft."
 
-:skills {:perception 8}
-:senses "darkvision 60 ft., passive Perception 18"
-:languages "understands Draconic but can't speak"
-:challenge 6
+  :str 19
+  :dex 10
+  :con 16
+  :int 5
+  :wis 11
+  :cha 5
 
-:actions [{:name "Multiattack" :description "The chimera makes three attacks: one with its bite, one with its horns, and one with its claws. When its fire breath is available, it can use the breath in place of its bite or horns."}
-{:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) piercing damage."}
-{:name "Horns" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 10 (1d12 + 4) bludgeoning damage."}
-{:name "Claws" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) slashing damage."}
-{:name "Fire Breath " :notes "Recharge 5–6" :description "The dragon head exhales fire in a 15-foot cone. Each creature in that area must make a DC 15 Dexterity saving throw, taking 31 (7d8) fire damage on a failed save, or half as much damage on a successful one."}]
+  :skills {:perception 4}
+  :damage-immunities "poison"
+  :condition-immunities "poisoned"
+  :senses "darkvision 60 ft., passive Perception 14"
+  :languages "understands Deep Speech but can't speak"
+  :challenge 4
 
-}{
-:name "Chuul"
-:size :large
-:type :aberration
-:alignment "chaotic evil"
-:armor-class 16
-:armor-notes "natural armor"
-:hit-points {:mean 93 :die-count 11 :die 10 :modifier 33}
-:speed "30 ft., swim 30 ft."
+  :traits [{:name "Amphibious" :description "The chuul can breathe air and water."}
+           {:name "Sense Magic" :description "The chuul senses magic within 120 feet of it at will. This trait otherwise works like the detect magic spell but isn't itself magical."}]
 
-:str 19
-:dex 10
-:con 16
-:int 5
-:wis 11
-:cha 5
+  :actions [{:name "Multiattack" :description "The chuul makes two pincer attacks. If the chuul is grappling a creature, the chuul can also use its tentacles once."}
+            {:name "Pincer" :description "Melee Weapon Attack: +6 to hit, reach 10 ft., one target. Hit: 11 (2d6 + 4) bludgeoning damage. The target is grappled (escape DC 14) if it is a Large or smaller creature and the chuul doesn't have two other creatures grappled."}
+            {:name "Tentacles" :description "One creature grappled by the chuul must succeed on a DC 13 Constitution saving throw or be poisoned for 1 minute. Until this poison ends, the target is paralyzed. The target can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}]}{
+  :name "Cloaker"
+  :size :large
+  :type :aberration
+  :alignment "chaotic neutral"
+  :armor-class 14
+  :armor-notes "natural armor"
+  :hit-points {:mean 78 :die-count 12 :die 10 :modifier 12}
+  :speed "10 ft., fly 40 ft."
 
-:skills {:perception 4}
-:damage-immunities "poison"
-:condition-immunities "poisoned"
-:senses "darkvision 60 ft., passive Perception 14"
-:languages "understands Deep Speech but can't speak"
-:challenge 4
+  :str 17
+  :dex 15
+  :con 12
+  :int 13
+  :wis 12
+  :cha 14
 
-:traits [{:name "Amphibious" :description "The chuul can breathe air and water."}
-{:name "Sense Magic" :description "The chuul senses magic within 120 feet of it at will. This trait otherwise works like the detect magic spell but isn't itself magical."}]
+  :skills {:stealth 5}
+  :senses "darkvision 60 ft., passive Perception 11"
+  :languages "Deep Speech, Undercommon"
+  :challenge 8
 
-:actions [{:name "Multiattack" :description "The chuul makes two pincer attacks. If the chuul is grappling a creature, the chuul can also use its tentacles once."}
-{:name "Pincer" :description "Melee Weapon Attack: +6 to hit, reach 10 ft., one target. Hit: 11 (2d6 + 4) bludgeoning damage. The target is grappled (escape DC 14) if it is a Large or smaller creature and the chuul doesn't have two other creatures grappled."}
-{:name "Tentacles" :description "One creature grappled by the chuul must succeed on a DC 13 Constitution saving throw or be poisoned for 1 minute. Until this poison ends, the target is paralyzed. The target can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success.
-"}]
-
-}{
-:name "Cloaker"
-:size :large
-:type :aberration
-:alignment "chaotic neutral"
-:armor-class 14
-:armor-notes "natural armor"
-:hit-points {:mean 78 :die-count 12 :die 10 :modifier 12}
-:speed "10 ft., fly 40 ft."
-
-:str 17
-:dex 15
-:con 12
-:int 13
-:wis 12
-:cha 14
-
-:skills {:stealth 5}
-:senses "darkvision 60 ft., passive Perception 11"
-:languages "Deep Speech, Undercommon"
-:challenge 8
-
-:traits [{:name "Damage Transfer" :description "While attached to a creature, the cloaker takes only half the damage dealt to it (rounded down), and that creature takes the other half."}
-{:name "False Appearance" :description "While the cloaker remains motionless without its underside exposed, it is indistinguishable from a dark leather cloak."}
-{:name "Light Sensitivity" :description "While in bright light, the cloaker has disadvantage on attack rolls and Wisdom (Perception) checks that rely on sight."}]
-:actions [{:name "Multiattack" :description "The cloaker makes two attacks: one with its bite and one with its tail."}
-{:name "Bite" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one creature. Hit: 10 (2d6 + 3) piercing damage, and if the target is Large or smaller, the cloaker attaches to it. If the cloaker has advantage against the target, the cloaker attaches to the target's head, and the target is blinded and unable to breathe while the cloaker is attached. While attached, the cloaker can make this attack only against the target and has advantage on the attack roll. The cloaker can detach itself by spending 5 feet of its movement. A creature, including the target, can take its action to detach the cloaker by succeeding on a DC 16 Strength check."}
-{:name "Tail" :description "Melee Weapon Attack: +6 to hit, reach 10 ft., one creature. Hit: 7 (1d8 + 3) slashing damage."}
-{:name "Moan" :description "Each creature within 60 feet of the cloaker that can hear its moan and that isn't an aberration must succeed on a DC 13 Wisdom saving throw or become frightened until the end of the cloaker's next turn. If a creature's saving throw is successful, the creature is immune to the cloaker's moan for the next 24 hours"}
-{:name "Phantasms " :notes "Recharges after a Short or Long Rest" :description "The cloaker magically creates three illusory duplicates of itself if it isn't in bright light. The duplicates move with it and mimic its actions, shifting position so as to make it impossible to track which cloaker is the real one. If the cloaker is ever in an area of bright light, the duplicates disappear.
+  :traits [{:name "Damage Transfer" :description "While attached to a creature, the cloaker takes only half the damage dealt to it (rounded down), and that creature takes the other half."}
+           {:name "False Appearance" :description "While the cloaker remains motionless without its underside exposed, it is indistinguishable from a dark leather cloak."}
+           {:name "Light Sensitivity" :description "While in bright light, the cloaker has disadvantage on attack rolls and Wisdom (Perception) checks that rely on sight."}]
+  :actions [{:name "Multiattack" :description "The cloaker makes two attacks: one with its bite and one with its tail."}
+            {:name "Bite" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one creature. Hit: 10 (2d6 + 3) piercing damage, and if the target is Large or smaller, the cloaker attaches to it. If the cloaker has advantage against the target, the cloaker attaches to the target's head, and the target is blinded and unable to breathe while the cloaker is attached. While attached, the cloaker can make this attack only against the target and has advantage on the attack roll. The cloaker can detach itself by spending 5 feet of its movement. A creature, including the target, can take its action to detach the cloaker by succeeding on a DC 16 Strength check."}
+            {:name "Tail" :description "Melee Weapon Attack: +6 to hit, reach 10 ft., one creature. Hit: 7 (1d8 + 3) slashing damage."}
+            {:name "Moan" :description "Each creature within 60 feet of the cloaker that can hear its moan and that isn't an aberration must succeed on a DC 13 Wisdom saving throw or become frightened until the end of the cloaker's next turn. If a creature's saving throw is successful, the creature is immune to the cloaker's moan for the next 24 hours"}
+            {:name "Phantasms" :notes "Recharges after a Short or Long Rest" :description "The cloaker magically creates three illusory duplicates of itself if it isn't in bright light. The duplicates move with it and mimic its actions, shifting position so as to make it impossible to track which cloaker is the real one. If the cloaker is ever in an area of bright light, the duplicates disappear.
 Whenever any creature targets the cloaker with an attack or a harmful spell while a duplicate remains, that creature rolls randomly to determine whether it targets the cloaker or one of the duplicates. A creature is unaffected by this magical effect if it can't see or if it relies on senses other than sight.
-A duplicate has the cloaker's AC and uses its saving throws. If an attack hits a duplicate, or if a duplicate fails a saving throw against an effect that deals damage, the duplicate disappears.
-"}]
+A duplicate has the cloaker's AC and uses its saving throws. If an attack hits a duplicate, or if a duplicate fails a saving throw against an effect that deals damage, the duplicate disappears."}]}{
+  :name "Cockatrice"
+  :size :small
+  :type :monstrosity
+  :alignment "unaligned"
+  :armor-class 11
+  :hit-points {:mean 27 :die-count 6 :die 6 :modifier 6}
+  :speed "20 ft., fly 40 ft."
 
-}{
-:name "Cockatrice"
-:size :small
-:type :monstrosity
-:alignment "unaligned"
-:armor-class 11
-:hit-points {:mean 27 :die-count 6 :die 6 :modifier 6}
-:speed "20 ft., fly 40 ft."
+  :str 6
+  :dex 12
+  :con 12
+  :int 2
+  :wis 13
+  :cha 5
 
-:str 6
-:dex 12
-:con 12
-:int 2
-:wis 13
-:cha 5
+  :senses "darkvision 60 ft., passive Perception 11"
+  :challenge (/ 1 2)
 
-:senses "darkvision 60 ft., passive Perception 11"
-:challenge (/ 1 2)
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +3 to hit, reach 5 ft., one creature. Hit: 3 (1d4 + 1) piercing damage, and the target must succeed on a DC 11 Constitution saving throw against being magically petrified. On a failed save, the creature begins to turn to stone and is restrained. It must repeat the saving throw at the end of its next turn. On a success, the effect ends. On a failure, the creature is petrified for 24 hours."}]}{
+  :name "Couatl"
+  :size :medium
+  :type :celestial
+  :alignment "lawful good"
+  :armor-class 19
+  :armor-notes "natural armor"
+  :hit-points {:mean 97 :die-count 13 :die 8 :modifier 39}
+  :speed "30 ft., fly 90 ft."
 
-:actions [{:name "Bite" :description "Melee Weapon Attack: +3 to hit, reach 5 ft., one creature. Hit: 3 (1d4 + 1) piercing damage, and the target must succeed on a DC 11 Constitution saving throw against being magically petrified. On a failed save, the creature begins to turn to stone and is restrained. It must repeat the saving throw at the end of its next turn. On a success, the effect ends. On a failure, the creature is petrified for 24 hours.
-"}]
+  :str 16
+  :dex 20
+  :con 17
+  :int 18
+  :wis 20
+  :cha 18
 
-}{
-:name "Couatl"
-:size :medium
-:type :celestial
-:alignment "lawful good"
-:armor-class 19
-:armor-notes "natural armor"
-:hit-points {:mean 97 :die-count 13 :die 8 :modifier 39}
-:speed "30 ft., fly 90 ft."
+  :saving-throws {:con 5, :wis 7, :cha 6}
+  :damage-resistances "radiant"
+  :damage-immunities "psychic; bludgeoning, piercing, and slashing from nonmagical attacks"
+  :senses "truesight 120 ft., passive Perception 15"
+  :languages "all, telepathy 120 ft."
+  :challenge 4
 
-:str 16
-:dex 20
-:con 17
-:int 18
-:wis 20
-:cha 18
-
-:saving-throws {:con 5, :wis 7, :cha 6}
-:damage-resistances "radiant"
-:damage-immunities "psychic; bludgeoning, piercing, and slashing from nonmagical attacks"
-:senses "truesight 120 ft., passive Perception 15"
-:languages "all, telepathy 120 ft."
-:challenge 4
-
-:traits [{:name "Innate Spellcasting" :description "The couatl's spellcasting ability is Charisma (spell save DC 14). It can innately cast the following spells, requiring only verbal components:
+  :traits [{:name "Innate Spellcasting" :description "The couatl's spellcasting ability is Charisma (spell save DC 14). It can innately cast the following spells, requiring only verbal components:
 At will: detect evil and good, detect magic, detect thoughts
 3/day each: bless, create food and water, cure wounds, lesser restoration, protection from poison, sanctuary, shield
 1/day each: dream, greater restoration, scrying"}
-{:name "Magic Weapons" :description "The couatl's weapon attacks are magical"}
-{:name "Shielded Mind" :description "The couatl is immune to scrying and to any effect that would sense its emotions, read its thoughts, or detect its location."}]
+           {:name "Magic Weapons" :description "The couatl's weapon attacks are magical"}
+           {:name "Shielded Mind" :description "The couatl is immune to scrying and to any effect that would sense its emotions, read its thoughts, or detect its location."}]
 
-:actions [{:name "Bite" :description "Melee Weapon Attack: +8 to hit, reach 5 ft., one creature. Hit: 8 (1d6 + 5) piercing damage, and the target must succeed on a DC 13 Constitution saving throw or be poisoned for 24 hours. Until this poison ends, the target is unconscious. Another creature can use an action to shake the target awake."}
-{:name "Constrict" :description "Melee Weapon Attack: +6 to hit, reach 10 ft., one Medium or smaller creature. Hit: 10 (2d6 + 3) bludgeoning damage, and the target is grappled (escape DC 15). Until this grapple ends, the target is restrained, and the couatl can't constrict another target."}
-{:name "Change Shape" :description "The couatl magically polymorphs into a humanoid or beast that has a challenge rating equal to or less than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the couatl's choice).
-In a new form, the couatl retains its game statistics and ability to speak, but its AC, movement modes, Strength, Dexterity, and other actions are replaced by those of the new form, and it gains any statistics and capabilities (except class features, legendary actions, and lair actions) that the new form has but that it lacks. If the new form has a bite attack, the couatl can use its bite in that form.
-"}]
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +8 to hit, reach 5 ft., one creature. Hit: 8 (1d6 + 5) piercing damage, and the target must succeed on a DC 13 Constitution saving throw or be poisoned for 24 hours. Until this poison ends, the target is unconscious. Another creature can use an action to shake the target awake."}
+            {:name "Constrict" :description "Melee Weapon Attack: +6 to hit, reach 10 ft., one Medium or smaller creature. Hit: 10 (2d6 + 3) bludgeoning damage, and the target is grappled (escape DC 15). Until this grapple ends, the target is restrained, and the couatl can't constrict another target."}
+            {:name "Change Shape" :description "The couatl magically polymorphs into a humanoid or beast that has a challenge rating equal to or less than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the couatl's choice).
+In a new form, the couatl retains its game statistics and ability to speak, but its AC, movement modes, Strength, Dexterity, and other actions are replaced by those of the new form, and it gains any statistics and capabilities (except class features, legendary actions, and lair actions) that the new form has but that it lacks. If the new form has a bite attack, the couatl can use its bite in that form."}]}{
+  :name "Darkmantle"
+  :size :small
+  :type :monstrosity
+  :alignment "unaligned"
+  :armor-class 11
+  :hit-points {:mean 22 :die-count 5 :die 6 :modifier 5}
+  :speed "10 ft., fly 30 ft."
 
-}{
-:name "Darkmantle"
-:size :small
-:type :monstrosity
-:alignment "unaligned"
-:armor-class 11
-:hit-points {:mean 22 :die-count 5 :die 6 :modifier 5}
-:speed "10 ft., fly 30 ft."
+  :str 16
+  :dex 12
+  :con 13
+  :int 2
+  :wis 10
+  :cha 5
 
-:str 16
-:dex 12
-:con 13
-:int 2
-:wis 10
-:cha 5
+  :skills {:stealth 3}
+  :senses "blindsight 60 ft., passive Perception 10"
+  :challenge (/ 1 2)
 
-:skills {:stealth 3}
-:senses "blindsight 60 ft., passive Perception 10"
-:challenge (/ 1 2)
+  :traits [{:name "Echolocation" :description "The darkmantle can't use its blindsight while deafened."}
+           {:name "False Appearance" :description "While the darkmantle remains motionless, it is indistinguishable from a cave formation such as a stalactite or stalagmite."}]
 
-:traits [{:name "Echolocation" :description "The darkmantle can't use its blindsight while deafened."}
-{:name "False Appearance" :description "While the darkmantle remains motionless, it is indistinguishable from a cave formation such as a stalactite or stalagmite."}]
-
-:actions [{:name "Crush" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one creature. Hit: 6 (1d6 + 3) bludgeoning damage, and the darkmantle attaches to the target. If the target is Medium or smaller and the darkmantle has advantage on the attack roll, it attaches by engulfing the target's head, and the target is also blinded and unable to breathe while the darkmantle is attached in this way.
+  :actions [{:name "Crush" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one creature. Hit: 6 (1d6 + 3) bludgeoning damage, and the darkmantle attaches to the target. If the target is Medium or smaller and the darkmantle has advantage on the attack roll, it attaches by engulfing the target's head, and the target is also blinded and unable to breathe while the darkmantle is attached in this way.
 While attached to the target, the darkmantle can attack no other creature except the target but has advantage on its attack rolls. The darkmantle's speed also becomes 0, it can't benefit from any bonus to its speed, and it moves with the target.
 A creature can detach the darkmantle by making a successful DC 13 Strength check as an action. On its turn, the darkmantle can detach itself from the target by using 5 feet of movement."}
-{:name "Darkness Aura " :notes "1/Day). A 15-foot radius of magical darkness extends out from the darkmantle, moves with it, and spreads around corners. The darkness lasts as long as the darkmantle maintains concentration, up to 10 minutes (as if concentrating on a spell" :description "Darkvision can't penetrate this darkness, and no natural light can illuminate it. If any of the darkness overlaps with an area of light created by a spell of 2nd level or lower, the spell creating the light is dispelled.
-"}]
+            {:name "Darkness Aura" :notes "1/Day" :description "A 15-foot radius of magical darkness extends out from the darkmantle, moves with it, and spreads around corners. The darkness lasts as long as the darkmantle maintains concentration, up to 10 minutes (as if concentrating on a spell
+Darkvision can't penetrate this darkness, and no natural light can illuminate it. If any of the darkness overlaps with an area of light created by a spell of 2nd level or lower, the spell creating the light is dispelled."}]}{
+  :name "Balor"
+  :size :huge
+  :type :fiend
+  :subtypes #{:demon}
+  :alignment "chaotic evil"
+  :armor-class 19
+  :armor-notes "natural armor"
+  :hit-points {:mean 262 :die-count 21 :die 12 :modifier 126}
+  :speed "40 ft., fly 80 ft."
 
-}{
-:name "Balor"
-:size :huge
-:type :fiend
-:subtypes #{:demon}
-:alignment "chaotic evil"
-:armor-class 19
-:armor-notes "natural armor"
-:hit-points {:mean 262 :die-count 21 :die 12 :modifier 126}
-:speed "40 ft., fly 80 ft."
+  :str 26
+  :dex 15
+  :con 22
+  :int 20
+  :wis 16
+  :cha 22
 
-:str 26
-:dex 15
-:con 22
-:int 20
-:wis 16
-:cha 22
+  :saving-throws {:str 14, :con 12, :wis 9, :cha 12}
+  :damage-resistances "cold, lightning; bludgeoning, piercing, and slashing from nonmagical attacks"
+  :damage-immunities "fire, poison"
+  :condition-immunities "poisoned"
+  :senses "truesight 120 ft., passive Perception 13"
+  :languages "Abyssal, telepathy 120 ft."
+  :challenge 19
 
-:saving-throws {:str 14, :con 12, :wis 9, :cha 12}
-:damage-resistances "cold, lightning; bludgeoning, piercing, and slashing from nonmagical attacks"
-:damage-immunities "fire, poison"
-:condition-immunities "poisoned"
-:senses "truesight 120 ft., passive Perception 13"
-:languages "Abyssal, telepathy 120 ft."
-:challenge 19
+  :traits [{:name "Death Throes" :description "When the balor dies, it explodes, and each creature within 30 feet of it must make a DC 20 Dexterity saving throw, taking 70 (20d6) fire damage on a failed save, or half as much damage on a successful one. The explosion ignites flammable objects in that area that aren't being worn or carried, and it destroys the balor's weapons."}
+           {:name "Fire Aura" :description "At the start of each of the balor's turns, each creature within 5 feet of it takes 10 (3d6) fire damage, and flammable objects in the aura that aren't being worn or carried ignite. A creature that touches the balor or hits it with a melee attack while within 5 feet of it takes 10 (3d6) fire damage."}
+           {:name "Magic Resistance" :description "The balor has advantage on saving throws against spells and other magical effects."}
+           {:name "Magic Weapons" :description "The balor's weapon attacks are magical."}]
 
-:traits [{:name "Death Throes" :description "When the balor dies, it explodes, and each creature within 30 feet of it must make a DC 20 Dexterity saving throw, taking 70 (20d6) fire damage on a failed save, or half as much damage on a successful one. The explosion ignites flammable objects in that area that aren't being worn or carried, and it destroys the balor's weapons."}
-{:name "Fire Aura" :description "At the start of each of the balor's turns, each creature within 5 feet of it takes 10 (3d6) fire damage, and flammable objects in the aura that aren't being worn or carried ignite. A creature that touches the balor or hits it with a melee attack while within 5 feet of it takes 10 (3d6) fire damage."}
-{:name "Magic Resistance" :description "The balor has advantage on saving throws against spells and other magical effects."}
-{:name "Magic Weapons" :description "The balor's weapon attacks are magical."}]
+  :actions [{:name "Multiattack" :description "The balor makes two attacks: one with its longsword and one with its whip."}
+            {:name "Longsword" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 21 (3d8 + 8) slashing damage plus 13 (3d8) lightning damage. If the balor scores a critical hit, it rolls damage dice three times, instead of twice."}
+            {:name "Whip" :description "Melee Weapon Attack: +14 to hit, reach 30 ft., one target. Hit: 15 (2d6 + 8) slashing damage plus 10 (3d6) fire damage, and the target must succeed on a DC 20 Strength saving throw or be pulled up to 25 feet toward the balor."}
+            {:name "Teleport" :description "The balor magically teleports, along with any equipment it is wearing or carrying, up to 120 feet to an unoccupied space it can see."}]}{
+  :name "Dretch"
+  :size :small
+  :type :fiend
+  :subtypes #{:demon}
+  :alignment "chaotic evil"
+  :armor-class 11
+  :armor-notes "natural armor"
+  :hit-points {:mean 18 :die-count 4 :die 6 :modifier 4}
+  :speed "20 ft."
 
-:actions [{:name "Multiattack" :description "The balor makes two attacks: one with its longsword and one with its whip."}
-{:name "Longsword" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 21 (3d8 + 8) slashing damage plus 13 (3d8) lightning damage. If the balor scores a critical hit, it rolls damage dice three times, instead of twice."}
-{:name "Whip" :description "Melee Weapon Attack: +14 to hit, reach 30 ft., one target. Hit: 15 (2d6 + 8) slashing damage plus 10 (3d6) fire damage, and the target must succeed on a DC 20 Strength saving throw or be pulled up to 25 feet toward the balor."}
-{:name "Teleport" :description "The balor magically teleports, along with any equipment it is wearing or carrying, up to 120 feet to an unoccupied space it can see.
-"}]
+  :str 11
+  :dex 11
+  :con 12
+  :int 5
+  :wis 8
+  :cha 3
 
-}{
-:name "Dretch"
-:size :small
-:type :fiend
-:subtypes #{:demon}
-:alignment "chaotic evil"
-:armor-class 11
-:armor-notes "natural armor"
-:hit-points {:mean 18 :die-count 4 :die 6 :modifier 4}
-:speed "20 ft."
+  :damage-resistances "cold, fire, lightning"
+  :damage-immunities "poison"
+  :condition-immunities "poisoned"
+  :senses "darkvision 60 ft., passive Perception 9"
+  :languages "Abyssal, telepathy 60 ft. (works only with creatures that understand Abyssal)"
+  :challenge (/ 1 4)
 
-:str 11
-:dex 11
-:con 12
-:int 5
-:wis 8
-:cha 3
+  :actions [{:name "Multiattack" :description "The dretch makes two attacks: one with its bite and one with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +2 to hit, reach 5 ft., one target. Hit: 3 (1d6) piercing damage."}
+            {:name "Claws" :description "Melee Weapon Attack: +2 to hit, reach 5 ft., one target. Hit: 5 (2d4) slashing damage."}
+            {:name "Fetid Cloud" :notes "1/Day" :description "A 10-foot radius of disgusting green gas extends out from the dretch. The gas spreads around corners, and its area is lightly obscured. It lasts for 1 minute or until a strong wind disperses it. Any creature that starts its turn in that area must succeed on a DC 11 Constitution saving throw or be poisoned until the start of its next turn. While poisoned in this way, the target can take either an action or a bonus action on its turn, not both, and can't take reactions."}]}{
+  :name "Glabrezu"
+  :size :large
+  :type :fiend
+  :subtypes #{:demon}
+  :alignment "chaotic evil"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 157 :die-count 15 :die 10 :modifier 75}
+  :speed "40 ft."
 
-:damage-resistances "cold, fire, lightning"
-:damage-immunities "poison"
-:condition-immunities "poisoned"
-:senses "darkvision 60 ft., passive Perception 9"
-:languages "Abyssal, telepathy 60 ft. (works only with creatures that understand Abyssal)"
-:challenge (/ 1 4)
+  :str 20
+  :dex 15
+  :con 21
+  :int 19
+  :wis 17
+  :cha 16
 
-:actions [{:name "Multiattack" :description "The dretch makes two attacks: one with its bite and one with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +2 to hit, reach 5 ft., one target. Hit: 3 (1d6) piercing damage."}
-{:name "Claws" :description "Melee Weapon Attack: +2 to hit, reach 5 ft., one target. Hit: 5 (2d4) slashing damage."}
-{:name "Fetid Cloud " :notes "1/Day" :description "A 10-foot radius of disgusting green gas extends out from the dretch. The gas spreads around corners, and its area is lightly obscured. It lasts for 1 minute or until a strong wind disperses it. Any creature that starts its turn in that area must succeed on a DC 11 Constitution saving throw or be poisoned until the start of its next turn. While poisoned in this way, the target can take either an action or a bonus action on its turn, not both, and can't take reactions.
-"}]
+  :saving-throws {:str 9, :con 9, :wis 7, :cha 7}
+  :damage-resistances "cold, fire, lightning; bludgeoning, piercing, and slashing from nonmagical attacks"
+  :damage-immunities "poison"
+  :condition-immunities "poisoned"
+  :senses "truesight 120 ft., passive Perception 13"
+  :languages "Abyssal, telepathy 120 ft."
+  :challenge 9
 
-}{
-:name "Glabrezu"
-:size :large
-:type :fiend
-:subtypes #{:demon}
-:alignment "chaotic evil"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 157 :die-count 15 :die 10 :modifier 75}
-:speed "40 ft."
-
-:str 20
-:dex 15
-:con 21
-:int 19
-:wis 17
-:cha 16
-
-:saving-throws {:str 9, :con 9, :wis 7, :cha 7}
-:damage-resistances "cold, fire, lightning; bludgeoning, piercing, and slashing from nonmagical attacks"
-:damage-immunities "poison"
-:condition-immunities "poisoned"
-:senses "truesight 120 ft., passive Perception 13"
-:languages "Abyssal, telepathy 120 ft."
-:challenge 9
-
-:traits [{:name "Innate Spellcasting" :description "The glabrezu's spellcasting ability is Intelligence (spell save DC 16). The glabrezu can innately cast the following spells, requiring no material components:
+  :traits [{:name "Innate Spellcasting" :description "The glabrezu's spellcasting ability is Intelligence (spell save DC 16). The glabrezu can innately cast the following spells, requiring no material components:
 At will: darkness, detect magic, dispel magic 1/day each: confusion, fly, power word stun"}
-{:name "Magic Resistance" :description "The glabrezu has advantage on saving throws against spells and other magical effects."}]
+           {:name "Magic Resistance" :description "The glabrezu has advantage on saving throws against spells and other magical effects."}]
 
-:actions [{:name "Multiattack" :description "The glabrezu makes four attacks: two with its pincers and two with its fists. Alternatively, it makes two attacks with its pincers and casts one spell."}
-{:name "Pincer" :description "Melee Weapon Attack: +9 to hit, reach 10 ft., one target. Hit: 16 (2d10 + 5) bludgeoning damage. If the target is a Medium or smaller creature, it is grappled (escape DC 15). The glabrezu has two pincers, each of which can grapple only one target."}
-{:name "Fist" :description "Melee Weapon Attack: +9 to hit, reach 5 ft., one target. Hit: 7 (2d4 + 2) bludgeoning damage.
-"}]
+  :actions [{:name "Multiattack" :description "The glabrezu makes four attacks: two with its pincers and two with its fists. Alternatively, it makes two attacks with its pincers and casts one spell."}
+            {:name "Pincer" :description "Melee Weapon Attack: +9 to hit, reach 10 ft., one target. Hit: 16 (2d10 + 5) bludgeoning damage. If the target is a Medium or smaller creature, it is grappled (escape DC 15). The glabrezu has two pincers, each of which can grapple only one target."}
+            {:name "Fist" :description "Melee Weapon Attack: +9 to hit, reach 5 ft., one target. Hit: 7 (2d4 + 2) bludgeoning damage."}]}{
+  :name "Hezrou"
+  :size :large
+  :type :fiend
+  :subtypes #{:demon}
+  :alignment "chaotic evil"
+  :armor-class 16
+  :armor-notes "natural armor"
+  :hit-points {:mean 136 :die-count 13 :die 10 :modifier 65}
+  :speed "30 ft."
 
-}{
-:name "Hezrou"
-:size :large
-:type :fiend
-:subtypes #{:demon}
-:alignment "chaotic evil"
-:armor-class 16
-:armor-notes "natural armor"
-:hit-points {:mean 136 :die-count 13 :die 10 :modifier 65}
-:speed "30 ft."
+  :str 19
+  :dex 17
+  :con 20
+  :int 5
+  :wis 12
+  :cha 13
 
-:str 19
-:dex 17
-:con 20
-:int 5
-:wis 12
-:cha 13
+  :saving-throws {:str 7, :con 8, :wis 4}
+  :damage-resistances "cold, fire, lightning; bludgeoning, piercing, and slashing from nonmagical attacks"
+  :damage-immunities "poison"
+  :condition-immunities "poisoned"
+  :senses "darkvision 120 ft., passive Perception 11"
+  :languages "Abyssal, telepathy 120 ft."
+  :challenge 8
 
-:saving-throws {:str 7, :con 8, :wis 4}
-:damage-resistances "cold, fire, lightning; bludgeoning, piercing, and slashing from nonmagical attacks"
-:damage-immunities "poison"
-:condition-immunities "poisoned"
-:senses "darkvision 120 ft., passive Perception 11"
-:languages "Abyssal, telepathy 120 ft."
-:challenge 8
+  :traits [{:name "Magic Resistance" :description "The hezrou has advantage on saving throws against spells and other magical effects."}
+           {:name "Stench" :description "Any creature that starts its turn within 10 feet of the hezrou must succeed on a DC 14 Constitution saving throw or be poisoned until the start of its next turn. On a successful saving throw, the creature is immune to the hezrou's stench for 24 hours."}]
 
-:traits [{:name "Magic Resistance" :description "The hezrou has advantage on saving throws against spells and other magical effects."}
-{:name "Stench" :description "Any creature that starts its turn within 10 feet of the hezrou must succeed on a DC 14 Constitution saving throw or be poisoned until the start of its next turn. On a successful saving throw, the creature is immune to the hezrou's stench for 24 hours."}]
+  :actions [{:name "Multiattack" :description "The hezrou makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 15 (2d10 + 4) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) slashing damage."}]}{
+  :name "Marilith"
+  :size :large
+  :type :fiend
+  :subtypes #{:demon}
+  :alignment "chaotic evil"
+  :armor-class 18
+  :armor-notes "natural armor"
+  :hit-points {:mean 189 :die-count 18 :die 10 :modifier 90}
+  :speed "40 ft."
 
-:actions [{:name "Multiattack" :description "The hezrou makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 15 (2d10 + 4) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) slashing damage.
-"}]
+  :str 18
+  :dex 20
+  :con 20
+  :int 18
+  :wis 16
+  :cha 20
 
-}{
-:name "Marilith"
-:size :large
-:type :fiend
-:subtypes #{:demon}
-:alignment "chaotic evil"
-:armor-class 18
-:armor-notes "natural armor"
-:hit-points {:mean 189 :die-count 18 :die 10 :modifier 90}
-:speed "40 ft."
+  :saving-throws {:str 9, :con 10, :wis 8, :cha 10}
+  :damage-resistances "cold, fire, lightning; bludgeoning, piercing, and slashing from nonmagical attacks"
+  :damage-immunities "poison"
+  :condition-immunities "poisoned"
+  :senses "truesight 120 ft., passive Perception 13"
+  :languages "Abyssal, telepathy 120 ft."
+  :challenge 16
 
-:str 18
-:dex 20
-:con 20
-:int 18
-:wis 16
-:cha 20
+  :traits [{:name "Magic Resistance" :description "The marilith has advantage on saving throws against spells and other magical effects."}
+           {:name "Magic Weapons" :description "The marilith's weapon attacks are magical."}
+           {:name "Reactive" :description "The marilith can take one reaction on every turn in a combat."}]
 
-:saving-throws {:str 9, :con 10, :wis 8, :cha 10}
-:damage-resistances "cold, fire, lightning; bludgeoning, piercing, and slashing from nonmagical attacks"
-:damage-immunities "poison"
-:condition-immunities "poisoned"
-:senses "truesight 120 ft., passive Perception 13"
-:languages "Abyssal, telepathy 120 ft."
-:challenge 16
+  :actions [{:name "Multiattack" :description "The marilith makes seven attacks: six with its longswords and one with its tail."}
+            {:name "Longsword" :description "Melee Weapon Attack: +9 to hit, reach 5 ft., one target. Hit: 13 (2d8 + 4) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +9 to hit, reach 10 ft., one creature. Hit: 15 (2d10 + 4) bludgeoning damage. If the target is Medium or smaller, it is grappled (escape DC 19). Until this grapple ends, the target is restrained, the marilith can automatically hit the target with its tail, and the marilith can't make tail attacks against other targets."}
+            {:name "Teleport" :description "The marilith magically teleports, along with any equipment it is wearing or carrying, up to 120 feet to an unoccupied space it can see."}]
 
-:traits [{:name "Magic Resistance" :description "The marilith has advantage on saving throws against spells and other magical effects."}
-{:name "Magic Weapons" :description "The marilith's weapon attacks are magical."}
-{:name "Reactive" :description "The marilith can take one reaction on every turn in a combat."}]
+  :reactions [{:name "Parry" :description "The marilith adds 5 to its AC against one melee attack that would hit it. To do so, the marilith must see the attacker and be wielding a melee weapon."}]}{
+  :name "Nalfeshnee"
+  :size :large
+  :type :fiend
+  :subtypes #{:demon}
+  :alignment "chaotic evil"
+  :armor-class 18
+  :armor-notes "natural armor"
+  :hit-points {:mean 184 :die-count 16 :die 10 :modifier 96}
+  :speed "20 ft., fly 30 ft."
 
-:actions [{:name "Multiattack" :description "The marilith makes seven attacks: six with its longswords and one with its tail."}
-{:name "Longsword" :description "Melee Weapon Attack: +9 to hit, reach 5 ft., one target. Hit: 13 (2d8 + 4) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +9 to hit, reach 10 ft., one creature. Hit: 15 (2d10 + 4) bludgeoning damage. If the target is Medium or smaller, it is grappled (escape DC 19). Until this grapple ends, the target is restrained, the marilith can automatically hit the target with its tail, and the marilith can't make tail attacks against other targets."}
-{:name "Teleport" :description "The marilith magically teleports, along with any equipment it is wearing or carrying, up to 120 feet to an unoccupied space it can see.
-"}]
+  :str 21
+  :dex 10
+  :con 22
+  :int 19
+  :wis 12
+  :cha 15
 
-:reactions [
-{:name "Parry" :description "The marilith adds 5 to its AC against one melee attack that would hit it. To do so, the marilith must see the attacker and be wielding a melee weapon."}]
+  :saving-throws {:con 11, :int 9, :wis 6, :cha 7}
+  :damage-resistances "cold, fire, lightning; bludgeoning, piercing, and slashing from nonmagical attacks"
+  :damage-immunities "poison"
+  :condition-immunities "poisoned"
+  :senses "truesight 120 ft., passive Perception 11"
+  :languages "Abyssal, telepathy 120 ft."
+  :challenge 13
 
-}{
-:name "Nalfeshnee"
-:size :large
-:type :fiend
-:subtypes #{:demon}
-:alignment "chaotic evil"
-:armor-class 18
-:armor-notes "natural armor"
-:hit-points {:mean 184 :die-count 16 :die 10 :modifier 96}
-:speed "20 ft., fly 30 ft."
+  :traits [{:name "Magic Resistance" :description "The nalfeshnee has advantage on saving throws against spells and other magical effects."}]
 
-:str 21
-:dex 10
-:con 22
-:int 19
-:wis 12
-:cha 15
+  :actions [{:name "Multiattack" :description "The nalfeshnee uses Horror Nimbus if it can. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +10 to hit, reach 5 ft., one target. Hit: 32 (5d10 + 5) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 15 (3d6 + 5) slashing damage."}
+            {:name "Horror Nimbus" :notes "Recharge 5–6" :description "The nalfeshnee magically emits scintillating, multicolored light. Each creature within 15 feet of the nalfeshnee that can see the light must succeed on a DC 15 Wisdom saving throw or be frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the nalfeshnee's Horror Nimbus for the next 24 hours."}
+            {:name "Teleport" :description "The nalfeshnee magically teleports, along with any equipment it is wearing or carrying, up to 120 feet to an unoccupied space it can see."}]}{
+  :name "Quasit"
+  :size :tiny
+  :type :fiend
+  :subtypes #{:demon, :shapechanger}
+  :alignment "chaotic evil"
+  :armor-class 13
+  :hit-points {:mean 7 :die-count 3 :die 4}
+  :speed "40 ft."
 
-:saving-throws {:con 11, :int 9, :wis 6, :cha 7}
-:damage-resistances "cold, fire, lightning; bludgeoning, piercing, and slashing from nonmagical attacks"
-:damage-immunities "poison"
-:condition-immunities "poisoned"
-:senses "truesight 120 ft., passive Perception 11"
-:languages "Abyssal, telepathy 120 ft."
-:challenge 13
+  :str 5
+  :dex 17
+  :con 10
+  :int 7
+  :wis 10
+  :cha 10
 
-:traits [{:name "Magic Resistance" :description "The nalfeshnee has advantage on saving throws against spells and other magical effects."}]
+  :skills {:stealth 5}
 
-:actions [{:name "Multiattack" :description "The nalfeshnee uses Horror Nimbus if it can. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +10 to hit, reach 5 ft., one target. Hit: 32 (5d10 + 5) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 15 (3d6 + 5) slashing damage."}
-{:name "Horror Nimbus " :notes "Recharge 5–6" :description "The nalfeshnee magically emits scintillating, multicolored light. Each creature within 15 feet of the nalfeshnee that can see the light must succeed on a DC 15 Wisdom saving throw or be frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the
-creature is immune to the nalfeshnee's Horror Nimbus for the next 24 hours."}
-{:name "Teleport" :description "The nalfeshnee magically teleports, along with any equipment it is wearing or carrying, up to 120 feet to an unoccupied space it can see.
-"}]
+  :damage-resistances "cold, fire, lightning; bludgeoning, piercing, and slashing from nonmagical attacks"
+  :damage-immunities "poison"
+  :condition-immunities "poisoned"
+  :senses "darkvision 120 ft., passive Perception 10"
+  :languages "Abyssal, Common"
+  :challenge 1
 
-}{
-:name "Quasit"
-:size :tiny
-:type :fiend
-:subtypes #{:demon, :shapechanger}
-:alignment "chaotic evil"
-:armor-class 13
-:hit-points {:mean 7 :die-count 3 :die 4}
-:speed "40 ft."
+  :traits [{:name "Shapechanger" :description "The quasit can use its action to polymorph into a beast form that resembles a bat (speed 10 ft. fly 40 ft.), a centipede (40 ft., climb 40 ft.), or a toad (40 ft., swim 40 ft.), or back into its true form. Its statistics are the same in each form, except for the speed changes noted. Any equipment it is wearing or carrying isn't transformed. It reverts to its true form if it dies."}
+           {:name "Magic Resistance" :description "The quasit has advantage on saving throws against spells and other magical effects."}]
 
-:str 5
-:dex 17
-:con 10
-:int 7
-:wis 10
-:cha 10
+  :actions [{:name "Claws " :notes "Bite in Beast Form" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d4 + 3) piercing damage, and the target must succeed on a DC 10 Constitution saving throw or take 5 (2d4) poison damage and become poisoned for 1 minute. The target can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}
+            {:name "Scare " :notes "1/Day" :description "One creature of the quasit's choice within 20 feet of it must succeed on a DC 10 Wisdom saving throw or be frightened for 1 minute. The target can repeat the saving throw at the end of each of its turns, with disadvantage if the quasit is within line of sight, ending the effect on itself on a success."}
+            {:name "Invisibility" :description "The quasit magically turns invisible until it attacks or uses Scare, or until its concentration ends (as if concentrating on a spell). Any equipment the quasit wears or carries is invisible with it."}]}{
+  :name "Vrock"
+  :size :large
+  :type :fiend
+  :subtypes #{:demon}
+  :alignment "chaotic evil"
+  :armor-class 15
+  :armor-notes "natural armor"
+  :hit-points {:mean 104 :die-count 11 :die 10 :modifier 44}
+  :speed "40 ft., fly 60 ft."
 
-:skills {:stealth 5}
+  :str 17
+  :dex 15
+  :con 18
+  :int 8
+  :wis 13
+  :cha 8
 
-:damage-resistances "cold, fire, lightning; bludgeoning, piercing, and slashing from nonmagical attacks"
-:damage-immunities "poison"
-:condition-immunities "poisoned"
-:senses "darkvision 120 ft., passive Perception 10"
-:languages "Abyssal, Common"
-:challenge 1
+  :saving-throws {:dex 5, :wis 4, :cha 2}
+  :damage-resistances "cold, fire, lightning; bludgeoning, piercing, and slashing from nonmagical attacks"
+  :damage-immunities "poison"
+  :condition-immunities "poisoned"
+  :senses "darkvision 120 ft., passive Perception 11"
+  :languages "Abyssal, telepathy 120 ft."
+  :challenge 6
 
-:traits [{:name "Shapechanger" :description "The quasit can use its action to polymorph into a beast form that resembles a bat (speed 10 ft. fly 40 ft.), a centipede (40 ft., climb 40 ft.), or a toad (40 ft., swim 40 ft.), or back into its true form. Its statistics are the same in each form, except for the speed changes noted. Any equipment it is wearing or carrying isn't transformed. It reverts to its true form if it dies."}
-{:name "Magic Resistance" :description "The quasit has advantage on saving throws against spells and other magical effects."}]
+  :traits [{:name "Magic Resistance" :description "The vrock has advantage on saving throws against spells and other magical effects."}]
 
-:actions [{:name "Claws " :notes "Bite in Beast Form" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d4 + 3) piercing damage, and the target must succeed on a DC 10 Constitution saving throw or take 5 (2d4) poison damage and become poisoned for 1 minute. The target can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}
-{:name "Scare " :notes "1/Day" :description "One creature of the quasit's choice within 20 feet of it must succeed on a DC 10 Wisdom saving throw or be frightened for 1 minute. The target can repeat the saving throw at the end of each of its turns, with disadvantage if the quasit is within line of sight, ending the effect on itself on a success."}
-{:name "Invisibility" :description "The quasit magically turns invisible until it attacks or uses Scare, or until its concentration ends (as if concentrating on a spell). Any equipment the quasit wears or carries is invisible with it."}]
+  :actions [{:name "Multiattack" :description "The vrock makes two attacks: one with its beak and one with its talons."}
+            {:name "Beak" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 10 (2d6 + 3) piercing damage."}
+            {:name "Talons" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 14 (2d10 + 3) slashing damage."}
+            {:name "Spores " :notes "Recharge 6" :description "A 15-foot-radius cloud of toxic spores extends out from the vrock. The spores spread around corners. Each creature in that area must succeed on a DC 14 Constitution saving throw or become poisoned. While poisoned in this way, a target takes 5 (1d10) poison damage at the start of each of its turns. A target can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. Emptying a vial of holy water on the target also ends the effect on it."}
+            {:name "Stunning Screech" :notes "1/Day" :description "The vrock emits a horrific screech. Each creature within 20 feet of it that can hear it and that isn't a demon must succeed on a DC 14 Constitution saving throw or be stunned until the end of the vrock's next turn."}]}{
+  :name "Barbed Devil"
+  :size :medium
+  :type :fiend
+  :subtypes #{:devil}
+  :alignment "lawful evil"
+  :armor-class 15
+  :armor-notes "natural armor"
+  :hit-points {:mean 110 :die-count 13 :die 8 :modifier 52}
+  :speed "30 ft."
 
-}{
-:name "Vrock"
-:size :large
-:type :fiend
-:subtypes #{:demon}
-:alignment "chaotic evil"
-:armor-class 15
-:armor-notes "natural armor"
-:hit-points {:mean 104 :die-count 11 :die 10 :modifier 44}
-:speed "40 ft., fly 60 ft."
+  :str 16
+  :dex 17
+  :con 18
+  :int 12
+  :wis 14
+  :cha 14
+                                                                                                                                                                                                                                                                                              
+  :saving-throws {:str 6, :con 7, :wis 5, :cha 5}
+  :skills {:deception 5, :insight 5, :perception 8}
+  :damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
+  :damage-immunities "fire, poison"
+  :condition-immunities "poisoned"
+  :senses "darkvision 120 ft., passive Perception 18"
+  :languages "Infernal, telepathy 120 ft."
+  :challenge 5
 
-:str 17
-:dex 15
-:con 18
-:int 8
-:wis 13
-:cha 8
-
-:saving-throws {:dex 5, :wis 4, :cha 2}
-:damage-resistances "cold, fire, lightning; bludgeoning, piercing, and slashing from nonmagical attacks"
-:damage-immunities "poison"
-:condition-immunities "poisoned"
-:senses "darkvision 120 ft., passive Perception 11"
-:languages "Abyssal, telepathy 120 ft."
-:challenge 6
-
-:traits [{:name "Magic Resistance" :description "The vrock has advantage on saving throws against spells and other magical effects."}]
-
-:actions [{:name "Multiattack" :description "The vrock makes two attacks: one with its beak and one with its talons."}
-{:name "Beak" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 10 (2d6 + 3) piercing damage."}
-{:name "Talons" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 14 (2d10 + 3) slashing damage."}
-{:name "Spores " :notes "Recharge 6" :description "A 15-foot-radius cloud of toxic spores extends out from the vrock. The spores spread around corners. Each creature in that area must succeed on a DC 14 Constitution saving throw or become poisoned. While poisoned in this way, a target takes 5 (1d10) poison damage at the start of each of its turns. A target can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. Emptying a vial of holy water on the target also ends the effect on it."}
-{:name "Stunning Screech " :notes "1/Day" :description "The vrock emits a horrific screech. Each creature within 20 feet of it that can hear it and that isn't a demon must succeed on a DC 14 Constitution saving throw or be stunned until the end of the vrock's next turn.
-"}]
-
-}{
-:name "Barbed Devil"
-:size :medium
-:type :fiend
-:subtypes #{:devil}
-:alignment "lawful evil"
-:armor-class 15
-:armor-notes "natural armor"
-:hit-points {:mean 110 :die-count 13 :die 8 :modifier 52}
-:speed "30 ft."
-
-:str 16
-:dex 17
-:con 18
-:int 12
-:wis 14
-:cha 14
-:saving-throws {:str 6, :con 7, :wis 5, :cha 5}
-:skills {:deception 5, :insight 5, :perception 8}
-:damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
-:damage-immunities "fire, poison"
-:condition-immunities "poisoned"
-:senses "darkvision 120 ft., passive Perception 18"
-:languages "Infernal, telepathy 120 ft."
-:challenge 5
-
-:traits [{:name "Barbed Hide" :description "At the start of each of its turns, the barbed devil deals 5 (1d10) piercing damage to any creature grappling it.
+  :traits [{:name "Barbed Hide" :description "At the start of each of its turns, the barbed devil deals 5 (1d10) piercing damage to any creature grappling it.
 Devil's Sight. Magical darkness doesn't impede the devil's darkvision."}
-{:name "Magic Resistance" :description "The devil has advantage on saving throws against spells and other magical effects."}]
+           {:name "Magic Resistance" :description "The devil has advantage on saving throws against spells and other magical effects."}]
 
-:actions [{:name "Multiattack" :description "The devil makes three melee attacks: one with its tail and two with its claws. Alternatively, it can use Hurl Flame twice."}
-{:name "Claw" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 6 (1d6 + 3) piercing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 10 (2d6 + 3) piercing damage."}
-{:name "Hurl Flame" :description "Ranged Spell Attack: +5 to hit, range 150 ft., one target. Hit: 10 (3d6) fire damage. If the target is
-a flammable object that isn't being worn or carried, it also catches fire."}]
+  :actions [{:name "Multiattack" :description "The devil makes three melee attacks: one with its tail and two with its claws. Alternatively, it can use Hurl Flame twice."}
+            {:name "Claw" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 6 (1d6 + 3) piercing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 10 (2d6 + 3) piercing damage."}
+            {:name "Hurl Flame" :description "Ranged Spell Attack: +5 to hit, range 150 ft., one target. Hit: 10 (3d6) fire damage. If the target is a flammable object that isn't being worn or carried, it also catches fire."}]}{
+  :name "Bearded Devil"
+  :size :medium
+  :type :fiend
+  :subtypes #{:devil}
+  :alignment "lawful evil"
+  :armor-class 13
+  :armor-notes "natural armor"
+  :hit-points {:mean 52 :die-count 8 :die 8 :modifier 16}
+  :speed "30 ft."
 
-}{
-:name "Bearded Devil"
-:size :medium
-:type :fiend
-:subtypes #{:devil}
-:alignment "lawful evil"
-:armor-class 13
-:armor-notes "natural armor"
-:hit-points {:mean 52 :die-count 8 :die 8 :modifier 16}
-:speed "30 ft."
+  :str 16
+  :dex 15
+  :con 15
+  :int 9
+  :wis 11
+  :cha 11
 
-:str 16
-:dex 15
-:con 15
-:int 9
-:wis 11
-:cha 11
+  :saving-throws {:str 5, :con 4, :wis 2}
+  :damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
+  :damage-immunities "fire, poison"
+  :condition-immunities "poisoned"
+  :senses "darkvision 120 ft., passive Perception 10"
+  :languages "Infernal, telepathy 120 ft."
+  :challenge 3
 
-:saving-throws {:str 5, :con 4, :wis 2}
-:damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
-:damage-immunities "fire, poison"
-:condition-immunities "poisoned"
-:senses "darkvision 120 ft., passive Perception 10"
-:languages "Infernal, telepathy 120 ft."
-:challenge 3
+  :traits [{:name "Devil's Sight" :description "Magical darkness doesn't impede the devil's darkvision."}
+           {:name "Magic Resistance" :description "The devil has advantage on saving throws against spells and other magical effects."}
+           {:name "Steadfast" :description "The devil can't be frightened while it can see an allied creature within 30 feet of it."}]
 
-:traits [{:name "Devil's Sight" :description "Magical darkness doesn't impede the devil's darkvision."}
-{:name "Magic Resistance" :description "The devil has advantage on saving throws against spells and other magical effects."}
-{:name "Steadfast" :description "The devil can't be frightened while it can see an allied creature within 30 feet of it."}]
+  :actions [{:name "Multiattack" :description "The devil makes two attacks: one with its beard and one with its glaive."}
+            {:name "Beard" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one creature. Hit: 6 (1d8 + 2) piercing damage, and the target must succeed on a DC 12 Constitution saving throw or be poisoned for 1 minute. While poisoned in this way, the target can't regain hit points. The target can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}
+            {:name "Glaive" :description "Melee Weapon Attack: +5 to hit, reach 10 ft., one target. Hit: 8 (1d10 + 3) slashing damage. If the target is a creature other than an undead or a construct, it must succeed on a DC 12 Constitution saving throw or lose 5 (1d10) hit points at the start of each of its turns due to an infernal wound. Each time the devil hits the wounded target with this attack, the damage dealt by the wound increases by 5 (1d10). Any creature can take an action to stanch the wound with a successful DC 12 Wisdom (Medicine) check. The wound also closes if the target receives magical healing."}]}{
+  :name "Bone Devil"
+  :size :large
+  :type :fiend
+  :subtypes #{:devil}
+  :alignment "lawful evil"
+  :armor-class 19
+  :armor-notes "natural armor"
+  :hit-points {:mean 142 :die-count 15 :die 10 :modifier 60}
+  :speed "40 ft., fly 40 ft."
 
-:actions [{:name "Multiattack" :description "The devil makes two attacks: one with its beard and one with its glaive."}
-{:name "Beard" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one creature. Hit: 6 (1d8 + 2) piercing damage, and the target must succeed on a DC 12 Constitution saving throw or be poisoned for 1 minute. While poisoned in this way, the target can't regain hit points. The target can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}
-{:name "Glaive" :description "Melee Weapon Attack: +5 to hit, reach 10 ft., one target. Hit: 8 (1d10 + 3) slashing damage. If the target is a creature other than an undead or a construct, it must succeed on a DC 12 Constitution saving throw or lose 5 (1d10) hit points at the start of each of its turns due to an infernal wound. Each time the devil hits the wounded target with this attack, the damage dealt by the wound increases by 5 (1d10). Any creature can take an action to stanch the wound with a
-successful DC 12 Wisdom (Medicine) check. The wound also closes if the target receives magical healing.
-"}]
+  :str 18
+  :dex 16
+  :con 18
+  :int 13
+  :wis 14
+  :cha 16
 
-}{
-:name "Bone Devil"
-:size :large
-:type :fiend
-:subtypes #{:devil}
-:alignment "lawful evil"
-:armor-class 19
-:armor-notes "natural armor"
-:hit-points {:mean 142 :die-count 15 :die 10 :modifier 60}
-:speed "40 ft., fly 40 ft."
+  :saving-throws {:int 5, :wis 6, :cha 7}
 
-:str 18
-:dex 16
-:con 18
-:int 13
-:wis 14
-:cha 16
+  :skills {:deception 7, :insight 6}
+  :damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
+  :damage-immunities "fire, poison"
+  :condition-immunities "poisoned"
+  :senses "darkvision 120 ft., passive Perception 12"
+  :languages "Infernal, telepathy 120 ft."
+  :challenge 9
 
-:saving-throws {:int 5, :wis 6, :cha 7}
+  :traits [{:name "Devil's Sight" :description "Magical darkness doesn't impede the devil's darkvision."}
+           {:name "Magic Resistance" :description "The devil has advantage on saving throws against spells and other magical effects."}]
 
-:skills {:deception 7, :insight 6}
-:damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
-:damage-immunities "fire, poison"
-:condition-immunities "poisoned"
-:senses "darkvision 120 ft., passive Perception 12"
-:languages "Infernal, telepathy 120 ft."
-:challenge 9
+  :actions [{:name "Multiattack" :description "The devil makes three attacks: two with its claws and one with its sting."}
+            {:name "Claw" :description "Melee Weapon Attack: +8 to hit, reach 10 ft., one target. Hit: 8 (1d8 + 4) slashing damage."}
+            {:name "Sting" :description "Melee Weapon Attack: +8 to hit, reach 10 ft., one target. Hit: 13 (2d8 + 4) piercing damage plus 17 (5d6) poison damage, and the target must succeed on a DC 14 Constitution saving throw or become poisoned for 1 minute. The target can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}]}{
+  :name "Chain Devil"
+  :size :medium
+  :type :fiend
+  :subtypes #{:devil}
+  :alignment "lawful evil"
+  :armor-class 16
+  :armor-notes "natural armor"
+  :hit-points {:mean 85 :die-count 10 :die 8 :modifier 40}
+  :speed "30 ft."
 
-:traits [{:name "Devil's Sight" :description "Magical darkness doesn't impede the devil's darkvision."}
-{:name "Magic Resistance" :description "The devil has advantage on saving throws against spells and other magical effects."}]
+  :str 18
+  :dex 15
+  :con 18
+  :int 11
+  :wis 12
+  :cha 14
 
-:actions [{:name "Multiattack" :description "The devil makes three attacks: two with its claws and one with its sting."}
-{:name "Claw" :description "Melee Weapon Attack: +8 to hit, reach 10 ft., one target. Hit: 8 (1d8 + 4) slashing damage."}
-{:name "Sting" :description "Melee Weapon Attack: +8 to hit, reach 10 ft., one target. Hit: 13 (2d8 + 4) piercing damage plus 17 (5d6) poison damage, and the target must succeed on a DC 14 Constitution saving throw or become poisoned for 1 minute. The target can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success.
-"}]
+  :saving-throws {:con 7, :wis 4, :cha 5}
+  :damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
+  :damage-immunities "fire, poison"
+  :condition-immunities "poisoned"
+  :senses "darkvision 120 ft., passive Perception 11"
+  :languages "Infernal, telepathy 120 ft."
+  :challenge 8
 
-}{
-:name "Chain Devil"
-:size :medium
-:type :fiend
-:subtypes #{:devil}
-:alignment "lawful evil"
-:armor-class 16
-:armor-notes "natural armor"
-:hit-points {:mean 85 :die-count 10 :die 8 :modifier 40}
-:speed "30 ft."
+  :traits [{:name "Devil's Sight" :description "Magical darkness doesn't impede the devil's darkvision."}
+           {:name "Magic Resistance" :description "The devil has advantage on saving throws against spells and other magical effects."}]
 
-:str 18
-:dex 15
-:con 18
-:int 11
-:wis 12
-:cha 14
+  :actions [{:name "Multiattack" :description "The devil makes two attacks with its chains."}
+            {:name "Chain" :description "Melee Weapon Attack: +8 to hit, reach 10 ft., one target. Hit: 11 (2d6 + 4) slashing damage. The target is grappled (escape DC 14) if the devil isn't already grappling a creature. Until this grapple ends, the target is restrained and takes 7 (2d6) piercing damage at the start of each of its turns."}
+            {:name "Animate Chains " :notes "Recharges after a Short or Long Rest" :description "Up to four chains the devil can see within 60 feet of it magically sprout razor-edged barbs and animate under the devil's control, provided that the chains aren't being worn or carried.
+Each animated chain is an object with AC 20, 20 hit points, resistance to piercing damage, and immunity to psychic and thunder damage. When the devil uses Multiattack on its turn, it can use each animated chain to make one additional chain attack. An animated chain can grapple one creature of its own but can't make attacks while grappling. An animated chain reverts to its inanimate state if reduced to 0 hit points or if the devil is incapacitated or dies."}]
 
-:saving-throws {:con 7, :wis 4, :cha 5}
-:damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
-:damage-immunities "fire, poison"
-:condition-immunities "poisoned"
-:senses "darkvision 120 ft., passive Perception 11"
-:languages "Infernal, telepathy 120 ft."
-:challenge 8
+  :reactions [{:name "Unnerving Mask" :description "When a creature the devil can see starts its turn within 30 feet of the devil, the devil can create the illusion that it looks like one of the creature's departed loved ones or bitter enemies. If the creature can see the devil, it must succeed on a DC 14 Wisdom saving throw or be frightened until the end of its turn."}]}{
+  :name "Erinyes"
+  :size :medium
+  :type :fiend
+  :subtypes #{:devil}
+  :alignment "lawful evil"
+  :armor-class 18
+  :armor-notes "(plate)"
+  :hit-points {:mean 153 :die-count 18 :die 8 :modifier 72}
+  :speed "30 ft., fly 60 ft."
 
-:traits [{:name "Devil's Sight" :description "Magical darkness doesn't impede the devil's darkvision."}
-{:name "Magic Resistance" :description "The devil has advantage on saving throws against spells and other magical effects."}]
+  :str 18
+  :dex 16
+  :con 18
+  :int 14
+  :wis 14
+  :cha 18
 
-:actions [{:name "Multiattack" :description "The devil makes two attacks with its chains."}
-{:name "Chain" :description "Melee Weapon Attack: +8 to hit, reach 10 ft., one target. Hit: 11 (2d6 + 4) slashing damage. The target is grappled (escape DC 14) if the devil isn't already grappling a creature. Until this grapple ends, the target is restrained and takes 7 (2d6) piercing damage at the start of each of its turns."}
-{:name "Animate Chains " :notes "Recharges after a Short or Long Rest" :description "Up to four chains the devil can see within 60 feet of it magically sprout razor-edged barbs and animate under the devil's control, provided that the chains aren't
-being worn or carried.
-Each animated chain is an object with AC 20, 20 hit points, resistance to piercing damage, and immunity to psychic and thunder damage. When the devil uses Multiattack on its turn, it can use each animated chain to make one additional chain attack. An animated chain can grapple one creature of its own but can't make attacks while grappling. An animated chain reverts to its inanimate state if reduced to 0 hit points or if the devil is incapacitated or dies.
-"}]
+  :saving-throws {:dex 7, :con 8, :wis 6, :cha 8}
+  :damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
+  :damage-immunities "fire, poison"
+  :condition-immunities "poisoned"
+  :senses "truesight 120 ft., passive Perception 12"
+  :languages "Infernal, telepathy 120 ft."
+  :challenge 12
 
-:reactions [
-{:name "Unnerving Mask" :description "When a creature the devil can see starts its turn within 30 feet of the devil, the devil can create the illusion that it looks like one of the creature's departed loved ones or bitter enemies. If the creature can see the devil, it must succeed on a DC 14
-Wisdom saving throw or be frightened until the end of its turn.
-"}]
+  :traits [{:name "Hellish Weapons" :description "The erinyes's weapon attacks are magical and deal an extra 13 (3d8) poison damage on a hit (included in the attacks)."}
+           {:name "Magic Resistance" :description "The erinyes has advantage on saving throws against spells and other magical effects."}]
 
-}{
-:name "Erinyes"
-:size :medium
-:type :fiend
-:subtypes #{:devil}
-:alignment "lawful evil"
-:armor-class 18
-:armor-notes "(plate)"
-:hit-points {:mean 153 :die-count 18 :die 8 :modifier 72}
-:speed "30 ft., fly 60 ft."
+  :actions [{:name "Multiattack" :description "The erinyes makes three attacks."}
+            {:name "Longsword" :description "Melee Weapon Attack: +8 to hit, reach 5 ft., one target. Hit: 8 (1d8 + 4) slashing damage, or 9 (1d10 + 4) slashing damage if used with two hands, plus 13 (3d8) poison damage."}
+            {:name "Longbow" :description "Ranged Weapon Attack: +7 to hit, range 150/600 ft., one target. Hit: 7 (1d8 + 3) piercing damage plus 13 (3d8) poison damage, and the target must succeed on a DC 14 Constitution saving throw or be poisoned. The poison lasts until it is removed by the lesser restoration spell or similar magic."}]
 
-:str 18
-:dex 16
-:con 18
-:int 14
-:wis 14
-:cha 18
-:saving-throws {:dex 7, :con 8, :wis 6, :cha 8}
-:damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
-:damage-immunities "fire, poison"
-:condition-immunities "poisoned"
-:senses "truesight 120 ft., passive Perception 12"
-:languages "Infernal, telepathy 120 ft."
-:challenge 12
+  :reactions [{:name "Parry" :description "The erinyes adds 4 to its AC against one melee attack that would hit it. To do so, the erinyes must see the attacker and be wielding a melee weapon."}]}{
+  :name "Horned Devil"
+  :size :large
+  :type :fiend
+  :subtypes #{:devil}
+  :alignment "lawful evil"
+  :armor-class 18
+  :armor-notes "natural armor"
+  :hit-points {:mean 148 :die-count 17 :die 10 :modifier 55}
+  :speed "20 ft., fly 60 ft."
 
-:traits [{:name "Hellish Weapons" :description "The erinyes's weapon attacks are magical and deal an extra 13 (3d8) poison damage on a hit (included in the attacks)."}
-{:name "Magic Resistance" :description "The erinyes has advantage on saving throws against spells and other magical effects."}]
+  :str 22
+  :dex 17
+  :con 21
+  :int 12
+  :wis 16
+  :cha 17
 
-:actions [{:name "Multiattack" :description "The erinyes makes three attacks."}
-{:name "Longsword" :description "Melee Weapon Attack: +8 to hit, reach 5 ft., one target. Hit: 8 (1d8 + 4) slashing damage, or 9 (1d10
-+ 4) slashing damage if used with two hands, plus 13 (3d8) poison damage."}
-{:name "Longbow" :description "Ranged Weapon Attack: +7 to hit, range 150/600 ft., one target. Hit: 7 (1d8 + 3) piercing damage plus 13 (3d8) poison damage, and the target must succeed on a DC 14 Constitution saving throw or be poisoned. The poison lasts until it is removed by the lesser restoration spell or similar magic.
-"}]
+  :saving-throws {:str 10, :dex 7, :wis 7, :cha 7}
+  :damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks not made with silvered weapons"
+  :damage-immunities "fire, poison"
+  :condition-immunities "poisoned"
+  :senses "darkvision 120 ft., passive Perception 13"
+  :languages "Infernal, telepathy 120 ft."
+  :challenge 11
 
-:reactions [
-{:name "Parry" :description "The erinyes adds 4 to its AC against one melee attack that would hit it. To do so, the erinyes must see the attacker and be wielding a melee weapon.
-"}]
+  :traits [{:name "Devil's Sight" :description "Magical darkness doesn't impede the devil's darkvision."}
+           {:name "Magic Resistance" :description "The devil has advantage on saving throws against spells and other magical effects."}]
 
-}{
-:name "Horned Devil"
-:size :large
-:type :fiend
-:subtypes #{:devil}
-:alignment "lawful evil"
-:armor-class 18
-:armor-notes "natural armor"
-:hit-points {:mean 148 :die-count 17 :die 10 :modifier 55}
-:speed "20 ft., fly 60 ft."
+  :actions [{:name "Multiattack" :description "The devil makes three melee attacks: two with its fork and one with its tail. It can use Hurl Flame in place of any melee attack."}
+            {:name "Fork" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 15 (2d8 + 6) piercing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 10 (1d8 + 6) piercing damage. If the target is a creature other than an undead or a construct, it must succeed on a DC 17 Constitution saving throw or lose 10 (3d6) hit points at the start of each of its turns due to an infernal wound. Each time the devil hits the wounded target with this attack, the damage dealt by the wound increases by 10 (3d6). Any creature can take an action to stanch the wound with a successful DC 12 Wisdom (Medicine) check. The wound also closes if the target receives magical healing."}
+            {:name "Hurl Flame" :description "Ranged Spell Attack: +7 to hit, range 150 ft., one target. Hit: 14 (4d6) fire damage. If the target is a flammable object that isn't being worn or carried, it also catches fire."}]}{
+  :name "Ice Devil"
+  :size :large
+  :type :fiend
+  :subtypes #{:devil}
+  :alignment "lawful evil"
+  :armor-class 18
+  :armor-notes "natural armor"
+  :hit-points {:mean 180 :die-count 19 :die 10 :modifier 76}
+  :speed "40 ft."
 
-:str 22
-:dex 17
-:con 21
-:int 12
-:wis 16
-:cha 17
+  :str 21
+  :dex 14
+  :con 18
+  :int 18
+  :wis 15
+  :cha 18
 
-:saving-throws {:str 10, :dex 7, :wis 7, :cha 7}
-:damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks not made with silvered weapons"
-:damage-immunities "fire, poison"
-:condition-immunities "poisoned"
-:senses "darkvision 120 ft., passive Perception 13"
-:languages "Infernal, telepathy 120 ft."
-:challenge 11
+  :saving-throws {:dex 7, :con 9, :wis 7, :cha 9}
+  :damage-resistances "bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
+  :damage-immunities "cold, fire, poison"
+  :condition-immunities "poisoned"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 12"
+  :languages "Infernal, telepathy 120 ft."
+  :challenge 14
 
-:traits [{:name "Devil's Sight" :description "Magical darkness doesn't impede the devil's darkvision."}
-{:name "Magic Resistance" :description "The devil has advantage on saving throws against spells and other magical effects."}]
+  :traits [{:name "Devil's Sight" :description "Magical darkness doesn't impede the devil's darkvision."}
+           {:name "Magic Resistance" :description "The devil has advantage on saving throws against spells and other magical effects."}]
 
-:actions [{:name "Multiattack" :description "The devil makes three melee attacks: two with its fork and one with its tail. It can use Hurl Flame in place of any melee attack."}
-{:name "Fork" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 15 (2d8 + 6) piercing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 10 (1d8 + 6) piercing damage. If the target is a creature other than an undead or a construct, it must succeed on a DC 17 Constitution saving throw or lose 10 (3d6) hit points at the start of each of its turns due to an infernal wound. Each time the devil hits the wounded target with this attack, the damage dealt by the wound increases by 10 (3d6). Any creature can take an action to stanch the wound with a successful DC 12 Wisdom (Medicine) check. The wound also closes if the target receives magical healing."}
-{:name "Hurl Flame" :description "Ranged Spell Attack: +7 to hit, range 150 ft., one target. Hit: 14 (4d6) fire damage. If the target is a flammable object that isn't being worn or carried, it also catches fire."}]
-
-}{
-:name "Ice Devil"
-:size :large
-:type :fiend
-:subtypes #{:devil}
-:alignment "lawful evil"
-:armor-class 18
-:armor-notes "natural armor"
-:hit-points {:mean 180 :die-count 19 :die 10 :modifier 76}
-:speed "40 ft."
-
-:str 21
-:dex 14
-:con 18
-:int 18
-:wis 15
-:cha 18
-
-:saving-throws {:dex 7, :con 9, :wis 7, :cha 9}
-:damage-resistances "bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
-:damage-immunities "cold, fire, poison"
-:condition-immunities "poisoned"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 12"
-:languages "Infernal, telepathy 120 ft."
-:challenge 14
-
-:traits [{:name "Devil's Sight" :description "Magical darkness doesn't impede the devil's darkvision."}
-{:name "Magic Resistance" :description "The devil has advantage on saving throws against spells and other magical effects."}]
-
-:actions [{:name "Multiattack" :description "The devil makes three attacks: one with its bite, one with its claws, and one with its tail."}
-{:name "Bite" :description "Melee Weapon Attack: +10 to hit, reach 5 ft., one target. Hit: 12 (2d6 + 5) piercing damage plus 10 (3d6) cold damage."}
-{:name "Claws" :description "Melee Weapon Attack: +10 to hit, reach 5 ft., one target. Hit: 10 (2d4 + 5) slashing damage plus 10 (3d6) cold damage."}
-{:name "Tail" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 12 (2d6 + 5) bludgeoning damage plus 10 (3d6) cold damage."}
-{:name "Wall of Ice" :notes "Recharge 6" :description "The devil magically forms an opaque wall of ice on a solid surface it can see within 60 feet of it. The wall is 1 foot thick and up to 30 feet long and 10 feet high, or it's a hemispherical dome up to 20 feet in diameter.
+  :actions [{:name "Multiattack" :description "The devil makes three attacks: one with its bite, one with its claws, and one with its tail."}
+            {:name "Bite" :description "Melee Weapon Attack: +10 to hit, reach 5 ft., one target. Hit: 12 (2d6 + 5) piercing damage plus 10 (3d6) cold damage."}
+            {:name "Claws" :description "Melee Weapon Attack: +10 to hit, reach 5 ft., one target. Hit: 10 (2d4 + 5) slashing damage plus 10 (3d6) cold damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 12 (2d6 + 5) bludgeoning damage plus 10 (3d6) cold damage."}
+            {:name "Wall of Ice" :notes "Recharge 6" :description "The devil magically forms an opaque wall of ice on a solid surface it can see within 60 feet of it. The wall is 1 foot thick and up to 30 feet long and 10 feet high, or it's a hemispherical dome up to 20 feet in diameter.
 When the wall appears, each creature in its space is pushed out of it by the shortest route. The creature chooses which side of the wall to end up on, unless the creature is incapacitated. The creature then makes a DC 17 Dexterity saving throw, taking 35 (10d6) cold damage on a failed save, or half as much damage on a successful one. 
-The wall lasts for 1 minute or until the devil is incapacitated or dies. The wall can be damaged and breached; each 10-foot section has AC 5, 30 hit points, vulnerability to fire damage, and immunity to acid, cold, necrotic, poison, and psychic damage. If a section is destroyed, it leaves behind a sheet of frigid air in the space the wall occupied. Whenever a creature finishes moving through the frigid air on a turn, willingly or otherwise, the creature must make a DC 17 Constitution saving throw, taking 17 (5d6) cold damage on a failed save, or half as much damage on a successful one. The frigid air dissipates when the rest of the wall vanishes."}]
+The wall lasts for 1 minute or until the devil is incapacitated or dies. The wall can be damaged and breached; each 10-foot section has AC 5, 30 hit points, vulnerability to fire damage, and immunity to acid, cold, necrotic, poison, and psychic damage. If a section is destroyed, it leaves behind a sheet of frigid air in the space the wall occupied. Whenever a creature finishes moving through the frigid air on a turn, willingly or otherwise, the creature must make a DC 17 Constitution saving throw, taking 17 (5d6) cold damage on a failed save, or half as much damage on a successful one. The frigid air dissipates when the rest of the wall vanishes."}]}{
+  :name "Imp"
+  :size :tiny
+  :type :fiend
+  :subtypes #{:devil, :shapechanger}
+  :alignment "lawful evil"
+  :armor-class 13
+  :hit-points {:mean 10 :die-count 3 :die 4 :modifier 3}
+  :speed "20 ft., fly 40 ft."
 
-}{
-:name "Imp"
-:size :tiny
-:type :fiend
-:subtypes #{:devil, :shapechanger}
-:alignment "lawful evil"
-:armor-class 13
-:hit-points {:mean 10 :die-count 3 :die 4 :modifier 3}
-:speed "20 ft., fly 40 ft."
+  :str 6
+  :dex 17
+  :con 13
+  :int 11
+  :wis 12
+  :cha 14
 
-:str 6
-:dex 17
-:con 13
-:int 11
-:wis 12
-:cha 14
+  :skills {:deception 4, :insight 3, :persuasion 4, :stealth 5}
+  :damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
+  :damage-immunities "fire, poison"
+  :condition-immunities "poisoned"
+  :senses "darkvision 120 ft., passive Perception 11"
+  :languages " Infernal, Common"
+  :challenge 1
 
-:skills {:deception 4, :insight 3, :persuasion 4, :stealth 5}
-:damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
-:damage-immunities "fire, poison"
-:condition-immunities "poisoned"
-:senses "darkvision 120 ft., passive Perception 11"
-:languages " Infernal, Common"
-:challenge 1
-
-:traits [{:name "Shapechanger" :description "The imp can use its action to polymorph into a beast form that resembles a rat (speed 20 ft.), a raven (20 ft., fly 60 ft.), or a spider (20 ft., climb 20 ft.), or back into its true form. Its statistics are the same in each form, except for the speed changes noted. Any equipment it is wearing or carrying isn't transformed. It reverts to its true form if it dies.
+  :traits [{:name "Shapechanger" :description "The imp can use its action to polymorph into a beast form that resembles a rat (speed 20 ft.), a raven (20 ft., fly 60 ft.), or a spider (20 ft., climb 20 ft.), or back into its true form. Its statistics are the same in each form, except for the speed changes noted. Any equipment it is wearing or carrying isn't transformed. It reverts to its true form if it dies.
 Devil's Sight. Magical darkness doesn't impede the imp's darkvision."}
-{:name "Magic Resistance" :description "The imp has advantage on saving throws against spells and other magical effects."}]
+           {:name "Magic Resistance" :description "The imp has advantage on saving throws against spells and other magical effects."}]
 
-:actions [{:name "Sting " :notes "Bite in Beast Form" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 5 (1d4 + 3) piercing damage, and the target must make on a DC 11 Constitution saving throw, taking 10 (3d6) poison damage on a failed save, or half as much damage on a successful one."}
-{:name "Invisibility" :description "The imp magically turns invisible until it attacks or until its concentration ends (as if concentrating on a spell). Any equipment the imp wears or carries is invisible with it.
-"}]
+  :actions [{:name "Sting " :notes "Bite in Beast Form" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 5 (1d4 + 3) piercing damage, and the target must make on a DC 11 Constitution saving throw, taking 10 (3d6) poison damage on a failed save, or half as much damage on a successful one."}
+            {:name "Invisibility" :description "The imp magically turns invisible until it attacks or until its concentration ends (as if concentrating on a spell). Any equipment the imp wears or carries is invisible with it."}]}{
+  :name "Lemure"
+  :size :medium
+  :type :fiend
+  :subtypes #{:devil}
+  :alignment "lawful evil"
+  :armor-class 7
+  :hit-points {:mean 13 :die-count 3 :die 8}
+  :speed "15 ft."
 
-}{
-:name "Lemure"
-:size :medium
-:type :fiend
-:subtypes #{:devil}
-:alignment "lawful evil"
-:armor-class 7
-:hit-points {:mean 13 :die-count 3 :die 8}
-:speed "15 ft."
+  :str 10
+  :dex 5
+  :con 11
+  :int 1
+  :wis 11
+  :cha 3
 
-:str 10
-:dex 5
-:con 11
-:int 1
-:wis 11
-:cha 3
-:damage-resistances "cold"
-:damage-immunities "fire, poison"
-:condition-immunities "charmed, frightened, poisoned"
-:senses "darkvision 120 ft., passive Perception 10"
-:languages "understands Infernal but can't speak"
-:challenge 0
+  :damage-resistances "cold"
+  :damage-immunities "fire, poison"
+  :condition-immunities "charmed, frightened, poisoned"
+  :senses "darkvision 120 ft., passive Perception 10"
+  :languages "understands Infernal but can't speak"
+  :challenge 0
 
-:traits [{:name "Devil's Sight" :description "Magical darkness doesn't impede the lemure's darkvision."}
-{:name "Hellish Rejuvenation" :description "A lemure that dies in the Nine Hells comes back to life with all its hit points in 1d10 days unless it is killed by a good-aligned creature with a bless spell cast on that creature or its remains are sprinkled with holy water."}]
+  :traits [{:name "Devil's Sight" :description "Magical darkness doesn't impede the lemure's darkvision."}
+           {:name "Hellish Rejuvenation" :description "A lemure that dies in the Nine Hells comes back to life with all its hit points in 1d10 days unless it is killed by a good-aligned creature with a bless spell cast on that creature or its remains are sprinkled with holy water."}]
 
-:actions [{:name "Fist" :description "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 2 (1d4) bludgeoning damage."}]
+  :actions [{:name "Fist" :description "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 2 (1d4) bludgeoning damage."}]}{
+  :name "Pit Fiend"
+  :size :large
+  :type :fiend
+  :subtypes #{:devil}
+  :alignment "lawful evil"
+  :armor-class 19
+  :armor-notes "natural armor"
+  :hit-points {:mean 300 :die-count 24 :die 10 :modifier 168}
+  :speed "30 ft., fly 60 ft."
 
-}{
-:name "Pit Fiend"
-:size :large
-:type :fiend
-:subtypes #{:devil}
-:alignment "lawful evil"
-:armor-class 19
-:armor-notes "natural armor"
-:hit-points {:mean 300 :die-count 24 :die 10 :modifier 168}
-:speed "30 ft., fly 60 ft."
+  :str 26
+  :dex 14
+  :con 24
+  :int 22
+  :wis 18
+  :cha 24
 
-:str 26
-:dex 14
-:con 24
-:int 22
-:wis 18
-:cha 24
+  :saving-throws {:dex 8, :con 13, :wis 10}
+  :damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
+  :damage-immunities "fire, poison"
+  :condition-immunities "poisoned"
+  :senses "truesight 120 ft., passive Perception 14"
+  :languages "Infernal, telepathy 120 ft."
+  :challenge 20
 
-:saving-throws {:dex 8, :con 13, :wis 10}
-:damage-resistances "cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered"
-:damage-immunities "fire, poison"
-:condition-immunities "poisoned"
-:senses "truesight 120 ft., passive Perception 14"
-:languages "Infernal, telepathy 120 ft."
-:challenge 20
-
-:traits [{:name "Fear Aura" :description "Any creature hostile to the pit fiend that starts its turn within 20 feet of the pit fiend must make a DC 21 Wisdom saving throw, unless the pit fiend is incapacitated. On a failed save, the creature is frightened until the start of its next turn. If a creature's saving throw is successful, the creature is immune to the pit fiend's Fear Aura for the next 24 hours."}
-{:name "Magic Resistance" :description "The pit fiend has advantage on saving throws against spells and other magical effects."}
-{:name "Magic Weapons" :description "The pit fiend's weapon attacks are magical."}
-{:name "Innate Spellcasting" :description "The pit fiend's spellcasting ability is Charisma (spell save DC 21). The pit fiend can innately cast the following spells, requiring no material components:
+  :traits [{:name "Fear Aura" :description "Any creature hostile to the pit fiend that starts its turn within 20 feet of the pit fiend must make a DC 21 Wisdom saving throw, unless the pit fiend is incapacitated. On a failed save, the creature is frightened until the start of its next turn. If a creature's saving throw is successful, the creature is immune to the pit fiend's Fear Aura for the next 24 hours."}
+           {:name "Magic Resistance" :description "The pit fiend has advantage on saving throws against spells and other magical effects."}
+           {:name "Magic Weapons" :description "The pit fiend's weapon attacks are magical."}
+           {:name "Innate Spellcasting" :description "The pit fiend's spellcasting ability is Charisma (spell save DC 21). The pit fiend can innately cast the following spells, requiring no material components:
 At will: detect magic, fireball
 3/day each: hold monster, wall of fire"}]
 
-:actions [{:name "Multiattack" :description "The pit fiend makes four attacks: one with its bite, one with its claw, one with its mace, and one with its tail."}
-{:name "Bite" :description "Melee Weapon Attack: +14 to hit, reach 5 ft., one target. Hit: 22 (4d6 + 8) piercing damage. The target must succeed on a DC 21 Constitution saving throw or become poisoned. While poisoned in this way, the target can't regain hit points, and it takes 21 (6d6) poison damage at the start of each of its turns. The poisoned target can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}
-{:name "Claw" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 17 (2d8 + 8) slashing damage."}
-{:name "Mace" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 15 (2d6 + 8) bludgeoning damage plus 21 (6d6) fire damage."}
-{:name "Tail" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 24 (3d10 + 8) bludgeoning damage.
-"}]
+  :actions [{:name "Multiattack" :description "The pit fiend makes four attacks: one with its bite, one with its claw, one with its mace, and one with its tail."}
+            {:name "Bite" :description "Melee Weapon Attack: +14 to hit, reach 5 ft., one target. Hit: 22 (4d6 + 8) piercing damage. The target must succeed on a DC 21 Constitution saving throw or become poisoned. While poisoned in this way, the target can't regain hit points, and it takes 21 (6d6) poison damage at the start of each of its turns. The poisoned target can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}
+            {:name "Claw" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 17 (2d8 + 8) slashing damage."}
+            {:name "Mace" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 15 (2d6 + 8) bludgeoning damage plus 21 (6d6) fire damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 24 (3d10 + 8) bludgeoning damage."}]}{
+  :name "Plesiosaurus"
+  :size :large
+  :type :beast
+  :alignment "unaligned"
+  :armor-class 13
+  :armor-notes "natural armor"
+  :hit-points {:mean 68 :die-count 8 :die 10 :modifier 24}
+  :speed "20 ft., swim 40 ft."
 
-}{
-:name "Plesiosaurus"
-:size :large
-:type :beast
-:alignment "unaligned"
-:armor-class 13
-:armor-notes "natural armor"
-:hit-points {:mean 68 :die-count 8 :die 10 :modifier 24}
-:speed "20 ft., swim 40 ft."
+  :str 18
+  :dex 15
+  :con 16
+  :int 2
+  :wis 12
+  :cha 5
 
-:str 18
-:dex 15
-:con 16
-:int 2
-:wis 12
-:cha 5
+  :skills {:perception 3, :stealth 4}
+  :senses "passive Perception 13"
+  :challenge 2
 
-:skills {:perception 3, :stealth 4}
-:senses "passive Perception 13"
-:challenge 2
+  :traits [{:name "Hold Breath" :description "The plesiosaurus can hold its breath for 1 hour."}]
 
-:traits [{:name "Hold Breath" :description "The plesiosaurus can hold its breath for 1 hour."}]
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +6 to hit, reach 10 ft., one target. Hit: 14 (3d6 + 4) piercing damage."}]}{
+  :name "Triceratops"
+  :size :huge
+  :type :beast
+  :alignment "unaligned"
+  :armor-class 13
+  :armor-notes "natural armor"
+  :hit-points {:mean 95 :die-count 10 :die 12 :modifier 30}
+  :speed "50 ft."
 
-:actions [{:name "Bite" :description "Melee Weapon Attack: +6 to hit, reach 10 ft., one target. Hit: 14 (3d6 + 4) piercing damage.
-"}]
+  :str 22
+  :dex 9
+  :con 17
+  :int 2
+  :wis 11
+  :cha 5
 
-}{
-:name "Triceratops"
-:size :huge
-:type :beast
-:alignment "unaligned"
-:armor-class 13
-:armor-notes "natural armor"
-:hit-points {:mean 95 :die-count 10 :die 12 :modifier 30}
-:speed "50 ft."
+  :senses "passive Perception 10"
+  :challenge 5
 
-:str 22
-:dex 9
-:con 17
-:int 2
-:wis 11
-:cha 5
-
-:senses "passive Perception 10"
-:challenge 5
-
-:traits [{:name "Trampling Charge" :description "If the triceratops moves at least 20 feet straight toward a creature and then hits it with a gore attack on the same turn, that target must succeed on a DC 13 Strength saving throw or be knocked prone.
+  :traits [{:name "Trampling Charge" :description "If the triceratops moves at least 20 feet straight toward a creature and then hits it with a gore attack on the same turn, that target must succeed on a DC 13 Strength saving throw or be knocked prone.
 If the target is prone, the triceratops can make one stomp attack against it as a bonus action."}]
 
-:actions [{:name "Gore" :description "Melee Weapon Attack: +9 to hit, reach 5 ft., one target. Hit: 24 (4d8 + 6) piercing damage."}
-{:name "Stomp" :description "Melee Weapon Attack: +9 to hit, reach 5 ft., one prone creature. Hit: 22 (3d10 + 6) bludgeoning damage.
-"}]
-
-}{
-:name "Tyrannosaurus Rex"
-:size :huge
-:type :beast
-:alignment "unaligned"
-:armor-class 13
-:armor-notes "natural armor"
-:hit-points {:mean 136 :die-count 13 :die 12 :modifier 52}
-:speed "50 ft."
-
-:str 25
-:dex 10
-:con 19
-:int 2
-:wis 12
-:cha 9
-
-:skills {:perception 4}
-:senses "passive Perception 14"
-:challenge 8
-
-:actions [{:name "Multiattack" :description "The tyrannosaurus makes two attacks: one with its bite and one with its tail. It can't make both attacks against the same target."}
-{:name "Bite" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 33 (4d12 + 7) piercing damage. If the target is a Medium or smaller creature, it is grappled (escape DC 17). Until this grapple ends, the target is restrained, and the tyrannosaurus can't bite another target."}
-{:name "Tail" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 20 (3d8 + 7) bludgeoning damage.
-"}]
-
-}{
-:name "Doppelganger"
-:size :medium
-:type :monstrosity
-:subtypes #{:shapechanger}
-:alignment "neutral"
-:armor-class 14
-:hit-points {:mean 52 :die-count 8 :die 8 :modifier 16}
-:speed "30 ft."
-
-:str 11
-:dex 18
-:con 14
-:int 11
-:wis 12
-:cha 14
-
-:skills {:deception 6, :insight 3}
-:condition-immunities "charmed"
-:senses "darkvision 60 ft., passive Perception 11"
-:languages "Common"
-:challenge 3
-
-:traits [{:name "Shapechanger" :description "The doppelganger can use its action to polymorph into a Small or Medium humanoid it has seen, or back into its true form. Its statistics, other than its size, are the same in each form. Any equipment it is wearing or carrying isn't transformed. It reverts to its true form if it dies."}
-{:name "Ambusher" :description "The doppelganger has advantage on attack rolls against any creature it has surprised."}
-{:name "Surprise Attack" :description "If the doppelganger surprises a creature and hits it with an attack during the first round of combat, the target takes an extra 10 (3d6) damage from the attack."}]
-
-:actions [{:name "Multiattack" :description "The doppelganger makes two melee attacks."}
-{:name "Slam" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 7 (1d6 + 4) bludgeoning damage."}
-{:name "Read Thoughts" :description "The doppelganger magically reads the surface thoughts of one creature within 60 feet of it. The effect can penetrate barriers, but 3 feet of wood or dirt, 2 feet of stone, 2 inches of metal, or a thin sheet of lead blocks it. While the target is in range, the doppelganger can continue reading its thoughts, as long as the doppelganger's concentration isn't broken (as if concentrating on a spell). While reading the target's mind, the doppelganger has advantage on Wisdom (Insight) and Charisma (Deception, Intimidation, and Persuasion) checks against the target.
-"}]
-
-}{
-:name "Ancient Black Dragon"
-:size :gargantuan
-:type :dragon
-:alignment "chaotic evil"
-:armor-class 22
-:armor-notes "natural armor"
-:hit-points {:mean 367 :die-count 21 :die 20 :modifier 147}
-:speed "40 ft., fly 80 ft., swim 40 ft."
-
-:str 27
-:dex 14
-:con 25
-:int 16
-:wis 15
-:cha 19
-
-:saving-throws {:dex 9, :con 14, :wis 9, :cha 11}
-
-:skills {:perception 16, :stealth 9}
-:damage-immunities "acid"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 26"
-:languages "Common, Draconic"
-:challenge 21
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
-{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +15 to hit, reach 15 ft., one target. Hit: 19 (2d10 + 8) piercing damage plus 9 (2d8) acid damage."}
-{:name "Claw" :description "Melee Weapon Attack: +15 to hit, reach 10 ft., one target. Hit: 15 (2d6 + 8) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +15 to hit, reach 20 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 19 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Acid Breath " :notes "Recharge 5–6" :description "The dragon exhales acid in a 90-foot line that is 10 feet wide. Each creature in that line must make a DC 22 Dexterity saving throw, taking 67 (15d8) acid damage on a failed save, or half as much damage on a successful one.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 23 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-
-}{
-:name "Adult Black Dragon"
-:size :huge
-:type :dragon
-:alignment "chaotic evil"
-:armor-class 19
-:armor-notes "natural armor"
-:hit-points {:mean 195 :die-count 17 :die 12 :modifier 85}
-:speed "40 ft., fly 80 ft., swim 40 ft."
-
-:str 23
-:dex 14
-:con 21
-:int 14
-:wis 13
-:cha 17
-
-:saving-throws {:dex 7, :con 10, :wis 6, :cha 8}
-
-:skills {:perception 11, :stealth 7}
-:damage-immunities "acid"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 21"
-:languages "Common, Draconic"
-:challenge 14
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
-{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +11 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage plus 4 (1d8) acid damage."}
-{:name "Claw" :description "Melee Weapon Attack: +11 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +11 to hit, reach 15 ft., one target. Hit: 15 (2d8 + 6) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 16 Wisdom saving throw or become frightened for 1 minute. A creature can repeat
-the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Acid Breath " :notes "Recharge 5–6" :description "The dragon exhales acid in a 60-foot line that is 5 feet wide. Each creature in that line must make a DC 18 Dexterity saving throw, taking 54 (12d8) acid damage on a failed save, or half as much damage on a successful one.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 19 Dexterity saving throw or take 13 (2d6 + 6) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-
-}{
-:name "Young Black Dragon"
-:size :large
-:type :dragon
-:alignment "chaotic evil"
-:armor-class 18
-:armor-notes "natural armor"
-:hit-points {:mean 127 :die-count 15 :die 10 :modifier 45}
-:speed "40 ft., fly 80 ft., swim 40 ft."
-
-:str 19
-:dex 14
-:con 17
-:int 12
-:wis 11
-:cha 15
-
-:saving-throws {:dex 5, :con 6, :wis 3, :cha 5}
-
-:skills {:perception 6, :stealth 5}
-:damage-immunities "acid"
-:senses "blindsight 30 ft., darkvision 120 ft., passive Perception 16"
-:languages "Common, Draconic"
-:challenge 7
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
-
-:actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 10 ft., one target. Hit: 15 (2d10 + 4) piercing damage plus 4 (1d8) acid damage."}
-{:name "Claw" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) slashing damage."}]
-
-}{
-:name "Black Dragon Wyrmling"
-:size :medium
-:type :dragon
-:alignment "chaotic evil"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 33 :die-count 6 :die 8 :modifier 6}
-:speed "30 ft., fly 60 ft., swim 30 ft."
-
-:str 15
-:dex 14
-:con 13
-:int 10
-:wis 11
-:cha 13
-
-:saving-throws {:dex 4, :con 3, :wis 2, :cha 3}
-
-:skills {:perception 4, :stealth 4}
-:damage-immunities "acid"
-:senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
-:languages "Draconic"
-:challenge 2
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
-
-:actions [{:name "Bite" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 7 (1d10 + 2) piercing damage plus 2 (1d4) acid damage."}
-{:name "Acid Breath " :notes "Recharge 5–6" :description "The dragon exhales acid in a 15-foot line that is 5 feet wide. Each creature in that line must make a DC 11 Dexterity saving throw, taking 22 (5d8) acid damage on a failed save, or half as much damage on a successful one.
-"}]
-}{
-:name "Ancient Blue Dragon"
-:size :gargantuan
-:type :dragon
-:alignment "lawful evil"
-:armor-class 22
-:armor-notes "natural armor"
-:hit-points {:mean 481 :die-count 26 :die 20 :modifier 208}
-:speed "40 ft., burrow 40 ft., fly 80 ft."
-
-:str 29
-:dex 10
-:con 27
-:int 18
-:wis 17
-:cha 21
-
-:saving-throws {:dex 7, :con 15, :wis 10, :cha 12}
-
-:skills {:perception 17, :stealth 7}
-:damage-immunities "lightning"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 27"
-:languages "Common, Draconic"
-:challenge 23
-
-:traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +16 to hit, reach 15 ft., one target. Hit: 20 (2d10 + 9) piercing damage plus 11 (2d10) lightning damage."}
-{:name "Claw" :description "Melee Weapon Attack: +16 to hit, reach 10 ft., one target. Hit: 16 (2d6 + 9) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +16 to hit, reach 20 ft., one target. Hit: 18 (2d8 + 9) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 20 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Lightning Breath " :notes "Recharge 5–6" :description "The dragon exhales lightning in a 120-foot line that is 10 feet wide. Each creature in that line must make a DC 23 Dexterity saving throw, taking 88 (16d10) lightning damage on a
-failed save, or half as much damage on a successful one.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 24 Dexterity saving throw or take 16 (2d6 + 9) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-
-}{
-:name "Adult Blue Dragon"
-:size :huge
-:type :dragon
-:alignment "lawful evil"
-:armor-class 19
-:armor-notes "natural armor"
-:hit-points {:mean 225 :die-count 18 :die 12 :modifier 108}
-:speed "40 ft., burrow 30 ft., fly 80 ft."
-
-:str 25
-:dex 10
-:con 23
-:int 16
-:wis 15
-:cha 19
-
-:saving-throws {:dex 5, :con 11, :wis 7, :cha 9}
-
-:skills {:perception 12, :stealth 5}
-:damage-immunities "lightning"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 22"
-:languages "Common, Draconic"
-:challenge 16
-
-:traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +12 to hit, reach 10 ft., one target. Hit: 18 (2d10 + 7) piercing damage plus 5 (1d10) lightning damage."}
-{:name "Claw" :description "Melee Weapon Attack: +12 to hit, reach 5 ft., one target. Hit: 14 (2d6 + 7) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +12 to hit, reach 15 ft., one target. Hit: 16 (2d8 + 7) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 17 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Lightning Breath " :notes "Recharge 5–6" :description "The dragon exhales lightning in a 90-foot line that is 5 feet wide. Each creature in that line must make a DC 19 Dexterity saving throw, taking 66 (12d10) lightning damage on a
-failed save, or half as much damage on a successful one.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 20 Dexterity saving throw or take 14 (2d6 + 7) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-
-}{
-:name "Young Blue Dragon"
-:size :large
-:type :dragon
-:alignment "lawful evil"
-:armor-class 18
-:armor-notes "natural armor"
-:hit-points {:mean 152 :die-count 16 :die 10 :modifier 64}
-:speed "40 ft., burrow 20 ft., fly 80 ft."
-
-:str 21
-:dex 10
-:con 19
-:int 14
-:wis 13
-:cha 17
-
-:saving-throws {:dex 4, :con 8, :wis 5, :cha 7}
-
-:skills {:perception 9, :stealth 4}
-:damage-immunities "lightning"
-:senses "blindsight 30 ft., darkvision 120 ft., passive Perception 19"
-:languages "Common, Draconic"
-:challenge 9
-
-:actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +9 to hit, reach 10 ft., one target. Hit: 16 (2d10 + 5) piercing damage plus 5 (1d10) lightning damage."}
-{:name "Claw" :description "Melee Weapon Attack: +9 to hit, reach 5 ft., one target. Hit: 12 (2d6 + 5) slashing damage."}
-{:name "Lightning Breath " :notes "Recharge 5–6" :description "The dragon exhales lightning in an 60-foot line that is 5 feet wide. Each creature in that line must make a DC 16 Dexterity saving throw, taking 55 (10d10) lightning damage on a
-failed save, or half as much damage on a successful one.
-"}]
-
-}{
-:name "Blue Dragon Wyrmling"
-:size :medium
-:type :dragon
-:alignment "lawful evil"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 52 :die-count 8 :die 8 :modifier 16}
-:speed "30 ft., burrow 15 ft., fly 60 ft."
-
-:str 17
-:dex 10
-:con 15
-:int 12
-:wis 11
-:cha 15
-
-:saving-throws {:dex 2, :con 4, :wis 2, :cha 4}
-
-:skills {:perception 4, :stealth 2}
-:damage-immunities "lightning"
-:senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
-:languages "Draconic"
-:challenge 3
-
-:actions [{:name "Bite" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 8 (1d10 + 3) piercing damage plus 3 (1d6) lightning damage."}
-{:name "Lightning Breath " :notes "Recharge 5–6" :description "The dragon exhales lightning in a 30-foot line that is 5 feet wide. Each creature in that line must make a DC 12 Dexterity saving throw, taking 22 (4d10) lightning damage on a
-failed save, or half as much damage on a successful one.
-Green Dragon
-"}]
-
-}{
-:name "Ancient Green Dragon"
-:size :gargantuan
-:type :dragon
-:alignment "lawful evil"
-:armor-class 21
-:armor-notes "natural armor"
-:hit-points {:mean 385 :die-count 22 :die 20 :modifier 154}
-:speed "40 ft., fly 80 ft., swim 40 ft."
-
-:str 27
-:dex 12
-:con 25
-:int 20
-:wis 17
-:cha 19
-
-:saving-throws {:dex 8, :con 14, :wis 10, :cha 11}
-
-:skills {:deception 11, :insight 10, :perception 17, :persuasion 11, :stealth 8}
-:damage-immunities "poison"
-:condition-immunities "poisoned"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 27"
-:languages "Common, Draconic"
-:challenge 22
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
-{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +15 to hit, reach 15 ft., one target. Hit: 19 (2d10 + 8) piercing damage plus 10 (3d6) poison damage."}
-{:name "Claw" :description "Melee Weapon Attack: +15 to hit, reach 10 ft., one target. Hit: 22 (4d6 + 8) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +15 to hit, reach 20 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 19 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Poison Breath " :notes "Recharge 5–6" :description "The dragon exhales poisonous gas in a 90-foot cone. Each creature in that area must make a DC 22 Constitution saving throw, taking 77 (22d6) poison damage on a failed save, or half as much damage on a successful one.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 23 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-
-}{
-:name "Adult Green Dragon"
-:size :huge
-:type :dragon
-:alignment "lawful evil"
-:armor-class 19
-:armor-notes "natural armor"
-:hit-points {:mean 207 :die-count 18 :die 12 :modifier 90}
-:speed "40 ft., fly 80 ft., swim 40 ft."
-
-:str 23
-:dex 12
-:con 21
-:int 18
-:wis 15
-:cha 17
-
-:saving-throws {:dex 6, :con 10, :wis 7, :cha 8}
-
-:skills {:deception 8, :insight 7, :perception 12,}
-:persuasion 8, :stealth 6
-:damage-immunities "poison"
-:condition-immunities "poisoned"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 22"
-:languages "Common, Draconic"
-:challenge 15
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
-{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +11 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage plus 7 (2d6) poison damage."}
-{:name "Claw" :description "Melee Weapon Attack: +11 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +11 to hit, reach 15 ft., one target. Hit: 15 (2d8 + 6) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 16 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Poison Breath " :notes "Recharge 5–6" :description "The dragon exhales poisonous gas in a 60-foot cone. Each creature in that area must make a DC 18 Constitution saving throw, taking 56 (16d6) poison damage on a failed save, or half as much damage on a successful one.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 19 Dexterity saving throw or take 13 (2d6 + 6) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-
-}{
-:name "Young Green Dragon"
-:size :large
-:type :dragon
-:alignment "lawful evil"
-:armor-class 18
-:armor-notes "natural armor"
-:hit-points {:mean 136 :die-count 16 :die 10 :modifier 48}
-:speed "40 ft., fly 80 ft., swim 40 ft."
-
-:str 19
-:dex 12
-:con 17
-:int 16
-:wis 13
-:cha 15
-
-:saving-throws {:dex 4, :con 6, :wis 4, :cha 5}
-
-:skills {:deception 5, :perception 7, :stealth 4}
-:damage-immunities "poison"
-:condition-immunities "poisoned"
-:senses "blindsight 30 ft., darkvision 120 ft., passive Perception 17"
-:languages "Common, Draconic"
-:challenge 8
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
-
-:actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 10 ft., one target. Hit: 15 (2d10 + 4) piercing damage plus 7 (2d6) poison damage."}
-{:name "Claw" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) slashing damage."}
-{:name "Poison Breath " :notes "Recharge 5–6" :description "The dragon exhales poisonous gas in a 30-foot cone. Each creature in that area must make a DC 14 Constitution saving throw, taking 42 (12d6) poison damage on a failed save, or half as much damage on a successful one."}]
-}{
-:name "Green Dragon Wyrmling"
-:size :medium
-:type :dragon
-:alignment "lawful evil"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 38 :die-count 7 :die 8 :modifier 7}
-:speed "30 ft., fly 60 ft., swim 30 ft."
-
-:str 15
-:dex 12
-:con 13
-:int 14
-:wis 11
-:cha 13
-
-:saving-throws {:dex 3, :con 3, :wis 2, :cha 3}
-
-:skills {:perception 4, :stealth 3}
-:damage-immunities "poison"
-:condition-immunities "poisoned"
-:senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
-:languages "Draconic"
-:challenge 2
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
-
-:actions [{:name "Bite" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 7 (1d10 + 2) piercing damage plus 3 (1d6) poison damage."}
-{:name "Poison Breath " :notes "Recharge 5-6" :description "The dragon exhales poisonous gas in a 15-foot cone. Each creature in that area must make a DC 11 Constitution saving throw, taking 21 (6d6) poison damage on a failed save, or half as much damage on a successful one."}]
-}{
-:name "Ancient Red Dragon"
-:size :gargantuan
-:type :dragon
-:alignment "chaotic evil"
-:armor-class 22
-:armor-notes "natural armor"
-:hit-points {:mean 546 :die-count 28 :die 20 :modifier 252}
-:speed "40 ft., climb 40 ft., fly 80 ft."
-
-:str 30
-:dex 10
-:con 29
-:int 18
-:wis 15
-:cha 23
-
-:saving-throws {:dex 7, :con 16, :wis 9, :cha 13}
-
-:skills {:perception 16, :stealth 7}
-:damage-immunities "fire"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 26"
-:languages "Common, Draconic"
-:challenge 24
-
-:traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +17 to hit, reach 15 ft., one target. Hit: 21 (2d10 + 10) piercing damage plus 14 (4d6) fire damage."}
-{:name "Claw" :description "Melee Weapon Attack: +17 to hit, reach 10 ft., one target. Hit: 17 (2d6 + 10) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +17 to hit, reach 20 ft., one target. Hit: 19 (2d8 + 10) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 21 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Fire Breath " :notes "Recharge 5–6" :description "The dragon exhales fire in a 90-foot cone. Each creature in that area must make a DC 24 Dexterity saving throw, taking 91 (26d6) fire damage on a failed save, or half as much damage on a successful one.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 25 Dexterity saving throw or take 17 (2d6 + 10) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-
-}{
-:name "Adult Red Dragon"
-:size :huge
-:type :dragon
-:alignment "chaotic evil"
-:armor-class 19
-:armor-notes "natural armor"
-:hit-points {:mean 256 :die-count 19 :die 12 :modifier 133}
-:speed "40 ft., climb 40 ft., fly 80 ft."
-
-:str 27
-:dex 10
-:con 25
-:int 16
-:wis 13
-:cha 21
-
-:saving-throws {:dex 6, :con 13, :wis 7, :cha 11}
-
-:skills {:perception 13, :stealth 6}
-:damage-immunities "fire"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 23"
-:languages "Common, Draconic"
-:challenge 17
-
-:traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 19 (2d10 + 8) piercing damage plus 7 (2d6) fire damage."}
-{:name "Claw" :description "Melee Weapon Attack: +14 to hit, reach 5 ft., one target. Hit: 15 (2d6 + 8) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +14 to hit, reach 15 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 19 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Fire Breath " :notes "Recharge 5–6" :description "The dragon exhales fire in a 60-foot cone. Each creature in that area must make a DC 21 Dexterity saving throw, taking 63 (18d6) fire damage on a failed save, or half as much damage on a successful one.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 22 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-
-}{
-:name "Young Red Dragon"
-:size :large
-:type :dragon
-:alignment "chaotic evil"
-:armor-class 18
-:armor-notes "natural armor"
-:hit-points {:mean 178 :die-count 17 :die 10 :modifier 85}
-:speed "40 ft., climb 40 ft., fly 80 ft."
-
-:str 23
-:dex 10
-:con 21
-:int 14
-:wis 11
-:cha 19
-
-:saving-throws {:dex 4, :con 9, :wis 4, :cha 8}
-
-:skills {:perception 8, :stealth 4}
-:damage-immunities "fire"
-:senses "blindsight 30 ft., darkvision 120 ft., passive Perception 18"
-:languages "Common, Draconic"
-:challenge 10
-
-:actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage plus 3 (1d6) fire damage."}
-{:name "Claw" :description "Melee Weapon Attack: +10 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
-{:name "Fire Breath " :notes "Recharge 5–6" :description "The dragon exhales fire in a 30-foot cone. Each creature in that area must make a DC 17 Dexterity saving throw, taking 56 (16d6) fire damage on a failed save, or half as much damage on a successful one.
-"}]
-
-}{
-:name "Red Dragon Wyrmling"
-:size :medium
-:type :dragon
-:alignment "chaotic evil"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 75 :die-count 10 :die 8 :modifier 30}
-:speed "30 ft., climb 30 ft., fly 60 ft."
-
-:str 19
-:dex 10
-:con 17
-:int 12
-:wis 11
-:cha 15
-
-:saving-throws {:dex 2, :con 5, :wis 2, :cha 4}
-
-:skills {:perception 4, :stealth 2}
-:damage-immunities "fire"
-:senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
-:languages "Draconic"
-:challenge 4
-
-:actions [{:name "Bite" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 9 (1d10 + 4) piercing damage plus 3 (1d6) fire damage."}
-{:name "Fire Breath " :notes "Recharge 5–6" :description "The dragon exhales fire in a 15-foot cone. Each creature in that area must make a DC 13 Dexterity saving throw, taking 24 (7d6) fire damage on a failed save, or half as much damage on a successful one.
-"}]
-
-}{
-:name "Ancient White Dragon"
-:size :gargantuan
-:type :dragon
-:alignment "chaotic evil"
-:armor-class 20
-:armor-notes "natural armor"
-:hit-points {:mean 333 :die-count 18 :die 20 :modifier 144}
-:speed "40 ft., burrow 40 ft., fly 80 ft., swim 40 ft."
-
-:str 26
-:dex 10
-:con 26
-:int 10
-:wis 13
-:cha 14
-
-:saving-throws {:dex 6, :con 14, :wis 7, :cha 8}
-
-:skills {:perception 13, :stealth 6}
-:damage-immunities "cold"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 23"
-:languages "Common, Draconic"
-:challenge 20
-
-:traits [{:name "Ice Walk" :description "The dragon can move across and climb icy surfaces without needing to make an ability check. Additionally, difficult terrain composed of ice or snow doesn't cost it extra moment."}
-{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +14 to hit, reach 15 ft., one target. Hit: 19 (2d10 + 8) piercing damage plus 9 (2d8) cold damage."}
-{:name "Claw" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 15 (2d6 + 8) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +14 to hit, reach 20 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 16 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Cold Breath " :notes "Recharge 5–6" :description "The dragon exhales an icy blast in a 90-foot cone. Each creature in that area must make a DC 22 Constitution saving throw, taking 72 (16d8) cold damage on a failed save, or half as much damage on a successful one.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 22 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-
-}{
-:name "Adult White Dragon"
-:size :huge
-:type :dragon
-:alignment "chaotic evil"
-:armor-class 18
-:armor-notes "natural armor"
-:hit-points {:mean 200 :die-count 16 :die 12 :modifier 96}
-:speed "40 ft., burrow 30 ft., fly 80 ft., swim 40 ft."
-
-:str 22
-:dex 10
-:con 22
-:int 8
-:wis 12
-:cha 12
-
-:saving-throws {:dex 5, :con 11, :wis 6, :cha 6}
-
-:skills {:perception 11, :stealth 5}
-:damage-immunities "cold"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 21"
-:languages "Common, Draconic"
-:challenge 13
-
-:traits [{:name "Ice Walk" :description "The dragon can move across and climb icy surfaces without needing to make an ability check. Additionally, difficult terrain composed of ice or snow doesn't cost it extra moment."}
-{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +11 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage plus 4 (1d8) cold damage."}
-{:name "Claw" :description "Melee Weapon Attack: +11 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +11 to hit, reach 15 ft., one target. Hit: 15 (2d8 + 6) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 14 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Cold Breath " :notes "Recharge 5–6" :description "The dragon exhales an icy blast in a 60-foot cone. Each creature in that area must make a DC 19 Constitution saving throw, taking 54 (12d8) cold damage on a failed save, or half as much damage on a successful one.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon"}]}
-
-}{
-:name "Young White Dragon"
-:size :large
-:type :dragon
-:alignment "chaotic evil"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 133 :die-count 14 :die 10 :modifier 56}
-:speed "40 ft., burrow 20 ft., fly 80 ft., swim 40 ft."
-
-:str 18
-:dex 10
-:con 18
-:int 6
-:wis 11
-:cha 12
-
-:saving-throws {:dex 3, :con 7, :wis 3, :cha 4}
-
-:skills {:perception 6, :stealth 3}
-:damage-immunities "cold"
-:senses "blindsight 30 ft., darkvision 120 ft., passive Perception 16"
-:languages "Common, Draconic"
-:challenge 6
-
-:traits [{:name "Ice Walk" :description "The dragon can move across and climb icy surfaces without needing to make an ability check. Additionally, difficult terrain composed of ice or snow doesn't cost it extra moment."}]
-
-:actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 10 ft., one target. Hit: 15 (2d10 + 4) piercing damage plus 4 (1d8) cold damage."}
-{:name "Claw" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) slashing damage."}
-{:name "Cold Breath " :notes "Recharge 5–6" :description "The dragon exhales an icy blast in a 30-foot cone. Each creature in that area must make a DC 15 Constitution saving throw, taking 45 (10d8) cold damage on a failed save, or half as much damage on a successful one."}]
-
-}{
-:name "White Dragon Wyrmling"
-:size :medium
-:type :dragon
-:alignment "chaotic evil"
-:armor-class 16
-:armor-notes "natural armor"
-:hit-points {:mean 32 :die-count 5 :die 8 :modifier 10}
-:speed "30 ft., burrow 15 ft., fly 60 ft., swim 30 ft."
-
-:str 14
-:dex 10
-:con 14
-:int 5
-:wis 10
-:cha 11
-
-:saving-throws {:dex 2, :con 4, :wis 2, :cha 2}
-
-:skills {:perception 4, :stealth 2}
-:damage-immunities "cold"
-:senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
-:languages "Draconic"
-:challenge 2
-
-:actions [{:name "Bite" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 7 (1d10 + 2) piercing damage plus 2 (1d4) cold damage."}
-{:name "Cold Breath " :notes "Recharge 5–6" :description "The dragon exhales an icy blast of hail in a 15-foot cone. Each creature in that area must make a DC 12 Constitution saving throw, taking 22 (5d8) cold damage on a failed save, or half as much damage on a successful one.
-"}]
-
-}{
-:name "Ancient Brass Dragon"
-:size :gargantuan
-:type :dragon
-:alignment "chaotic good"
-:armor-class 20
-:armor-notes "natural armor"
-:hit-points {:mean 297 :die-count 17 :die 20 :modifier 119}
-:speed "40 ft., burrow 40 ft., fly 80 ft."
-
-:str 27
-:dex 10
-:con 25
-:int 16
-:wis 15
-:cha 19
-
-:saving-throws {:dex 6, :con 13, :wis 8, :cha 10}
-
-:skills {:history 9, :perception 14, :persuasion 10,}
-:stealth 6
-:damage-immunities "fire"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 24"
-:languages "Common, Draconic"
-:challenge 20
-
-:traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +14 to hit, reach 15 ft., one target. Hit: 19 (2d10 + 8) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 15 (2d6 + 8) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +14 to hit, reach 20 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 18 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours.
-"}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one
-of the following breath weapons:"}
-{:name "Fire Breath" :description "The dragon exhales fire in an 90-foot line that is 10 feet wide. Each creature in that line must make a DC 21 Dexterity saving throw, taking 56 (16d6) fire damage on a failed save, or half as much damage on a successful one."}
-{:name "Sleep Breath" :description "The dragon exhales sleep gas in a 90-foot cone. Each creature in that area must succeed on a DC 21 Constitution saving throw or fall unconscious for 10 minutes. This effect ends for a creature if the creature takes damage or someone uses an action to wake it."}
-{:name "Change Shape" :description "The dragon magically polymorphs into a humanoid or beast that has a challenge rating no higher than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the dragon's choice).
+  :actions [{:name "Gore" :description "Melee Weapon Attack: +9 to hit, reach 5 ft., one target. Hit: 24 (4d8 + 6) piercing damage."}
+            {:name "Stomp" :description "Melee Weapon Attack: +9 to hit, reach 5 ft., one prone creature. Hit: 22 (3d10 + 6) bludgeoning damage."}]}{
+  :name "Tyrannosaurus Rex"
+  :size :huge
+  :type :beast
+  :alignment "unaligned"
+  :armor-class 13
+  :armor-notes "natural armor"
+  :hit-points {:mean 136 :die-count 13 :die 12 :modifier 52}
+  :speed "50 ft."
+
+  :str 25
+  :dex 10
+  :con 19
+  :int 2
+  :wis 12
+  :cha 9
+
+  :skills {:perception 4}
+  :senses "passive Perception 14"
+  :challenge 8
+
+  :actions [{:name "Multiattack" :description "The tyrannosaurus makes two attacks: one with its bite and one with its tail. It can't make both attacks against the same target."}
+            {:name "Bite" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 33 (4d12 + 7) piercing damage. If the target is a Medium or smaller creature, it is grappled (escape DC 17). Until this grapple ends, the target is restrained, and the tyrannosaurus can't bite another target."}
+            {:name "Tail" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 20 (3d8 + 7) bludgeoning damage."}]}{
+  :name "Doppelganger"
+  :size :medium
+  :type :monstrosity
+  :subtypes #{:shapechanger}
+  :alignment "neutral"
+  :armor-class 14
+  :hit-points {:mean 52 :die-count 8 :die 8 :modifier 16}
+  :speed "30 ft."
+
+  :str 11
+  :dex 18
+  :con 14
+  :int 11
+  :wis 12
+  :cha 14
+
+  :skills {:deception 6, :insight 3}
+  :condition-immunities "charmed"
+  :senses "darkvision 60 ft., passive Perception 11"
+  :languages "Common"
+  :challenge 3
+
+  :traits [{:name "Shapechanger" :description "The doppelganger can use its action to polymorph into a Small or Medium humanoid it has seen, or back into its true form. Its statistics, other than its size, are the same in each form. Any equipment it is wearing or carrying isn't transformed. It reverts to its true form if it dies."}
+           {:name "Ambusher" :description "The doppelganger has advantage on attack rolls against any creature it has surprised."}
+           {:name "Surprise Attack" :description "If the doppelganger surprises a creature and hits it with an attack during the first round of combat, the target takes an extra 10 (3d6) damage from the attack."}]
+
+  :actions [{:name "Multiattack" :description "The doppelganger makes two melee attacks."}
+            {:name "Slam" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 7 (1d6 + 4) bludgeoning damage."}
+            {:name "Read Thoughts" :description "The doppelganger magically reads the surface thoughts of one creature within 60 feet of it. The effect can penetrate barriers, but 3 feet of wood or dirt, 2 feet of stone, 2 inches of metal, or a thin sheet of lead blocks it. While the target is in range, the doppelganger can continue reading its thoughts, as long as the doppelganger's concentration isn't broken (as if concentrating on a spell). While reading the target's mind, the doppelganger has advantage on Wisdom (Insight) and Charisma (Deception, Intimidation, and Persuasion) checks against the target."}]}{
+  :name "Ancient Black Dragon"
+  :size :gargantuan
+  :type :dragon
+  :alignment "chaotic evil"
+  :armor-class 22
+  :armor-notes "natural armor"
+  :hit-points {:mean 367 :die-count 21 :die 20 :modifier 147}
+  :speed "40 ft., fly 80 ft., swim 40 ft."
+
+  :str 27
+  :dex 14
+  :con 25
+  :int 16
+  :wis 15
+  :cha 19
+
+  :saving-throws {:dex 9, :con 14, :wis 9, :cha 11}
+
+  :skills {:perception 16, :stealth 9}
+  :damage-immunities "acid"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 26"
+  :languages "Common, Draconic"
+  :challenge 21
+
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
+           {:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +15 to hit, reach 15 ft., one target. Hit: 19 (2d10 + 8) piercing damage plus 9 (2d8) acid damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +15 to hit, reach 10 ft., one target. Hit: 15 (2d6 + 8) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +15 to hit, reach 20 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 19 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Acid Breath" :notes "Recharge 5–6" :description "The dragon exhales acid in a 90-foot line that is 10 feet wide. Each creature in that line must make a DC 22 Dexterity saving throw, taking 67 (15d8) acid damage on a failed save, or half as much damage on a successful one."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 23 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Adult Black Dragon"
+  :size :huge
+  :type :dragon
+  :alignment "chaotic evil"
+  :armor-class 19
+  :armor-notes "natural armor"
+  :hit-points {:mean 195 :die-count 17 :die 12 :modifier 85}
+  :speed "40 ft., fly 80 ft., swim 40 ft."
+
+  :str 23
+  :dex 14
+  :con 21
+  :int 14
+  :wis 13
+  :cha 17
+
+  :saving-throws {:dex 7, :con 10, :wis 6, :cha 8}
+
+  :skills {:perception 11, :stealth 7}
+  :damage-immunities "acid"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 21"
+  :languages "Common, Draconic"
+  :challenge 14
+
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
+           {:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +11 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage plus 4 (1d8) acid damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +11 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +11 to hit, reach 15 ft., one target. Hit: 15 (2d8 + 6) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 16 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Acid Breath " :notes "Recharge 5–6" :description "The dragon exhales acid in a 60-foot line that is 5 feet wide. Each creature in that line must make a DC 18 Dexterity saving throw, taking 54 (12d8) acid damage on a failed save, or half as much damage on a successful one."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 19 Dexterity saving throw or take 13 (2d6 + 6) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Young Black Dragon"
+  :size :large
+  :type :dragon
+  :alignment "chaotic evil"
+  :armor-class 18
+  :armor-notes "natural armor"
+  :hit-points {:mean 127 :die-count 15 :die 10 :modifier 45}
+  :speed "40 ft., fly 80 ft., swim 40 ft."
+
+  :str 19
+  :dex 14
+  :con 17
+  :int 12
+  :wis 11
+  :cha 15
+
+  :saving-throws {:dex 5, :con 6, :wis 3, :cha 5}
+
+  :skills {:perception 6, :stealth 5}
+  :damage-immunities "acid"
+  :senses "blindsight 30 ft., darkvision 120 ft., passive Perception 16"
+  :languages "Common, Draconic"
+  :challenge 7
+
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
+
+  :actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 10 ft., one target. Hit: 15 (2d10 + 4) piercing damage plus 4 (1d8) acid damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) slashing damage."}]}{
+  :name "Black Dragon Wyrmling"
+  :size :medium
+  :type :dragon
+  :alignment "chaotic evil"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 33 :die-count 6 :die 8 :modifier 6}
+  :speed "30 ft., fly 60 ft., swim 30 ft."
+
+  :str 15
+  :dex 14
+  :con 13
+  :int 10
+  :wis 11
+  :cha 13
+
+  :saving-throws {:dex 4, :con 3, :wis 2, :cha 3}
+
+  :skills {:perception 4, :stealth 4}
+  :damage-immunities "acid"
+  :senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
+  :languages "Draconic"
+  :challenge 2
+
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
+
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 7 (1d10 + 2) piercing damage plus 2 (1d4) acid damage."}
+            {:name "Acid Breath " :notes "Recharge 5–6" :description "The dragon exhales acid in a 15-foot line that is 5 feet wide. Each creature in that line must make a DC 11 Dexterity saving throw, taking 22 (5d8) acid damage on a failed save, or half as much damage on a successful one."}]}{
+  :name "Ancient Blue Dragon"
+  :size :gargantuan
+  :type :dragon
+  :alignment "lawful evil"
+  :armor-class 22
+  :armor-notes "natural armor"
+  :hit-points {:mean 481 :die-count 26 :die 20 :modifier 208}
+  :speed "40 ft., burrow 40 ft., fly 80 ft."
+
+  :str 29
+  :dex 10
+  :con 27
+  :int 18
+  :wis 17
+  :cha 21
+
+  :saving-throws {:dex 7, :con 15, :wis 10, :cha 12}
+
+  :skills {:perception 17, :stealth 7}
+  :damage-immunities "lightning"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 27"
+  :languages "Common, Draconic"
+  :challenge 23
+
+  :traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +16 to hit, reach 15 ft., one target. Hit: 20 (2d10 + 9) piercing damage plus 11 (2d10) lightning damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +16 to hit, reach 10 ft., one target. Hit: 16 (2d6 + 9) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +16 to hit, reach 20 ft., one target. Hit: 18 (2d8 + 9) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 20 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Lightning Breath " :notes "Recharge 5–6" :description "The dragon exhales lightning in a 120-foot line that is 10 feet wide. Each creature in that line must make a DC 23 Dexterity saving throw, taking 88 (16d10) lightning damage on a failed save, or half as much damage on a successful one."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 24 Dexterity saving throw or take 16 (2d6 + 9) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Adult Blue Dragon"
+  :size :huge
+  :type :dragon
+  :alignment "lawful evil"
+  :armor-class 19
+  :armor-notes "natural armor"
+  :hit-points {:mean 225 :die-count 18 :die 12 :modifier 108}
+  :speed "40 ft., burrow 30 ft., fly 80 ft."
+
+  :str 25
+  :dex 10
+  :con 23
+  :int 16
+  :wis 15
+  :cha 19
+
+  :saving-throws {:dex 5, :con 11, :wis 7, :cha 9}
+
+  :skills {:perception 12, :stealth 5}
+  :damage-immunities "lightning"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 22"
+  :languages "Common, Draconic"
+  :challenge 16
+
+  :traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +12 to hit, reach 10 ft., one target. Hit: 18 (2d10 + 7) piercing damage plus 5 (1d10) lightning damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +12 to hit, reach 5 ft., one target. Hit: 14 (2d6 + 7) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +12 to hit, reach 15 ft., one target. Hit: 16 (2d8 + 7) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 17 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Lightning Breath" :notes "Recharge 5–6" :description "The dragon exhales lightning in a 90-foot line that is 5 feet wide. Each creature in that line must make a DC 19 Dexterity saving throw, taking 66 (12d10) lightning damage on a failed save, or half as much damage on a successful one."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 20 Dexterity saving throw or take 14 (2d6 + 7) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Young Blue Dragon"
+  :size :large
+  :type :dragon
+  :alignment "lawful evil"
+  :armor-class 18
+  :armor-notes "natural armor"
+  :hit-points {:mean 152 :die-count 16 :die 10 :modifier 64}
+  :speed "40 ft., burrow 20 ft., fly 80 ft."
+
+  :str 21
+  :dex 10
+  :con 19
+  :int 14
+  :wis 13
+  :cha 17
+
+  :saving-throws {:dex 4, :con 8, :wis 5, :cha 7}
+
+  :skills {:perception 9, :stealth 4}
+  :damage-immunities "lightning"
+  :senses "blindsight 30 ft., darkvision 120 ft., passive Perception 19"
+  :languages "Common, Draconic"
+  :challenge 9
+
+  :actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +9 to hit, reach 10 ft., one target. Hit: 16 (2d10 + 5) piercing damage plus 5 (1d10) lightning damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +9 to hit, reach 5 ft., one target. Hit: 12 (2d6 + 5) slashing damage."}
+            {:name "Lightning Breath" :notes "Recharge 5–6" :description "The dragon exhales lightning in an 60-foot line that is 5 feet wide. Each creature in that line must make a DC 16 Dexterity saving throw, taking 55 (10d10) lightning damage on a failed save, or half as much damage on a successful one."}]}{
+  :name "Blue Dragon Wyrmling"
+  :size :medium
+  :type :dragon
+  :alignment "lawful evil"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 52 :die-count 8 :die 8 :modifier 16}
+  :speed "30 ft., burrow 15 ft., fly 60 ft."
+
+  :str 17
+  :dex 10
+  :con 15
+  :int 12
+  :wis 11
+  :cha 15
+
+  :saving-throws {:dex 2, :con 4, :wis 2, :cha 4}
+
+  :skills {:perception 4, :stealth 2}
+  :damage-immunities "lightning"
+  :senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
+  :languages "Draconic"
+  :challenge 3
+
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 8 (1d10 + 3) piercing damage plus 3 (1d6) lightning damage."}
+            {:name "Lightning Breath" :notes "Recharge 5–6" :description "The dragon exhales lightning in a 30-foot line that is 5 feet wide. Each creature in that line must make a DC 12 Dexterity saving throw, taking 22 (4d10) lightning damage on a failed save, or half as much damage on a successful one."}]}{
+  :name "Ancient Green Dragon"
+  :size :gargantuan
+  :type :dragon
+  :alignment "lawful evil"
+  :armor-class 21
+  :armor-notes "natural armor"
+  :hit-points {:mean 385 :die-count 22 :die 20 :modifier 154}
+  :speed "40 ft., fly 80 ft., swim 40 ft."
+
+  :str 27
+  :dex 12
+  :con 25
+  :int 20
+  :wis 17
+  :cha 19
+
+  :saving-throws {:dex 8, :con 14, :wis 10, :cha 11}
+
+  :skills {:deception 11, :insight 10, :perception 17, :persuasion 11, :stealth 8}
+  :damage-immunities "poison"
+  :condition-immunities "poisoned"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 27"
+  :languages "Common, Draconic"
+  :challenge 22
+
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
+           {:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +15 to hit, reach 15 ft., one target. Hit: 19 (2d10 + 8) piercing damage plus 10 (3d6) poison damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +15 to hit, reach 10 ft., one target. Hit: 22 (4d6 + 8) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +15 to hit, reach 20 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 19 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Poison Breath" :notes "Recharge 5–6" :description "The dragon exhales poisonous gas in a 90-foot cone. Each creature in that area must make a DC 22 Constitution saving throw, taking 77 (22d6) poison damage on a failed save, or half as much damage on a successful one."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 23 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Adult Green Dragon"
+  :size :huge
+  :type :dragon
+  :alignment "lawful evil"
+  :armor-class 19
+  :armor-notes "natural armor"
+  :hit-points {:mean 207 :die-count 18 :die 12 :modifier 90}
+  :speed "40 ft., fly 80 ft., swim 40 ft."
+
+  :str 23
+  :dex 12
+  :con 21
+  :int 18
+  :wis 15
+  :cha 17
+
+  :saving-throws {:dex 6, :con 10, :wis 7, :cha 8}
+
+  :skills {:deception 8, :insight 7, :perception 12}
+  :persuasion 8, :stealth 6
+  :damage-immunities "poison"
+  :condition-immunities "poisoned"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 22"
+  :languages "Common, Draconic"
+  :challenge 15
+
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
+           {:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +11 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage plus 7 (2d6) poison damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +11 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +11 to hit, reach 15 ft., one target. Hit: 15 (2d8 + 6) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 16 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Poison Breath" :notes "Recharge 5–6" :description "The dragon exhales poisonous gas in a 60-foot cone. Each creature in that area must make a DC 18 Constitution saving throw, taking 56 (16d6) poison damage on a failed save, or half as much damage on a successful one."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 19 Dexterity saving throw or take 13 (2d6 + 6) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Young Green Dragon"
+  :size :large
+  :type :dragon
+  :alignment "lawful evil"
+  :armor-class 18
+  :armor-notes "natural armor"
+  :hit-points {:mean 136 :die-count 16 :die 10 :modifier 48}
+  :speed "40 ft., fly 80 ft., swim 40 ft."
+
+  :str 19
+  :dex 12
+  :con 17
+  :int 16
+  :wis 13
+  :cha 15
+
+  :saving-throws {:dex 4, :con 6, :wis 4, :cha 5}
+
+  :skills {:deception 5, :perception 7, :stealth 4}
+  :damage-immunities "poison"
+  :condition-immunities "poisoned"
+  :senses "blindsight 30 ft., darkvision 120 ft., passive Perception 17"
+  :languages "Common, Draconic"
+  :challenge 8
+
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
+
+  :actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 10 ft., one target. Hit: 15 (2d10 + 4) piercing damage plus 7 (2d6) poison damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) slashing damage."}
+            {:name "Poison Breath" :notes "Recharge 5–6" :description "The dragon exhales poisonous gas in a 30-foot cone. Each creature in that area must make a DC 14 Constitution saving throw, taking 42 (12d6) poison damage on a failed save, or half as much damage on a successful one."}]}{
+  :name "Green Dragon Wyrmling"
+  :size :medium
+  :type :dragon
+  :alignment "lawful evil"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 38 :die-count 7 :die 8 :modifier 7}
+  :speed "30 ft., fly 60 ft., swim 30 ft."
+
+  :str 15
+  :dex 12
+  :con 13
+  :int 14
+  :wis 11
+  :cha 13
+
+  :saving-throws {:dex 3, :con 3, :wis 2, :cha 3}
+
+  :skills {:perception 4, :stealth 3}
+  :damage-immunities "poison"
+  :condition-immunities "poisoned"
+  :senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
+  :languages "Draconic"
+  :challenge 2
+
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
+
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 7 (1d10 + 2) piercing damage plus 3 (1d6) poison damage."}
+            {:name "Poison Breath" :notes "Recharge 5-6" :description "The dragon exhales poisonous gas in a 15-foot cone. Each creature in that area must make a DC 11 Constitution saving throw, taking 21 (6d6) poison damage on a failed save, or half as much damage on a successful one."}]}{
+  :name "Ancient Red Dragon"
+  :size :gargantuan
+  :type :dragon
+  :alignment "chaotic evil"
+  :armor-class 22
+  :armor-notes "natural armor"
+  :hit-points {:mean 546 :die-count 28 :die 20 :modifier 252}
+  :speed "40 ft., climb 40 ft., fly 80 ft."
+
+  :str 30
+  :dex 10
+  :con 29
+  :int 18
+  :wis 15
+  :cha 23
+
+  :saving-throws {:dex 7, :con 16, :wis 9, :cha 13}
+
+  :skills {:perception 16, :stealth 7}
+  :damage-immunities "fire"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 26"
+  :languages "Common, Draconic"
+  :challenge 24
+
+  :traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +17 to hit, reach 15 ft., one target. Hit: 21 (2d10 + 10) piercing damage plus 14 (4d6) fire damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +17 to hit, reach 10 ft., one target. Hit: 17 (2d6 + 10) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +17 to hit, reach 20 ft., one target. Hit: 19 (2d8 + 10) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 21 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Fire Breath" :notes "Recharge 5–6" :description "The dragon exhales fire in a 90-foot cone. Each creature in that area must make a DC 24 Dexterity saving throw, taking 91 (26d6) fire damage on a failed save, or half as much damage on a successful one."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 25 Dexterity saving throw or take 17 (2d6 + 10) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Adult Red Dragon"
+  :size :huge
+  :type :dragon
+  :alignment "chaotic evil"
+  :armor-class 19
+  :armor-notes "natural armor"
+  :hit-points {:mean 256 :die-count 19 :die 12 :modifier 133}
+  :speed "40 ft., climb 40 ft., fly 80 ft."
+
+  :str 27
+  :dex 10
+  :con 25
+  :int 16
+  :wis 13
+  :cha 21
+
+  :saving-throws {:dex 6, :con 13, :wis 7, :cha 11}
+
+  :skills {:perception 13, :stealth 6}
+  :damage-immunities "fire"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 23"
+  :languages "Common, Draconic"
+  :challenge 17
+
+  :traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 19 (2d10 + 8) piercing damage plus 7 (2d6) fire damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +14 to hit, reach 5 ft., one target. Hit: 15 (2d6 + 8) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +14 to hit, reach 15 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 19 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Fire Breath" :notes "Recharge 5–6" :description "The dragon exhales fire in a 60-foot cone. Each creature in that area must make a DC 21 Dexterity saving throw, taking 63 (18d6) fire damage on a failed save, or half as much damage on a successful one."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 22 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Young Red Dragon"
+  :size :large
+  :type :dragon
+  :alignment "chaotic evil"
+  :armor-class 18
+  :armor-notes "natural armor"
+  :hit-points {:mean 178 :die-count 17 :die 10 :modifier 85}
+  :speed "40 ft., climb 40 ft., fly 80 ft."
+
+  :str 23
+  :dex 10
+  :con 21
+  :int 14
+  :wis 11
+  :cha 19
+
+  :saving-throws {:dex 4, :con 9, :wis 4, :cha 8}
+
+  :skills {:perception 8, :stealth 4}
+  :damage-immunities "fire"
+  :senses "blindsight 30 ft., darkvision 120 ft., passive Perception 18"
+  :languages "Common, Draconic"
+  :challenge 10
+
+  :actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage plus 3 (1d6) fire damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +10 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
+            {:name "Fire Breath" :notes "Recharge 5–6" :description "The dragon exhales fire in a 30-foot cone. Each creature in that area must make a DC 17 Dexterity saving throw, taking 56 (16d6) fire damage on a failed save, or half as much damage on a successful one."}]}{
+  :name "Red Dragon Wyrmling"
+  :size :medium
+  :type :dragon
+  :alignment "chaotic evil"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 75 :die-count 10 :die 8 :modifier 30}
+  :speed "30 ft., climb 30 ft., fly 60 ft."
+
+  :str 19
+  :dex 10
+  :con 17
+  :int 12
+  :wis 11
+  :cha 15
+
+  :saving-throws {:dex 2, :con 5, :wis 2, :cha 4}
+
+  :skills {:perception 4, :stealth 2}
+  :damage-immunities "fire"
+  :senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
+  :languages "Draconic"
+  :challenge 4
+
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 9 (1d10 + 4) piercing damage plus 3 (1d6) fire damage."}
+            {:name "Fire Breath " :notes "Recharge 5–6" :description "The dragon exhales fire in a 15-foot cone. Each creature in that area must make a DC 13 Dexterity saving throw, taking 24 (7d6) fire damage on a failed save, or half as much damage on a successful one."}]}{
+  :name "Ancient White Dragon"
+  :size :gargantuan
+  :type :dragon
+  :alignment "chaotic evil"
+  :armor-class 20
+  :armor-notes "natural armor"
+  :hit-points {:mean 333 :die-count 18 :die 20 :modifier 144}
+  :speed "40 ft., burrow 40 ft., fly 80 ft., swim 40 ft."
+
+  :str 26
+  :dex 10
+  :con 26
+  :int 10
+  :wis 13
+  :cha 14
+
+  :saving-throws {:dex 6, :con 14, :wis 7, :cha 8}
+
+  :skills {:perception 13, :stealth 6}
+  :damage-immunities "cold"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 23"
+  :languages "Common, Draconic"
+  :challenge 20
+
+  :traits [{:name "Ice Walk" :description "The dragon can move across and climb icy surfaces without needing to make an ability check. Additionally, difficult terrain composed of ice or snow doesn't cost it extra moment."}
+           {:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +14 to hit, reach 15 ft., one target. Hit: 19 (2d10 + 8) piercing damage plus 9 (2d8) cold damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 15 (2d6 + 8) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +14 to hit, reach 20 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 16 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Cold Breath " :notes "Recharge 5–6" :description "The dragon exhales an icy blast in a 90-foot cone. Each creature in that area must make a DC 22 Constitution saving throw, taking 72 (16d8) cold damage on a failed save, or half as much damage on a successful one."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 22 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Adult White Dragon"
+  :size :huge
+  :type :dragon
+  :alignment "chaotic evil"
+  :armor-class 18
+  :armor-notes "natural armor"
+  :hit-points {:mean 200 :die-count 16 :die 12 :modifier 96}
+  :speed "40 ft., burrow 30 ft., fly 80 ft., swim 40 ft."
+
+  :str 22
+  :dex 10
+  :con 22
+  :int 8
+  :wis 12
+  :cha 12
+
+  :saving-throws {:dex 5, :con 11, :wis 6, :cha 6}
+
+  :skills {:perception 11, :stealth 5}
+  :damage-immunities "cold"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 21"
+  :languages "Common, Draconic"
+  :challenge 13
+
+  :traits [{:name "Ice Walk" :description "The dragon can move across and climb icy surfaces without needing to make an ability check. Additionally, difficult terrain composed of ice or snow doesn't cost it extra moment."}
+           {:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +11 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage plus 4 (1d8) cold damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +11 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +11 to hit, reach 15 ft., one target. Hit: 15 (2d8 + 6) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 14 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Cold Breath" :notes "Recharge 5–6" :description "The dragon exhales an icy blast in a 60-foot cone. Each creature in that area must make a DC 19 Constitution saving throw, taking 54 (12d8) cold damage on a failed save, or half as much damage on a successful one."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon"}]}}{
+  :name "Young White Dragon"
+  :size :large
+  :type :dragon
+  :alignment "chaotic evil"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 133 :die-count 14 :die 10 :modifier 56}
+  :speed "40 ft., burrow 20 ft., fly 80 ft., swim 40 ft."
+
+  :str 18
+  :dex 10
+  :con 18
+  :int 6
+  :wis 11
+  :cha 12
+
+  :saving-throws {:dex 3, :con 7, :wis 3, :cha 4}
+
+  :skills {:perception 6, :stealth 3}
+  :damage-immunities "cold"
+  :senses "blindsight 30 ft., darkvision 120 ft., passive Perception 16"
+  :languages "Common, Draconic"
+  :challenge 6
+
+  :traits [{:name "Ice Walk" :description "The dragon can move across and climb icy surfaces without needing to make an ability check. Additionally, difficult terrain composed of ice or snow doesn't cost it extra moment."}]
+
+  :actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 10 ft., one target. Hit: 15 (2d10 + 4) piercing damage plus 4 (1d8) cold damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) slashing damage."}
+            {:name "Cold Breath" :notes "Recharge 5–6" :description "The dragon exhales an icy blast in a 30-foot cone. Each creature in that area must make a DC 15 Constitution saving throw, taking 45 (10d8) cold damage on a failed save, or half as much damage on a successful one."}]}{
+  :name "White Dragon Wyrmling"
+  :size :medium
+  :type :dragon
+  :alignment "chaotic evil"
+  :armor-class 16
+  :armor-notes "natural armor"
+  :hit-points {:mean 32 :die-count 5 :die 8 :modifier 10}
+  :speed "30 ft., burrow 15 ft., fly 60 ft., swim 30 ft."
+
+  :str 14
+  :dex 10
+  :con 14
+  :int 5
+  :wis 10
+  :cha 11
+
+  :saving-throws {:dex 2, :con 4, :wis 2, :cha 2}
+
+  :skills {:perception 4, :stealth 2}
+  :damage-immunities "cold"
+  :senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
+  :languages "Draconic"
+  :challenge 2
+
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 7 (1d10 + 2) piercing damage plus 2 (1d4) cold damage."}
+            {:name "Cold Breath" :notes "Recharge 5–6" :description "The dragon exhales an icy blast of hail in a 15-foot cone. Each creature in that area must make a DC 12 Constitution saving throw, taking 22 (5d8) cold damage on a failed save, or half as much damage on a successful one."}]}{
+  :name "Ancient Brass Dragon"
+  :size :gargantuan
+  :type :dragon
+  :alignment "chaotic good"
+  :armor-class 20
+  :armor-notes "natural armor"
+  :hit-points {:mean 297 :die-count 17 :die 20 :modifier 119}
+  :speed "40 ft., burrow 40 ft., fly 80 ft."
+
+  :str 27
+  :dex 10
+  :con 25
+  :int 16
+  :wis 15
+  :cha 19
+
+  :saving-throws {:dex 6, :con 13, :wis 8, :cha 10}
+
+  :skills {:history 9, :perception 14, :persuasion 10}
+  :stealth 6
+  :damage-immunities "fire"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 24"
+  :languages "Common, Draconic"
+  :challenge 20
+
+  :traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +14 to hit, reach 15 ft., one target. Hit: 19 (2d10 + 8) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 15 (2d6 + 8) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +14 to hit, reach 20 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 18 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons:"}
+            {:name "Fire Breath" :description "The dragon exhales fire in an 90-foot line that is 10 feet wide. Each creature in that line must make a DC 21 Dexterity saving throw, taking 56 (16d6) fire damage on a failed save, or half as much damage on a successful one."}
+            {:name "Sleep Breath" :description "The dragon exhales sleep gas in a 90-foot cone. Each creature in that area must succeed on a DC 21 Constitution saving throw or fall unconscious for 10 minutes. This effect ends for a creature if the creature takes damage or someone uses an action to wake it."}
+            {:name "Change Shape" :description "The dragon magically polymorphs into a humanoid or beast that has a challenge rating no higher than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the dragon's choice).
 In a new form, the dragon retains its alignment, hit points, Hit Dice, ability to speak, proficiencies, Legendary Resistance, lair actions, and Intelligence, Wisdom, and Charisma scores, as well as this action. Its statistics and capabilities are otherwise replaced by those of the new form, except any class features or legendary actions of that form."}]
 
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 22 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-
-}{
-:name "Adult Brass Dragon"
-:size :huge
-:type :dragon
-:alignment "chaotic good"
-:armor-class 18
-:armor-notes "natural armor"
-:hit-points {:mean 172 :die-count 15 :die 12 :modifier 75}
-:speed "40 ft., burrow 30 ft., fly 80 ft."
-
-:str 23
-:dex 10
-:con 21
-:int 14
-:wis 13
-:cha 17
-
-:saving-throws {:dex 5, :con 10, :wis 6, :cha 8}
-
-:skills {:history 7, :perception 11, :persuasion 8, :stealth 5}
-:damage-immunities "fire"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 21"
-:languages "Common, Draconic"
-:challenge 13
-
-:traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +11 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +11 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +11 to hit, reach 15 ft., one target. Hit: 15 (2d8 + 6) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 16 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Fire Breath" :description "The dragon exhales fire in an 60-foot line that is 5 feet wide. Each creature in that line must make a DC 18 Dexterity saving throw, taking 45 (13d6) fire damage on a failed save, or half as much damage on a successful one."}
-{:name "Sleep Breath" :description "The dragon exhales sleep gas in a 60-foot cone. Each creature in that area must succeed on a DC 18 Constitution saving throw or fall unconscious for 10 minutes. This effect ends for a creature if the creature takes damage or someone uses an action to wake it.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 19 Dexterity saving throw or take 13 (2d6 + 6) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-
-}{
-:name "Young Brass Dragon"
-:size :large
-:type :dragon
-:alignment "chaotic good"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 110 :die-count 13 :die 10 :modifier 39}
-:speed "40 ft., burrow 20 ft., fly 80 ft."
-
-:str 19
-:dex 10
-:con 17
-:int 12
-:wis 11
-:cha 15
-
-:saving-throws {:dex 3, :con 6, :wis 3, :cha 5}
-
-:skills {:perception 6, :persuasion 5, :stealth 3}
-:damage-immunities "fire"
-:senses "blindsight 30 ft., darkvision 120 ft., passive Perception 16"
-:languages "Common, Draconic"
-:challenge 6
-
-:actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 10 ft., one target. Hit: 15 (2d10 + 4) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) slashing damage."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Fire Breath" :description "The dragon exhales fire in a 40-foot line that is 5 feet wide. Each creature in that line must make a DC 14 Dexterity saving throw, taking 42 (12d6) fire damage on a failed save, or half as much damage on a successful one."}
-{:name "Sleep Breath" :description "The dragon exhales sleep gas in a 30-foot cone. Each creature in that area must succeed on a DC 14 Constitution saving throw or fall unconscious for 5 minutes. This effect ends for a creature if the creature takes damage or someone uses an action to wake it.
-"}]
-
-}{
-:name "Brass Dragon Wyrmling"
-:size :medium
-:type :dragon
-:alignment "chaotic good"
-:armor-class 16
-:armor-notes "natural armor"
-:hit-points {:mean 16 :die-count 3 :die 8 :modifier 3}
-:speed "30 ft., burrow 15 ft., fly 60 ft."
-
-:str 15
-:dex 10
-:con 13
-:int 10
-:wis 11
-:cha 13
-
-:saving-throws {:dex 2, :con 3, :wis 2, :cha 3}
-
-:skills {:perception 4, :stealth 2}
-:damage-immunities "fire"
-:senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
-:languages "Draconic"
-:challenge 1
-
-:actions [{:name "Bite" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 7 (1d10 + 2) piercing damage."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Fire Breath" :description "The dragon exhales fire in an 20-foot line that is 5 feet wide. Each creature in that line must make a DC 11 Dexterity saving throw, taking 14 (4d6) fire damage on a failed save, or half as much damage on a successful one."}
-{:name "Sleep Breath" :description "The dragon exhales sleep gas in a 15-foot cone. Each creature in that area must succeed on a DC 11 Constitution saving throw or fall unconscious for 1 minute. This effect ends for a creature if the creature takes damage or someone uses an action to wake it.
-"}]
-
-}{
-:name "Ancient Bronze Dragon"
-:size :gargantuan
-:type :dragon
-:alignment "lawful good"
-:armor-class 22
-:armor-notes "natural armor"
-:hit-points {:mean 444 :die-count 24 :die 20 :modifier 192}
-:speed "40 ft., fly 80 ft., swim 40 ft."
-
-:str 29
-:dex 10
-:con 27
-:int 18
-:wis 17
-:cha 21
-
-:saving-throws {:dex 7, :con 15, :wis 10, :cha 12}
-
-:skills {:insight 10, :perception 17, :stealth 7}
-:damage-immunities "lightning"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 27"
-:languages "Common, Draconic"
-:challenge 22
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
-{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +16 to hit, reach 15 ft., one target. Hit: 20 (2d10 + 9) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +16 to hit, reach 10 ft., one target. Hit: 16 (2d6 + 9) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +16 to hit, reach 20 ft., one target. Hit: 18 (2d8 + 9) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 20 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Lightning Breath" :description "The dragon exhales lightning in a 120-foot line that is 10 feet wide. Each creature in that line must make a DC 23 Dexterity saving throw, taking 88 (16d10) lightning damage on a failed save, or half as much damage on a successful one."}
-{:name "Repulsion Breath" :description "The dragon exhales repulsion energy in a 30-foot cone. Each creature in that area must succeed on a DC 23 Strength saving throw. On a failed save, the creature is pushed 60 feet away from the dragon."}
-{:name "Change Shape" :description "The dragon magically polymorphs into a humanoid or beast that has a challenge rating no higher than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the dragon's choice).
-In a new form, the dragon retains its alignment, hit points, Hit Dice, ability to speak, proficiencies, Legendary Resistance, lair actions, and Intelligence, Wisdom, and Charisma scores, as well as this action. Its statistics and capabilities are otherwise replaced by those of the new form, except any class features or legendary actions of that form.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 24 Dexterity saving throw or take 16 (2d6 + 9) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-}{
-:name "Adult Bronze Dragon"
-:size :huge
-:type :dragon
-:alignment "lawful good"
-:armor-class 19
-:armor-notes "natural armor"
-:hit-points {:mean 212 :die-count 17 :die 12 :modifier 102}
-:speed "40 ft., fly 80 ft., swim 40 ft."
-
-:str 25
-:dex 10
-:con 23
-:int 16
-:wis 15
-:cha 19
-
-:saving-throws {:dex 5, :con 11, :wis 7, :cha 9}
-
-:skills {:insight 7, :perception 12, :stealth 5}
-:damage-immunities "lightning"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 22"
-:languages "Common, Draconic"
-:challenge 15
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
-{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +12 to hit, reach 10 ft., one target. Hit: 18 (2d10 + 7) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +12 to hit, reach 5 ft., one target. Hit: 14 (2d6 + 7) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +12 to hit, reach 15 ft., one target. Hit: 16 (2d8 + 7) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware
-of it must succeed on a DC 17 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Lightning Breath" :description "The dragon exhales lightning in a 90- foot line that is 5 feet wide. Each creature in that line must make a DC 19 Dexterity saving throw, taking 66 (12d10) lightning damage on a failed save, or half as much damage on a successful one."}
-{:name "Repulsion Breath" :description "The dragon exhales repulsion energy in a 30-foot cone. Each creature in that area must succeed on a DC 19 Strength saving throw. On a failed save, the creature is pushed 60 feet away from the dragon."}
-{:name "Change Shape" :description "The dragon magically polymorphs into a humanoid or beast that has a challenge rating no higher than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the dragon's choice).
-In a new form, the dragon retains its alignment, hit points, Hit Dice, ability to speak, proficiencies, Legendary Resistance, lair actions, and Intelligence, Wisdom, and Charisma scores, as well as this action. Its statistics and capabilities are otherwise replaced by those of the new form, except any class features or legendary actions of that form.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 20 Dexterity saving throw or take 14 (2d6 + 7) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-
-}{
-:name "Young Bronze Dragon"
-:size :large
-:type :dragon
-:alignment "lawful good"
-:armor-class 18
-:armor-notes "natural armor"
-:hit-points {:mean 142 :die-count 15 :die 10 :modifier 60}
-:speed "40 ft., fly 80 ft., swim 40 ft."
-
-:str 21
-:dex 10
-:con 19
-:int 14
-:wis 13
-:cha 17
-
-:saving-throws {:dex 3, :con 7, :wis 4, :cha 6}
-
-:skills {:insight 4, :perception 7, :stealth 3}
-:damage-immunities "lightning"
-:senses "blindsight 30 ft., darkvision 120 ft., passive Perception 17"
-:languages "Common, Draconic"
-:challenge 8
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
-
-:actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +8 to hit, reach 10 ft., one target. Hit: 16 (2d10 + 5) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +8 to hit, reach 5 ft., one target. Hit: 12 (2d6 + 5) slashing damage."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Lightning Breath" :description "The dragon exhales lightning in a 60- foot line that is 5 feet wide. Each creature in that line must make a DC 15 Dexterity saving throw, taking 55 (10d10) lightning damage on a failed save, or half as much damage on a successful one."}
-{:name "Repulsion Breath" :description "The dragon exhales repulsion energy in a 30-foot cone. Each creature in that area must succeed on a DC 15 Strength saving throw. On a failed save, the creature is pushed 40 feet away from the dragon.
-"}]
-
-}{
-:name "Bronze Dragon Wyrmling"
-:size :medium
-:type :dragon
-:alignment "lawful good"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 32 :die-count 5 :die 8 :modifier 10}
-:speed "30 ft., fly 60 ft., swim 30 ft."
-
-:str 17
-:dex 10
-:con 15
-:int 12
-:wis 11
-:cha 15
-
-:saving-throws {:dex 2, :con 4, :wis 2, :cha 4}
-
-:skills {:perception 4, :stealth 2}
-:damage-immunities "lightning"
-:senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
-:languages "Draconic"
-:challenge 2
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
-
-:actions [{:name "Bite" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 8 (1d10 + 3) piercing damage."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Lightning Breath" :description "The dragon exhales lightning in a 40- foot line that is 5 feet wide. Each creature in that line must make a DC 12 Dexterity saving throw, taking 16 (3d10) lightning damage on a failed save, or half as much damage on a successful one."}
-{:name "Repulsion Breath" :description "The dragon exhales repulsion energy in a 30-foot cone. Each creature in that area must succeed on a DC 12 Strength saving throw. On a failed save, the creature is pushed 30 feet away from the dragon.
-"}]
-
-}{
-:name "Ancient Copper Dragon"
-:size :gargantuan
-:type :dragon
-:alignment "chaotic good"
-:armor-class 21
-:armor-notes "natural armor"
-:hit-points {:mean 350 :die-count 20 :die 20 :modifier 140}
-:speed "40 ft., climb 40 ft., fly 80 ft."
-
-:str 27
-:dex 12
-:con 25
-:int 20
-:wis 17
-:cha 19
-
-:saving-throws {:dex 8, :con 14, :wis 10, :cha 11}
-
-:skills {:deception 11, :perception 17, :stealth 8}
-:damage-immunities "acid"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 27"
-:languages "Common, Draconic"
-:challenge 21
-
-:traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +15 to hit, reach 15 ft., one target. Hit: 19 (2d10 + 8) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +15 to hit, reach 10 ft., one target. Hit: 15 (2d6 + 8) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +15 to hit, reach 20 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 19 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Acid Breath" :description "The dragon exhales acid in an 90-foot line that is 10 feet wide. Each creature in that line must
-In a new form, the dragon retains its alignment, hit points, Hit Dice, ability to speak, proficiencies, Legendary Resistance, lair actions, and Intelligence, Wisdom, and Charisma scores, as well as this action. Its statistics and capabilities are otherwise replaced by those of the new form, except any class features or legendary actions of that form.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 23 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-
-}{
-:name "Adult Copper Dragon"
-:size :huge
-:type :dragon
-:alignment "chaotic good"
-:armor-class 18
-:armor-notes "natural armor"
-:hit-points {:mean 184 :die-count 16 :die 12 :modifier 80}
-:speed "40 ft., climb 40 ft., fly 80 ft."
-
-:str 23
-:dex 12
-:con 21
-:int 18
-:wis 15
-:cha 17
-
-:saving-throws {:dex 6, :con 10, :wis 7, :cha 8}
-
-:skills {:deception 8, :perception 12, :stealth 6}
-:damage-immunities "acid"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 22"
-:languages "Common, Draconic"
-:challenge 14
-
-:traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +11 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +11 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +11 to hit, reach 15 ft., one target. Hit: 15 (2d8 + 6) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware"}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Acid Breath" :description "The dragon exhales acid in an 60-foot line that is 5 feet wide. Each creature in that line must make a DC 18 Dexterity saving throw, taking 54 (12d8) acid damage on a failed save, or half as much damage on a successful one."}
-{:name "Slowing Breath" :description "The dragon exhales gas in a 60-foot cone. Each creature in that area must succeed on a DC 18 Constitution saving throw. On a failed save, the creature can't use reactions, its speed is halved, and it can't make more than one attack on its turn. In addition, the creature can use either an action or a bonus action on its turn, but not both. These effects last for 1 minute. The creature can repeat the saving throw at the end of each of its turns, ending the effect on itself with a successful save."}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 19 Dexterity saving throw or take 13 (2d6 + 6) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}
-
-}{
-:name "Young Copper Dragon"
-:size :large
-:type :dragon
-:alignment "chaotic good"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 119 :die-count 14 :die 10 :modifier 42}
-:speed "40 ft., climb 40 ft., fly 80 ft."
-
-:str 19
-:dex 12
-:con 17
-:int 16
-:wis 13
-:cha 15
-
-:saving-throws {:dex 4, :con 6, :wis 4, :cha 5}
-:skills {:deception 5, :perception 7, :stealth 4}
-:damage-immunities "acid"
-:senses "blindsight 30 ft., darkvision 120 ft., passive Perception 17"
-:languages "Common, Draconic"
-:challenge 7
-:actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 10 ft., one target. Hit: 15 (2d10 + 4) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) slashing damage."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Acid Breath" :description "The dragon exhales acid in an 40-foot line that is 5 feet wide. Each creature in that line must make a DC 14 Dexterity saving throw, taking 40 (9d8) acid damage on a failed save, or half as much damage on a successful one."}
-{:name "Slowing Breath" :description "The dragon exhales gas in a 30-foot cone. Each creature in that area must succeed on a DC 14 Constitution saving throw. On a failed save, the creature can't use reactions, its speed is halved, and it can't make more than one attack on its turn. In addition, the creature can use either an action or a bonus action on its turn, but not both. These effects last for 1 minute. The creature can repeat the saving throw at the end of each of its turns, ending the effect on itself with a successful save.
-"}]
-
-}{
-:name "Copper Dragon Wyrmling"
-:size :medium
-:type :dragon
-:alignment "chaotic good"
-:armor-class 16
-:armor-notes "natural armor"
-:hit-points {:mean 22 :die-count 4 :die 8 :modifier 4}
-:speed "30 ft., climb 30 ft., fly 60 ft."
-
-:str 15
-:dex 12
-:con 13
-:int 14
-:wis 11
-:cha 13
-:saving-throws {:dex 3, :con 3, :wis 2, :cha 3}
-:skills {:perception 4, :stealth 3}
-:damage-immunities "acid"
-:senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
-:languages "Draconic"
-:challenge 1
-
-:actions [{:name "Bite" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 7 (1d10 + 2) piercing damage."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Acid Breath" :description "The dragon exhales acid in an 20-foot line that is 5 feet wide. Each creature in that line must make a DC 11 Dexterity saving throw, taking 18 (4d8) acid damage on a failed save, or half as much damage on a successful one."}
-{:name "Slowing Breath" :description "The dragon exhales gas in a 15-foot cone. Each creature in that area must succeed on a DC 11 Constitution saving throw. On a failed save, the creature can't use reactions, its speed is halved, and it can't make more than one attack on its turn. In addition, the creature can use either an action or a bonus action on its turn, but not both. These effects last for 1 minute. The creature can repeat the saving throw at the end of each of its turns, ending the effect on itself with a successful save.
-"}]
-
-}{
-:name "Ancient Gold Dragon"
-:size :gargantuan
-:type :dragon
-:alignment "lawful good"
-:armor-class 22
-:armor-notes "natural armor"
-:hit-points {:mean 546 :die-count 28 :die 20 :modifier 252}
-:speed "40 ft., fly 80 ft., swim 40 ft."
-
-:str 30
-:dex 14
-:con 29
-:int 18
-:wis 17
-:cha 28
-
-:saving-throws {:dex 9, :con 16, :wis 10, :cha 16}
-
-:skills {:insight 10, :perception 17, :persuasion 16,}
-:stealth 9
-:damage-immunities "fire"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 27"
-:languages "Common, Draconic"
-:challenge 24
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
-{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +17 to hit, reach 15 ft., one target. Hit: 21 (2d10 + 10) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +17 to hit, reach 10 ft., one target. Hit: 17 (2d6 + 10) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +17 to hit, reach 20 ft., one target. Hit: 19 (2d8 + 10) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 24 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Fire Breath" :description "The dragon exhales fire in a 90-foot cone. Each creature in that area must make a DC 24 Dexterity saving throw, taking 71 (13d10) fire damage on a failed save, or half as much damage on a successful one."}
-{:name "Weakening Breath" :description "The dragon exhales gas in a 90-foot cone. Each creature in that area must succeed on a DC 24 Strength saving throw or have disadvantage on Strength-based attack rolls, Strength checks, and Strength saving throws for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}
-{:name "Change Shape" :description "The dragon magically polymorphs into a humanoid or beast that has a challenge rating no higher than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the dragon's choice).
-In a new form, the dragon retains its alignment, hit points, Hit Dice, ability to speak, proficiencies, Legendary Resistance, lair actions, and Intelligence, Wisdom, and Charisma scores, as well as this action. Its statistics and capabilities are otherwise replaced by those of the new form, except any class features or legendary actions of that form.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 25 Dexterity saving throw or take 17 (2d6 + 10) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-
-}{
-:name "Adult Gold Dragon"
-:size :huge
-:type :dragon
-:alignment "lawful good"
-:armor-class 19
-:armor-notes "natural armor"
-:hit-points {:mean 256 :die-count 19 :die 12 :modifier 133}
-:speed "40 ft., fly 80 ft., swim 40 ft."
-
-:str 27
-:dex 14
-:con 25
-:int 16
-:wis 15
-:cha 24
-
-:saving-throws {:dex 8, :con 13, :wis 8, :cha 13}
-
-:skills {:insight 8, :perception 14, :persuasion 13,}
-:stealth 8
-:damage-immunities "fire"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 24"
-:languages "Common, Draconic"
-:challenge 17
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
-{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 19 (2d10 + 8) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +14 to hit, reach 5 ft., one target. Hit: 15 (2d6 + 8) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +14 to hit, reach 15 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 21 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Fire Breath" :description "The dragon exhales fire in a 60-foot cone. Each creature in that area must make a DC 21 Dexterity saving throw, taking 66 (12d10) fire damage on a failed save, or half as much damage on a successful one."}
-{:name "Weakening Breath" :description "The dragon exhales gas in a 60-foot cone. Each creature in that area must succeed on a DC 21 Strength saving throw or have disadvantage on Strength-based attack rolls, Strength checks, and Strength saving throws for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}
-{:name "Change Shape" :description "The dragon magically polymorphs into a humanoid or beast that has a challenge rating no higher than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the dragon's choice).
-In a new form, the dragon retains its alignment, hit points, Hit Dice, ability to speak, proficiencies, Legendary Resistance, lair actions, and Intelligence, Wisdom, and Charisma scores, as well as this action. Its statistics and capabilities are otherwise replaced by those of the new form, except any class features or legendary actions of that form.
-"}]
-
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 22 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
-"}]}
-
-}{
-:name "Young Gold Dragon"
-:size :large
-:type :dragon
-:alignment "lawful good"
-:armor-class 18
-:armor-notes "natural armor"
-:hit-points {:mean 178 :die-count 17 :die 10 :modifier 85}
-:speed "40 ft., fly 80 ft., swim 40 ft."
-
-:str 23
-:dex 14
-:con 21
-:int 16
-:wis 13
-:cha 20
-
-:saving-throws {:dex 6, :con 9, :wis 5, :cha 9}
-
-:skills {:insight 5, :perception 9, :persuasion 9, :stealth 6}
-:damage-immunities "fire"
-:senses "blindsight 30 ft., darkvision 120 ft., passive Perception 19"
-:languages "Common, Draconic"
-:challenge 10
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
-
-:actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +10 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Fire Breath" :description "The dragon exhales fire in a 30-foot cone. Each creature in that area must make a DC 17 Dexterity saving throw, taking 55 (10d10) fire damage on a failed save, or half as much damage on a successful one."}
-{:name "Weakening Breath" :description "The dragon exhales gas in a 30-foot cone. Each creature in that area must succeed on a DC 17 Strength saving throw or have disadvantage on Strength-based attack rolls, Strength checks, and Strength saving throws for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success.
-"}]
-
-}{
-:name "Gold Dragon Wyrmling"
-:size :medium
-:type :dragon
-:alignment "lawful good"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 60 :die-count 8 :die 8 :modifier 24}
-:speed "30 ft., fly 60 ft., swim 30 ft."
-
-:str 19
-:dex 14
-:con 17
-:int 14
-:wis 11
-:cha 16	 	
-
-:saving-throws {:dex 4, :con 5, :wis 2, :cha 5}
-
-:skills {:perception 4, :stealth 4}
-:damage-immunities "fire"
-:senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
-:languages "Draconic"
-:challenge 3
-
-:traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
-
-:actions [{:name "Bite" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 9 (1d10 + 4) piercing damage."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Fire Breath" :description "The dragon exhales fire in a 15-foot cone. Each creature in that area must make a DC 13 Dexterity saving throw, taking 22 (4d10) fire damage on a failed save, or half as much damage on a successful one."}
-{:name "Weakening Breath" :description "The dragon exhales gas in a 15-foot cone. Each creature in that area must succeed on a DC 13 Strength saving throw or have disadvantage on Strength-based attack rolls, Strength checks, and Strength saving throws for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success.
-"}]
-
-}{
-:name "Ancient Silver Dragon"
-:size :gargantuan
-:type :dragon
-:alignment "lawful good"
-:armor-class 22
-:armor-notes "natural armor"
-:hit-points {:mean 487 :die-count 25 :die 20 :modifier 225}
-:speed "40 ft., fly 80 ft."
-
-:str 30
-:dex 10
-:con 29
-:int 18
-:wis 15
-:cha 23
-
-:saving-throws {:dex 7, :con 16, :wis 9, :cha 13}
-
-:skills {:arcana 11, :history 11, :perception 16, :stealth 7}
-:damage-immunities "cold"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 26"
-:languages "Common, Draconic"
-:challenge 23
-
-:traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +17 to hit, reach 15 ft., one target. Hit: 21 (2d10 + 10) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +17 to hit, reach 10 ft., one target. Hit: 17 (2d6 + 10) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +17 to hit, reach 20 ft., one target. Hit: 19 (2d8 + 10) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 21 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Cold Breath" :description "The dragon exhales an icy blast in a 90- foot cone. Each creature in that area must make a DC 24 Constitution saving throw, taking 67 (15d8) cold damage on a failed save, or half as much damage on a successful one."}
-{:name "Paralyzing Breath" :description "The dragon exhales paralyzing gas in a 90-foot cone. Each creature in that area must succeed on a DC 24 Constitution saving throw or be paralyzed for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}
-{:name "Change Shape" :description "The dragon magically polymorphs into a humanoid or beast that has a challenge rating no higher than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the dragon's choice).
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 22 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Adult Brass Dragon"
+  :size :huge
+  :type :dragon
+  :alignment "chaotic good"
+  :armor-class 18
+  :armor-notes "natural armor"
+  :hit-points {:mean 172 :die-count 15 :die 12 :modifier 75}
+  :speed "40 ft., burrow 30 ft., fly 80 ft."
+
+  :str 23
+  :dex 10
+  :con 21
+  :int 14
+  :wis 13
+  :cha 17
+
+  :saving-throws {:dex 5, :con 10, :wis 6, :cha 8}
+
+  :skills {:history 7, :perception 11, :persuasion 8, :stealth 5}
+  :damage-immunities "fire"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 21"
+  :languages "Common, Draconic"
+  :challenge 13
+
+  :traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +11 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +11 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +11 to hit, reach 15 ft., one target. Hit: 15 (2d8 + 6) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 16 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Fire Breath" :description "The dragon exhales fire in an 60-foot line that is 5 feet wide. Each creature in that line must make a DC 18 Dexterity saving throw, taking 45 (13d6) fire damage on a failed save, or half as much damage on a successful one."}
+            {:name "Sleep Breath" :description "The dragon exhales sleep gas in a 60-foot cone. Each creature in that area must succeed on a DC 18 Constitution saving throw or fall unconscious for 10 minutes. This effect ends for a creature if the creature takes damage or someone uses an action to wake it."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 19 Dexterity saving throw or take 13 (2d6 + 6) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Young Brass Dragon"
+  :size :large
+  :type :dragon
+  :alignment "chaotic good"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 110 :die-count 13 :die 10 :modifier 39}
+  :speed "40 ft., burrow 20 ft., fly 80 ft."
+
+  :str 19
+  :dex 10
+  :con 17
+  :int 12
+  :wis 11
+  :cha 15
+
+  :saving-throws {:dex 3, :con 6, :wis 3, :cha 5}
+
+  :skills {:perception 6, :persuasion 5, :stealth 3}
+  :damage-immunities "fire"
+  :senses "blindsight 30 ft., darkvision 120 ft., passive Perception 16"
+  :languages "Common, Draconic"
+  :challenge 6
+
+  :actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 10 ft., one target. Hit: 15 (2d10 + 4) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) slashing damage."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Fire Breath" :description "The dragon exhales fire in a 40-foot line that is 5 feet wide. Each creature in that line must make a DC 14 Dexterity saving throw, taking 42 (12d6) fire damage on a failed save, or half as much damage on a successful one."}
+            {:name "Sleep Breath" :description "The dragon exhales sleep gas in a 30-foot cone. Each creature in that area must succeed on a DC 14 Constitution saving throw or fall unconscious for 5 minutes. This effect ends for a creature if the creature takes damage or someone uses an action to wake it."}]}{
+  :name "Brass Dragon Wyrmling"
+  :size :medium
+  :type :dragon
+  :alignment "chaotic good"
+  :armor-class 16
+  :armor-notes "natural armor"
+  :hit-points {:mean 16 :die-count 3 :die 8 :modifier 3}
+  :speed "30 ft., burrow 15 ft., fly 60 ft."
+
+  :str 15
+  :dex 10
+  :con 13
+  :int 10
+  :wis 11
+  :cha 13
+
+  :saving-throws {:dex 2, :con 3, :wis 2, :cha 3}
+
+  :skills {:perception 4, :stealth 2}
+  :damage-immunities "fire"
+  :senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
+  :languages "Draconic"
+  :challenge 1
+
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 7 (1d10 + 2) piercing damage."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Fire Breath" :description "The dragon exhales fire in an 20-foot line that is 5 feet wide. Each creature in that line must make a DC 11 Dexterity saving throw, taking 14 (4d6) fire damage on a failed save, or half as much damage on a successful one."}
+            {:name "Sleep Breath" :description "The dragon exhales sleep gas in a 15-foot cone. Each creature in that area must succeed on a DC 11 Constitution saving throw or fall unconscious for 1 minute. This effect ends for a creature if the creature takes damage or someone uses an action to wake it."}]}{
+  :name "Ancient Bronze Dragon"
+  :size :gargantuan
+  :type :dragon
+  :alignment "lawful good"
+  :armor-class 22
+  :armor-notes "natural armor"
+  :hit-points {:mean 444 :die-count 24 :die 20 :modifier 192}
+  :speed "40 ft., fly 80 ft., swim 40 ft."
+
+  :str 29
+  :dex 10
+  :con 27
+  :int 18
+  :wis 17
+  :cha 21
+
+  :saving-throws {:dex 7, :con 15, :wis 10, :cha 12}
+
+  :skills {:insight 10, :perception 17, :stealth 7}
+  :damage-immunities "lightning"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 27"
+  :languages "Common, Draconic"
+  :challenge 22
+
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
+           {:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +16 to hit, reach 15 ft., one target. Hit: 20 (2d10 + 9) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +16 to hit, reach 10 ft., one target. Hit: 16 (2d6 + 9) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +16 to hit, reach 20 ft., one target. Hit: 18 (2d8 + 9) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 20 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Lightning Breath" :description "The dragon exhales lightning in a 120-foot line that is 10 feet wide. Each creature in that line must make a DC 23 Dexterity saving throw, taking 88 (16d10) lightning damage on a failed save, or half as much damage on a successful one."}
+            {:name "Repulsion Breath" :description "The dragon exhales repulsion energy in a 30-foot cone. Each creature in that area must succeed on a DC 23 Strength saving throw. On a failed save, the creature is pushed 60 feet away from the dragon."}
+            {:name "Change Shape" :description "The dragon magically polymorphs into a humanoid or beast that has a challenge rating no higher than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the dragon's choice).
 In a new form, the dragon retains its alignment, hit points, Hit Dice, ability to speak, proficiencies, Legendary Resistance, lair actions, and Intelligence, Wisdom, and Charisma scores, as well as this action. Its statistics and capabilities are otherwise replaced by those of the new form, except any class features or legendary actions of that form."}]
 
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 25 Dexterity saving throw or take 17 (2d6 + 10) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 24 Dexterity saving throw or take 16 (2d6 + 9) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Adult Bronze Dragon"
+  :size :huge
+  :type :dragon
+  :alignment "lawful good"
+  :armor-class 19
+  :armor-notes "natural armor"
+  :hit-points {:mean 212 :die-count 17 :die 12 :modifier 102}
+  :speed "40 ft., fly 80 ft., swim 40 ft."
 
-}{
-:name "Adult Silver Dragon"
-:size :huge
-:type :dragon
-:alignment "lawful good"
-:armor-class 19
-:armor-notes "natural armor"
-:hit-points {:mean 243 :die-count 18 :die 12 :modifier 126}
-:speed "40 ft., fly 80 ft."
+  :str 25
+  :dex 10
+  :con 23
+  :int 16
+  :wis 15
+  :cha 19
 
-:str 27
-:dex 10
-:con 25
-:int 16
-:wis 13
-:cha 21
+  :saving-throws {:dex 5, :con 11, :wis 7, :cha 9}
 
-:saving-throws {:dex 5, :con 12, :wis 6, :cha 10}
+  :skills {:insight 7, :perception 12, :stealth 5}
+  :damage-immunities "lightning"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 22"
+  :languages "Common, Draconic"
+  :challenge 15
 
-:skills {:arcana 8, :history 8, :perception 11, :stealth 5}
-:damage-immunities "cold"
-:senses "blindsight 60 ft., darkvision 120 ft., passive Perception 21"
-:languages "Common, Draconic"
-:challenge 16
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
+           {:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
 
-:traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
-
-:actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +13 to hit, reach 10 ft., one target. Hit: 19 (2d10 + 8) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +13 to hit, reach 5 ft., one target. Hit: 15 (2d6 + 8) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +13 to hit, reach 15 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
-{:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 18 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Cold Breath" :description "The dragon exhales an icy blast in a 60- foot cone. Each creature in that area must make a DC 20 Constitution saving throw, taking 58 (13d8) cold damage on a failed save, or half as much damage on a successful one."}
-{:name "Paralyzing Breath" :description "The dragon exhales paralyzing gas in a 60-foot cone. Each creature in that area must succeed on a DC 20 Constitution saving throw or be paralyzed for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}
-{:name "Change Shape" :description "The dragon magically polymorphs into a humanoid or beast that has a challenge rating no higher than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the dragon's choice).
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +12 to hit, reach 10 ft., one target. Hit: 18 (2d10 + 7) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +12 to hit, reach 5 ft., one target. Hit: 14 (2d6 + 7) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +12 to hit, reach 15 ft., one target. Hit: 16 (2d8 + 7) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 17 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Lightning Breath" :description "The dragon exhales lightning in a 90- foot line that is 5 feet wide. Each creature in that line must make a DC 19 Dexterity saving throw, taking 66 (12d10) lightning damage on a failed save, or half as much damage on a successful one."}
+            {:name "Repulsion Breath" :description "The dragon exhales repulsion energy in a 30-foot cone. Each creature in that area must succeed on a DC 19 Strength saving throw. On a failed save, the creature is pushed 60 feet away from the dragon."}
+            {:name "Change Shape" :description "The dragon magically polymorphs into a humanoid or beast that has a challenge rating no higher than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the dragon's choice).
 In a new form, the dragon retains its alignment, hit points, Hit Dice, ability to speak, proficiencies, Legendary Resistance, lair actions, and Intelligence, Wisdom, and Charisma scores, as well as this action. Its statistics and capabilities are otherwise replaced by those of the new form, except any class features or legendary actions of that form."}]
 
-:legendary-actions {
-:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
-:actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
-{:name "Tail Attack" :description "The dragon makes a tail attack."}
-{:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 21 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 20 Dexterity saving throw or take 14 (2d6 + 7) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Young Bronze Dragon"
+  :size :large
+  :type :dragon
+  :alignment "lawful good"
+  :armor-class 18
+  :armor-notes "natural armor"
+  :hit-points {:mean 142 :die-count 15 :die 10 :modifier 60}
+  :speed "40 ft., fly 80 ft., swim 40 ft."
 
-}{
-:name "Young Silver Dragon"
-:size :large
-:type :dragon
-:alignment "lawful good"
-:armor-class 18
-:armor-notes "natural armor"
-:hit-points {:mean 168 :die-count 16 :die 10 :modifier 80}
-:speed "40 ft., fly 80 ft."
+  :str 21
+  :dex 10
+  :con 19
+  :int 14
+  :wis 13
+  :cha 17
 
-:str 23
-:dex 10
-:con 21
-:int 14
-:wis 11
-:cha 19
+  :saving-throws {:dex 3, :con 7, :wis 4, :cha 6}
 
-:saving-throws {:dex 4, :con 9, :wis 4, :cha 8}
+  :skills {:insight 4, :perception 7, :stealth 3}
+  :damage-immunities "lightning"
+  :senses "blindsight 30 ft., darkvision 120 ft., passive Perception 17"
+  :languages "Common, Draconic"
+  :challenge 8
 
-:skills {:arcana 6, :history 6, :perception 8, :stealth 4}
-:damage-immunities "cold"
-:senses "blindsight 30 ft., darkvision 120 ft., passive Perception 18"
-:languages "Common, Draconic"
-:challenge 9
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
 
-:actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +10 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Cold Breath" :description "The dragon exhales an icy blast in a 30- foot cone. Each creature in that area must make a DC 17 Constitution saving throw, taking 54 (12d8) cold damage on a failed save, or half as much damage on a successful one."}
-{:name "Paralyzing Breath" :description "The dragon exhales paralyzing gas in a 30-foot cone. Each creature in that area must succeed on a DC 17 Constitution saving throw or be paralyzed for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}]
+  :actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +8 to hit, reach 10 ft., one target. Hit: 16 (2d10 + 5) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +8 to hit, reach 5 ft., one target. Hit: 12 (2d6 + 5) slashing damage."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Lightning Breath" :description "The dragon exhales lightning in a 60- foot line that is 5 feet wide. Each creature in that line must make a DC 15 Dexterity saving throw, taking 55 (10d10) lightning damage on a failed save, or half as much damage on a successful one."}
+            {:name "Repulsion Breath" :description "The dragon exhales repulsion energy in a 30-foot cone. Each creature in that area must succeed on a DC 15 Strength saving throw. On a failed save, the creature is pushed 40 feet away from the dragon."}]}{
+  :name "Bronze Dragon Wyrmling"
+  :size :medium
+  :type :dragon
+  :alignment "lawful good"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 32 :die-count 5 :die 8 :modifier 10}
+  :speed "30 ft., fly 60 ft., swim 30 ft."
 
-}{
-:name "Silver Dragon Wyrmling"
-:size :medium
-:type :dragon
-:alignment "lawful good"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 45 :die-count 6 :die 8 :modifier 18}
-:speed "30 ft., fly 60 ft."
+  :str 17
+  :dex 10
+  :con 15
+  :int 12
+  :wis 11
+  :cha 15
 
-:str 19
-:dex 10
-:con 17
-:int 12
-:wis 11
-:cha 15
+  :saving-throws {:dex 2, :con 4, :wis 2, :cha 4}
 
-:saving-throws {:dex 2, :con 5, :wis 2, :cha 4}
+  :skills {:perception 4, :stealth 2}
+  :damage-immunities "lightning"
+  :senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
+  :languages "Draconic"
+  :challenge 2
 
-:skills {:perception 4, :stealth 2}
-:damage-immunities "cold"
-:senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
-:languages "Draconic"
-:challenge 2
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
 
-:actions [{:name "Bite" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 9 (1d10 + 4) piercing damage."}
-{:name "Breath Weapons " :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
-{:name "Cold Breath" :description "The dragon exhales an icy blast in a 15- foot cone. Each creature in that area must make a DC 13 Constitution saving throw, taking 18 (4d8) cold damage on a failed save, or half as much damage on a successful one."}
-{:name "Paralyzing Breath" :description "The dragon exhales paralyzing gas in a 15-foot cone. Each creature in that area must succeed on a DC 13 Constitution saving throw or be paralyzed for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success.
-"}]
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 8 (1d10 + 3) piercing damage."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Lightning Breath" :description "The dragon exhales lightning in a 40- foot line that is 5 feet wide. Each creature in that line must make a DC 12 Dexterity saving throw, taking 16 (3d10) lightning damage on a failed save, or half as much damage on a successful one."}
+            {:name "Repulsion Breath" :description "The dragon exhales repulsion energy in a 30-foot cone. Each creature in that area must succeed on a DC 12 Strength saving throw. On a failed save, the creature is pushed 30 feet away from the dragon."}]}{
+  :name "Ancient Copper Dragon"
+  :size :gargantuan
+  :type :dragon
+  :alignment "chaotic good"
+  :armor-class 21
+  :armor-notes "natural armor"
+  :hit-points {:mean 350 :die-count 20 :die 20 :modifier 140}
+  :speed "40 ft., climb 40 ft., fly 80 ft."
 
-}{
-:name "Dragon Turtle"
-:size :gargantuan
-:type :dragon
-:alignment "neutral"
-:armor-class 20
-:armor-notes "natural armor"
-:hit-points {:mean 341 :die-count 22 :die 20 :modifier 110}
-:speed "20 ft., swim 40 ft."
+  :str 27
+  :dex 12
+  :con 25
+  :int 20
+  :wis 17
+  :cha 19
 
-:str 25
-:dex 10
-:con 20
-:int 10
-:wis 12
-:cha 12
+  :saving-throws {:dex 8, :con 14, :wis 10, :cha 11}
 
-:saving-throws {:dex 6, :con 11, :wis 7}
-:damage-resistances "fire"
-:senses "darkvision 120 ft., passive Perception 11"
-:languages "Aquan, Draconic"
-:challenge 17
+  :skills {:deception 11, :perception 17, :stealth 8}
+  :damage-immunities "acid"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 27"
+  :languages "Common, Draconic"
+  :challenge 21
 
-:traits [{:name "Amphibious" :description "The dragon turtle can breathe air and water."}]
+  :traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
 
-:actions [{:name "Multiattack" :description "The dragon turtle makes three attacks: one with its bite and two with its claws. It can make one tail attack in place of its two claw attacks."}
-{:name "Bite" :description "Melee Weapon Attack: +13 to hit, reach 15 ft., one target. Hit: 26 (3d12 + 7) piercing damage."}
-{:name "Claw" :description "Melee Weapon Attack: +13 to hit, reach 10 ft., one target. Hit: 16 (2d8 + 7) slashing damage."}
-{:name "Tail" :description "Melee Weapon Attack: +13 to hit, reach 15 ft., one target. Hit: 26 (3d12 + 7) bludgeoning damage. If the target is a creature, it must succeed on a DC 20 Strength saving throw or be pushed up to 10 feet away from the dragon turtle and knocked prone."}
-{:name "Steam Breath " :notes "Recharge 5–6" :description "The dragon turtle exhales scalding steam in a 60-foot cone. Each creature in that area must make a DC 18 Constitution saving throw, taking 52 (15d6) fire damage on a failed save, or half as much damage on a successful one. Being underwater doesn't grant resistance against this damage.
-"}]
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +15 to hit, reach 15 ft., one target. Hit: 19 (2d10 + 8) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +15 to hit, reach 10 ft., one target. Hit: 15 (2d6 + 8) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +15 to hit, reach 20 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 19 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Acid Breath" :description "The dragon exhales acid in an 90-foot line that is 10 feet wide. Each creature in that line must
+In a new form, the dragon retains its alignment, hit points, Hit Dice, ability to speak, proficiencies, Legendary Resistance, lair actions, and Intelligence, Wisdom, and Charisma scores, as well as this action. Its statistics and capabilities are otherwise replaced by those of the new form, except any class features or legendary actions of that form."}]
 
-}{
-:name "Drider"
-:size :large
-:type :monstrosity
-:alignment "chaotic evil"
-:armor-class 19
-:armor-notes "natural armor"
-:hit-points {:mean 123 :die-count 13 :die 10 :modifier 52}
-:speed "30 ft., climb 30 ft."
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 23 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Adult Copper Dragon"
+  :size :huge
+  :type :dragon
+  :alignment "chaotic good"
+  :armor-class 18
+  :armor-notes "natural armor"
+  :hit-points {:mean 184 :die-count 16 :die 12 :modifier 80}
+  :speed "40 ft., climb 40 ft., fly 80 ft."
 
-:str 16
-:dex 16
-:con 18
-:int 13
-:wis 14
-:cha 12
+  :str 23
+  :dex 12
+  :con 21
+  :int 18
+  :wis 15
+  :cha 17
 
-:skills {:perception 5, :stealth 9}
-:senses "darkvision 120 ft., passive Perception 15"
-:languages " Elvish, Undercommon"
-:challenge 6
+  :saving-throws {:dex 6, :con 10, :wis 7, :cha 8}
 
-:traits [{:name "Fey Ancestry" :description "The drider has advantage on saving throws against being charmed, and magic can't put the drider to sleep."}
-{:name "Innate Spellcasting" :description "The drider's innate spellcasting ability is Wisdom (spell save DC 13). The drider can
-innately cast the following spells, requiring no material components:
+  :skills {:deception 8, :perception 12, :stealth 6}
+  :damage-immunities "acid"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 22"
+  :languages "Common, Draconic"
+  :challenge 14
+
+  :traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +11 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +11 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +11 to hit, reach 15 ft., one target. Hit: 15 (2d8 + 6) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware"}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Acid Breath" :description "The dragon exhales acid in an 60-foot line that is 5 feet wide. Each creature in that line must make a DC 18 Dexterity saving throw, taking 54 (12d8) acid damage on a failed save, or half as much damage on a successful one."}
+            {:name "Slowing Breath" :description "The dragon exhales gas in a 60-foot cone. Each creature in that area must succeed on a DC 18 Constitution saving throw. On a failed save, the creature can't use reactions, its speed is halved, and it can't make more than one attack on its turn. In addition, the creature can use either an action or a bonus action on its turn, but not both. These effects last for 1 minute. The creature can repeat the saving throw at the end of each of its turns, ending the effect on itself with a successful save."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 19 Dexterity saving throw or take 13 (2d6 + 6) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Young Copper Dragon"
+  :size :large
+  :type :dragon
+  :alignment "chaotic good"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 119 :die-count 14 :die 10 :modifier 42}
+  :speed "40 ft., climb 40 ft., fly 80 ft."
+
+  :str 19
+  :dex 12
+  :con 17
+  :int 16
+  :wis 13
+  :cha 15
+
+  :saving-throws {:dex 4, :con 6, :wis 4, :cha 5}
+  :skills {:deception 5, :perception 7, :stealth 4}
+  :damage-immunities "acid"
+  :senses "blindsight 30 ft., darkvision 120 ft., passive Perception 17"
+  :languages "Common, Draconic"
+  :challenge 7
+  :actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 10 ft., one target. Hit: 15 (2d10 + 4) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) slashing damage."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Acid Breath" :description "The dragon exhales acid in an 40-foot line that is 5 feet wide. Each creature in that line must make a DC 14 Dexterity saving throw, taking 40 (9d8) acid damage on a failed save, or half as much damage on a successful one."}
+            {:name "Slowing Breath" :description "The dragon exhales gas in a 30-foot cone. Each creature in that area must succeed on a DC 14 Constitution saving throw. On a failed save, the creature can't use reactions, its speed is halved, and it can't make more than one attack on its turn. In addition, the creature can use either an action or a bonus action on its turn, but not both. These effects last for 1 minute. The creature can repeat the saving throw at the end of each of its turns, ending the effect on itself with a successful save."}]}{
+  :name "Copper Dragon Wyrmling"
+  :size :medium
+  :type :dragon
+  :alignment "chaotic good"
+  :armor-class 16
+  :armor-notes "natural armor"
+  :hit-points {:mean 22 :die-count 4 :die 8 :modifier 4}
+  :speed "30 ft., climb 30 ft., fly 60 ft."
+
+  :str 15
+  :dex 12
+  :con 13
+  :int 14
+  :wis 11
+  :cha 13
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+  :saving-throws {:dex 3, :con 3, :wis 2, :cha 3}
+  :skills {:perception 4, :stealth 3}
+  :damage-immunities "acid"
+  :senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
+  :languages "Draconic"
+  :challenge 1
+
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 7 (1d10 + 2) piercing damage."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Acid Breath" :description "The dragon exhales acid in an 20-foot line that is 5 feet wide. Each creature in that line must make a DC 11 Dexterity saving throw, taking 18 (4d8) acid damage on a failed save, or half as much damage on a successful one."}
+            {:name "Slowing Breath" :description "The dragon exhales gas in a 15-foot cone. Each creature in that area must succeed on a DC 11 Constitution saving throw. On a failed save, the creature can't use reactions, its speed is halved, and it can't make more than one attack on its turn. In addition, the creature can use either an action or a bonus action on its turn, but not both. These effects last for 1 minute. The creature can repeat the saving throw at the end of each of its turns, ending the effect on itself with a successful save."}]}{
+  :name "Ancient Gold Dragon"
+  :size :gargantuan
+  :type :dragon
+  :alignment "lawful good"
+  :armor-class 22
+  :armor-notes "natural armor"
+  :hit-points {:mean 546 :die-count 28 :die 20 :modifier 252}
+  :speed "40 ft., fly 80 ft., swim 40 ft."
+
+  :str 30
+  :dex 14
+  :con 29
+  :int 18
+  :wis 17
+  :cha 28
+
+  :saving-throws {:dex 9, :con 16, :wis 10, :cha 16}
+
+  :skills {:insight 10, :perception 17, :persuasion 16}
+  :stealth 9
+  :damage-immunities "fire"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 27"
+  :languages "Common, Draconic"
+  :challenge 24
+
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
+           {:name "Legendary Resistance" :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +17 to hit, reach 15 ft., one target. Hit: 21 (2d10 + 10) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +17 to hit, reach 10 ft., one target. Hit: 17 (2d6 + 10) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +17 to hit, reach 20 ft., one target. Hit: 19 (2d8 + 10) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 24 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Fire Breath" :description "The dragon exhales fire in a 90-foot cone. Each creature in that area must make a DC 24 Dexterity saving throw, taking 71 (13d10) fire damage on a failed save, or half as much damage on a successful one."}
+            {:name "Weakening Breath" :description "The dragon exhales gas in a 90-foot cone. Each creature in that area must succeed on a DC 24 Strength saving throw or have disadvantage on Strength-based attack rolls, Strength checks, and Strength saving throws for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}
+            {:name "Change Shape" :description "The dragon magically polymorphs into a humanoid or beast that has a challenge rating no higher than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the dragon's choice).
+In a new form, the dragon retains its alignment, hit points, Hit Dice, ability to speak, proficiencies, Legendary Resistance, lair actions, and Intelligence, Wisdom, and Charisma scores, as well as this action. Its statistics and capabilities are otherwise replaced by those of the new form, except any class features or legendary actions of that form."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 25 Dexterity saving throw or take 17 (2d6 + 10) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Adult Gold Dragon"
+  :size :huge
+  :type :dragon
+  :alignment "lawful good"
+  :armor-class 19
+  :armor-notes "natural armor"
+  :hit-points {:mean 256 :die-count 19 :die 12 :modifier 133}
+  :speed "40 ft., fly 80 ft., swim 40 ft."
+
+  :str 27
+  :dex 14
+  :con 25
+  :int 16
+  :wis 15
+  :cha 24
+
+  :saving-throws {:dex 8, :con 13, :wis 8, :cha 13}
+
+  :skills {:insight 8, :perception 14, :persuasion 13}
+  :stealth 8
+  :damage-immunities "fire"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 24"
+  :languages "Common, Draconic"
+  :challenge 17
+
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}
+           {:name "Legendary Resistance" :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 19 (2d10 + 8) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +14 to hit, reach 5 ft., one target. Hit: 15 (2d6 + 8) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +14 to hit, reach 15 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 21 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Fire Breath" :description "The dragon exhales fire in a 60-foot cone. Each creature in that area must make a DC 21 Dexterity saving throw, taking 66 (12d10) fire damage on a failed save, or half as much damage on a successful one."}
+            {:name "Weakening Breath" :description "The dragon exhales gas in a 60-foot cone. Each creature in that area must succeed on a DC 21 Strength saving throw or have disadvantage on Strength-based attack rolls, Strength checks, and Strength saving throws for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}
+            {:name "Change Shape" :description "The dragon magically polymorphs into a humanoid or beast that has a challenge rating no higher than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the dragon's choice).
+In a new form, the dragon retains its alignment, hit points, Hit Dice, ability to speak, proficiencies, Legendary Resistance, lair actions, and Intelligence, Wisdom, and Charisma scores, as well as this action. Its statistics and capabilities are otherwise replaced by those of the new form, except any class features or legendary actions of that form."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 22 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Young Gold Dragon"
+  :size :large
+  :type :dragon
+  :alignment "lawful good"
+  :armor-class 18
+  :armor-notes "natural armor"
+  :hit-points {:mean 178 :die-count 17 :die 10 :modifier 85}
+  :speed "40 ft., fly 80 ft., swim 40 ft."
+
+  :str 23
+  :dex 14
+  :con 21
+  :int 16
+  :wis 13
+  :cha 20
+
+  :saving-throws {:dex 6, :con 9, :wis 5, :cha 9}
+
+  :skills {:insight 5, :perception 9, :persuasion 9, :stealth 6}
+  :damage-immunities "fire"
+  :senses "blindsight 30 ft., darkvision 120 ft., passive Perception 19"
+  :languages "Common, Draconic"
+  :challenge 10
+
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
+
+  :actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +10 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Fire Breath" :description "The dragon exhales fire in a 30-foot cone. Each creature in that area must make a DC 17 Dexterity saving throw, taking 55 (10d10) fire damage on a failed save, or half as much damage on a successful one."}
+            {:name "Weakening Breath" :description "The dragon exhales gas in a 30-foot cone. Each creature in that area must succeed on a DC 17 Strength saving throw or have disadvantage on Strength-based attack rolls, Strength checks, and Strength saving throws for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}]}{
+  :name "Gold Dragon Wyrmling"
+  :size :medium
+  :type :dragon
+  :alignment "lawful good"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 60 :die-count 8 :die 8 :modifier 24}
+  :speed "30 ft., fly 60 ft., swim 30 ft."
+
+  :str 19
+  :dex 14
+  :con 17
+  :int 14
+  :wis 11
+  :cha 16
+
+  :saving-throws {:dex 4, :con 5, :wis 2, :cha 5}
+
+  :skills {:perception 4, :stealth 4}
+  :damage-immunities "fire"
+  :senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
+  :languages "Draconic"
+  :challenge 3
+
+  :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
+
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 9 (1d10 + 4) piercing damage."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Fire Breath" :description "The dragon exhales fire in a 15-foot cone. Each creature in that area must make a DC 13 Dexterity saving throw, taking 22 (4d10) fire damage on a failed save, or half as much damage on a successful one."}
+            {:name "Weakening Breath" :description "The dragon exhales gas in a 15-foot cone. Each creature in that area must succeed on a DC 13 Strength saving throw or have disadvantage on Strength-based attack rolls, Strength checks, and Strength saving throws for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}]}{
+  :name "Ancient Silver Dragon"
+  :size :gargantuan
+  :type :dragon
+  :alignment "lawful good"
+  :armor-class 22
+  :armor-notes "natural armor"
+  :hit-points {:mean 487 :die-count 25 :die 20 :modifier 225}
+  :speed "40 ft., fly 80 ft."
+
+  :str 30
+  :dex 10
+  :con 29
+  :int 18
+  :wis 15
+  :cha 23
+
+  :saving-throws {:dex 7, :con 16, :wis 9, :cha 13}
+
+  :skills {:arcana 11, :history 11, :perception 16, :stealth 7}
+  :damage-immunities "cold"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 26"
+  :languages "Common, Draconic"
+  :challenge 23
+
+  :traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +17 to hit, reach 15 ft., one target. Hit: 21 (2d10 + 10) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +17 to hit, reach 10 ft., one target. Hit: 17 (2d6 + 10) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +17 to hit, reach 20 ft., one target. Hit: 19 (2d8 + 10) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 21 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Cold Breath" :description "The dragon exhales an icy blast in a 90- foot cone. Each creature in that area must make a DC 24 Constitution saving throw, taking 67 (15d8) cold damage on a failed save, or half as much damage on a successful one."}
+            {:name "Paralyzing Breath" :description "The dragon exhales paralyzing gas in a 90-foot cone. Each creature in that area must succeed on a DC 24 Constitution saving throw or be paralyzed for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}
+            {:name "Change Shape" :description "The dragon magically polymorphs into a humanoid or beast that has a challenge rating no higher than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the dragon's choice).
+In a new form, the dragon retains its alignment, hit points, Hit Dice, ability to speak, proficiencies, Legendary Resistance, lair actions, and Intelligence, Wisdom, and Charisma scores, as well as this action. Its statistics and capabilities are otherwise replaced by those of the new form, except any class features or legendary actions of that form."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack" :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 25 Dexterity saving throw or take 17 (2d6 + 10) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Adult Silver Dragon"
+  :size :huge
+  :type :dragon
+  :alignment "lawful good"
+  :armor-class 19
+  :armor-notes "natural armor"
+  :hit-points {:mean 243 :die-count 18 :die 12 :modifier 126}
+  :speed "40 ft., fly 80 ft."
+
+  :str 27
+  :dex 10
+  :con 25
+  :int 16
+  :wis 13
+  :cha 21
+
+  :saving-throws {:dex 5, :con 12, :wis 6, :cha 10}
+
+  :skills {:arcana 8, :history 8, :perception 11, :stealth 5}
+  :damage-immunities "cold"
+  :senses "blindsight 60 ft., darkvision 120 ft., passive Perception 21"
+  :languages "Common, Draconic"
+  :challenge 16
+
+  :traits [{:name "Legendary Resistance " :notes "3/Day" :description "If the dragon fails a saving throw, it can choose to succeed instead."}]
+
+  :actions [{:name "Multiattack" :description "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +13 to hit, reach 10 ft., one target. Hit: 19 (2d10 + 8) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +13 to hit, reach 5 ft., one target. Hit: 15 (2d6 + 8) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +13 to hit, reach 15 ft., one target. Hit: 17 (2d8 + 8) bludgeoning damage."}
+            {:name "Frightful Presence" :description "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 18 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Cold Breath" :description "The dragon exhales an icy blast in a 60- foot cone. Each creature in that area must make a DC 20 Constitution saving throw, taking 58 (13d8) cold damage on a failed save, or half as much damage on a successful one."}
+            {:name "Paralyzing Breath" :description "The dragon exhales paralyzing gas in a 60-foot cone. Each creature in that area must succeed on a DC 20 Constitution saving throw or be paralyzed for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}
+            {:name "Change Shape" :description "The dragon magically polymorphs into a humanoid or beast that has a challenge rating no higher than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the dragon's choice).
+In a new form, the dragon retains its alignment, hit points, Hit Dice, ability to speak, proficiencies, Legendary Resistance, lair actions, and Intelligence, Wisdom, and Charisma scores, as well as this action. Its statistics and capabilities are otherwise replaced by those of the new form, except any class features or legendary actions of that form."}]
+
+  :legendary-actions {:description "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn."
+                      :actions [{:name "Detect" :description "The dragon makes a Wisdom (Perception) check."}
+                                {:name "Tail Attack" :description "The dragon makes a tail attack."}
+                                {:name "Wing Attack " :notes "Costs 2 Actions" :description "The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 21 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."}]}}{
+  :name "Young Silver Dragon"
+  :size :large
+  :type :dragon
+  :alignment "lawful good"
+  :armor-class 18
+  :armor-notes "natural armor"
+  :hit-points {:mean 168 :die-count 16 :die 10 :modifier 80}
+  :speed "40 ft., fly 80 ft."
+
+  :str 23
+  :dex 10
+  :con 21
+  :int 14
+  :wis 11
+  :cha 19
+
+  :saving-throws {:dex 4, :con 9, :wis 4, :cha 8}
+
+  :skills {:arcana 6, :history 6, :perception 8, :stealth 4}
+  :damage-immunities "cold"
+  :senses "blindsight 30 ft., darkvision 120 ft., passive Perception 18"
+  :languages "Common, Draconic"
+  :challenge 9
+
+  :actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +10 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Cold Breath" :description "The dragon exhales an icy blast in a 30- foot cone. Each creature in that area must make a DC 17 Constitution saving throw, taking 54 (12d8) cold damage on a failed save, or half as much damage on a successful one."}
+            {:name "Paralyzing Breath" :description "The dragon exhales paralyzing gas in a 30-foot cone. Each creature in that area must succeed on a DC 17 Constitution saving throw or be paralyzed for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}]}{
+  :name "Silver Dragon Wyrmling"
+  :size :medium
+  :type :dragon
+  :alignment "lawful good"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 45 :die-count 6 :die 8 :modifier 18}
+  :speed "30 ft., fly 60 ft."
+
+  :str 19
+  :dex 10
+  :con 17
+  :int 12
+  :wis 11
+  :cha 15
+
+  :saving-throws {:dex 2, :con 5, :wis 2, :cha 4}
+
+  :skills {:perception 4, :stealth 2}
+  :damage-immunities "cold"
+  :senses "blindsight 10 ft., darkvision 60 ft., passive Perception 14"
+  :languages "Draconic"
+  :challenge 2
+
+  :actions [{:name "Bite" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 9 (1d10 + 4) piercing damage."}
+            {:name "Breath Weapons" :notes "Recharge 5–6" :description "The dragon uses one of the following breath weapons."}
+            {:name "Cold Breath" :description "The dragon exhales an icy blast in a 15- foot cone. Each creature in that area must make a DC 13 Constitution saving throw, taking 18 (4d8) cold damage on a failed save, or half as much damage on a successful one."}
+            {:name "Paralyzing Breath" :description "The dragon exhales paralyzing gas in a 15-foot cone. Each creature in that area must succeed on a DC 13 Constitution saving throw or be paralyzed for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."}]}{
+  :name "Dragon Turtle"
+  :size :gargantuan
+  :type :dragon
+  :alignment "neutral"
+  :armor-class 20
+  :armor-notes "natural armor"
+  :hit-points {:mean 341 :die-count 22 :die 20 :modifier 110}
+  :speed "20 ft., swim 40 ft."
+
+  :str 25
+  :dex 10
+  :con 20
+  :int 10
+  :wis 12
+  :cha 12
+
+  :saving-throws {:dex 6, :con 11, :wis 7}
+  :damage-resistances "fire"
+  :senses "darkvision 120 ft., passive Perception 11"
+  :languages "Aquan, Draconic"
+  :challenge 17
+
+  :traits [{:name "Amphibious" :description "The dragon turtle can breathe air and water."}]
+
+  :actions [{:name "Multiattack" :description "The dragon turtle makes three attacks: one with its bite and two with its claws. It can make one tail attack in place of its two claw attacks."}
+            {:name "Bite" :description "Melee Weapon Attack: +13 to hit, reach 15 ft., one target. Hit: 26 (3d12 + 7) piercing damage."}
+            {:name "Claw" :description "Melee Weapon Attack: +13 to hit, reach 10 ft., one target. Hit: 16 (2d8 + 7) slashing damage."}
+            {:name "Tail" :description "Melee Weapon Attack: +13 to hit, reach 15 ft., one target. Hit: 26 (3d12 + 7) bludgeoning damage. If the target is a creature, it must succeed on a DC 20 Strength saving throw or be pushed up to 10 feet away from the dragon turtle and knocked prone."}
+            {:name "Steam Breath " :notes "Recharge 5–6" :description "The dragon turtle exhales scalding steam in a 60-foot cone. Each creature in that area must make a DC 18 Constitution saving throw, taking 52 (15d6) fire damage on a failed save, or half as much damage on a successful one. Being underwater doesn't grant resistance against this damage."}]}{
+  :name "Drider"
+  :size :large
+  :type :monstrosity
+  :alignment "chaotic evil"
+  :armor-class 19
+  :armor-notes "natural armor"
+  :hit-points {:mean 123 :die-count 13 :die 10 :modifier 52}
+  :speed "30 ft., climb 30 ft."
+
+  :str 16
+  :dex 16
+  :con 18
+  :int 13
+  :wis 14
+  :cha 12
+
+  :skills {:perception 5, :stealth 9}
+  :senses "darkvision 120 ft., passive Perception 15"
+  :languages " Elvish, Undercommon"
+  :challenge 6
+
+  :traits [{:name "Fey Ancestry" :description "The drider has advantage on saving throws against being charmed, and magic can't put the drider to sleep."}
+           {:name "Innate Spellcasting" :description "The drider's innate spellcasting ability is Wisdom (spell save DC 13). 
+The drider can innately cast the following spells, requiring no material components:
 At will: dancing lights
 1/day each: darkness, faerie fire"}
-{:name "Spider Climb" :description "The drider can climb difficult surfaces, including upside down on ceilings, without needing to make an ability check."}
-{:name "Sunlight Sensitivity" :description "While in sunlight, the drider has disadvantage on attack rolls, as well as on Wisdom (Perception) checks that rely on sight."}
-{:name "Web Walker" :description "The drider ignores movement restrictions caused by webbing."}]
+           {:name "Spider Climb" :description "The drider can climb difficult surfaces, including upside down on ceilings, without needing to make an ability check."}
+           {:name "Sunlight Sensitivity" :description "While in sunlight, the drider has disadvantage on attack rolls, as well as on Wisdom (Perception) checks that rely on sight."}
+           {:name "Web Walker" :description "The drider ignores movement restrictions caused by webbing."}]
 
-:actions [{:name "Multiattack" :description "The drider makes three attacks, either with its longsword or its longbow. It can replace one of those attacks with a bite attack."}
-{:name "Bite" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one creature. Hit: 2 (1d4) piercing damage plus 9 (2d8) poison damage."}
-{:name "Longsword" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 7 (1d8 + 3) slashing damage, or 8 (1d10
-+ 3) slashing damage if used with two hands."}
-{:name "Longbow" :description "Ranged Weapon Attack: +6 to hit, range 150/600 ft., one target. Hit: 7 (1d8 + 3) piercing damage plus 4 (1d8) poison damage.
-"}]
+  :actions [{:name "Multiattack" :description "The drider makes three attacks, either with its longsword or its longbow. It can replace one of those attacks with a bite attack."}
+            {:name "Bite" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one creature. Hit: 2 (1d4) piercing damage plus 9 (2d8) poison damage."}
+            {:name "Longsword" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 7 (1d8 + 3) slashing damage, or 8 (1d10 + 3) slashing damage if used with two hands."}
+            {:name "Longbow" :description "Ranged Weapon Attack: +6 to hit, range 150/600 ft., one target. Hit: 7 (1d8 + 3) piercing damage plus 4 (1d8) poison damage."}]}{
+  :name "Dryad"
+  :size :medium
+  :type :fey
+  :alignment "neutral"
+  :armor-class 11
+  :armor-notes "(16 with barkskin)"
+  :hit-points {:mean 22 :die-count 5 :die 8}
+  :speed "30 ft."
 
-}{
-:name "Dryad"
-:size :medium
-:type :fey
-:alignment "neutral"
-:armor-class 11
-:armor-notes "(16 with barkskin)"
-:hit-points {:mean 22 :die-count 5 :die 8}
-:speed "30 ft."
+  :str 10
+  :dex 12
+  :con 11
+  :int 14
+  :wis 15
+  :cha 18
 
-:str 10
-:dex 12
-:con 11
-:int 14
-:wis 15
-:cha 18
+  :skills {:perception 4, :stealth 5}
+  :senses "darkvision 60 ft., passive Perception 14"
+  :languages "Elvish, Sylvan"
+  :challenge 1
 
-:skills {:perception 4, :stealth 5}
-:senses "darkvision 60 ft., passive Perception 14"
-:languages "Elvish, Sylvan"
-:challenge 1
-
-:traits [{:name "Innate Spellcasting" :description "The dryad's innate spellcasting ability is Charisma (spell save DC 14). The dryad can innately cast the following spells, requiring no material components:
+  :traits [{:name "Innate Spellcasting" :description "The dryad's innate spellcasting ability is Charisma (spell save DC 14). 
+The dryad can innately cast the following spells, requiring no material components:
 At will: druidcraft
 3/day each: entangle, goodberry
 1/day each: barkskin, pass without trace, shillelagh"}
-{:name "Magic Resistance" :description "The dryad has advantage on saving throws against spells and other magical effects.
+           {:name "Magic Resistance" :description "The dryad has advantage on saving throws against spells and other magical effects.
 Speak with Beasts and Plants. The dryad can communicate with beasts and plants as if they shared a language."}
-{:name "Tree Stride" :description "Once on her turn, the dryad can use 10 feet of her movement to step magically into one living tree within her reach and emerge from a second living tree within 60 feet of the first tree, appearing in an unoccupied space within 5 feet of the second tree.
-Both trees must be Large or bigger."}]
+           {:name "Tree Stride" :description "Once on her turn, the dryad can use 10 feet of her movement to step magically into one living tree within her reach and emerge from a second living tree within 60 feet of the first tree, appearing in an unoccupied space within 5 feet of the second tree. Both trees must be Large or bigger."}]
 
-:actions [{:name "Club" :description "Melee Weapon Attack: +2 to hit (+6 to hit with shillelagh), reach 5 ft., one target. Hit: 2 (1d4) bludgeoning damage, or 8 (1d8 + 4) bludgeoning damage with shillelagh."}
-{:name "Fey Charm" :description "The dryad targets one humanoid or beast that she can see within 30 feet of her. If the target can see the dryad, it must succeed on a DC 14 Wisdom saving throw or be magically charmed. The charmed creature regards the dryad as a trusted friend to be heeded and protected. Although the target isn't under the dryad's control, it takes the dryad's requests or actions in the most favorable way it can.
+  :actions [{:name "Club" :description "Melee Weapon Attack: +2 to hit (+6 to hit with shillelagh), reach 5 ft., one target. Hit: 2 (1d4) bludgeoning damage, or 8 (1d8 + 4) bludgeoning damage with shillelagh."}
+            {:name "Fey Charm" :description "The dryad targets one humanoid or beast that she can see within 30 feet of her. If the target can see the dryad, it must succeed on a DC 14 Wisdom saving throw or be magically charmed. The charmed creature regards the dryad as a trusted friend to be heeded and protected. Although the target isn't under the dryad's control, it takes the dryad's requests or actions in the most favorable way it can.
 Each time the dryad or its allies do anything harmful to the target, it can repeat the saving throw, ending the effect on itself on a success. Otherwise, the effect lasts 24 hours or until the dryad dies, is on a different plane of existence from the target, or ends the effect as a bonus action. If a target's saving throw is successful, the target is immune to the dryad's Fey Charm for the next 24 hours.
-The dryad can have no more than one humanoid and up to three beasts charmed at a time.
-"}]
+The dryad can have no more than one humanoid and up to three beasts charmed at a time."}]}{
+  :name "Duergar"
+  :size :medium
+  :type :humanoid
+  :subtypes #{:dwarf}
+  :alignment "lawful evil"
+  :armor-class 16
+  :armor-notes "(scale mail, shield)"
+  :hit-points {:mean 26 :die-count 4 :die 8 :modifier 8}
+  :speed "25 ft."
 
-}{
-:name "Duergar"
-:size :medium
-:type :humanoid
-:subtypes #{:dwarf}
-:alignment "lawful evil"
-:armor-class 16
-:armor-notes "(scale mail, shield)"
-:hit-points {:mean 26 :die-count 4 :die 8 :modifier 8}
-:speed "25 ft."
+  :str 14
+  :dex 11
+  :con 14
+  :int 11
+  :wis 10
+  :cha 9
 
-:str 14
-:dex 11
-:con 14
-:int 11
-:wis 10
-:cha 9
+  :damage-resistances "poison"
+  :senses "darkvision 120 ft., passive Perception 10"
+  :languages "Dwarvish, Undercommon"
+  :challenge 1
 
-:damage-resistances "poison"
-:senses "darkvision 120 ft., passive Perception 10"
-:languages "Dwarvish, Undercommon"
-:challenge 1
+  :traits [{:name "Duergar Resilience" :description "The duergar has advantage on saving throws against poison, spells, and illusions, as well as to resist being charmed or paralyzed."}
+           {:name "Sunlight Sensitivity" :description "While in sunlight, the duergar has disadvantage on attack rolls, as well as on Wisdom (Perception) checks that rely on sight."}]
 
-:traits [{:name "Duergar Resilience" :description "The duergar has advantage on saving throws against poison, spells, and illusions, as well as to resist being charmed or paralyzed."}
-{:name "Sunlight Sensitivity" :description "While in sunlight, the duergar has disadvantage on attack rolls, as well as on Wisdom (Perception) checks that rely on sight."}]
+  :actions [{:name "Enlarge " :notes "Recharges after a Short or Long Rest" :description "For 1 minute, the duergar magically increases in size, along with anything it is wearing or carrying. While enlarged, the duergar is Large, doubles its damage dice on Strength-based weapon attacks (included in the attacks), and makes Strength checks and Strength saving throws with advantage. If the duergar lacks the room to become Large, it attains the maximum size possible in the space available."}
+            {:name "War Pick" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 6 (1d8 + 2) piercing damage, or 11 (2d8 + 2) piercing damage while enlarged."}
+            {:name "Javelin" :description "Melee or Ranged Weapon Attack: +4 to hit, reach 5 ft. or range 30/120 ft., one target. Hit: 5 (1d6 + 2) piercing damage, or 9 (2d6 + 2) piercing damage while enlarged."}
+            {:name "Invisibility" :notes "Recharges after a Short or Long Rest" :description "The duergar magically turns invisible until it attacks, casts a spell, or uses its Enlarge, or until its concentration is broken, up to 1 hour (as if concentrating on a spell). Any equipment the duergar wears or carries is invisible with it."}]}{
+  :name "Air Elemental"
+  :size :large
+  :type :elemental
+  :alignment "neutral"
+  :armor-class 15
+  :hit-points {:mean 90 :die-count 12 :die 10 :modifier 24}
+  :speed "0 ft., fly 90 ft. (hover)"
 
-:actions [{:name "Enlarge " :notes "Recharges after a Short or Long Rest" :description "For 1 minute, the duergar magically increases in size, along with anything it is wearing or carrying. While enlarged, the duergar is Large, doubles its damage dice on Strength-based weapon attacks (included in the attacks), and makes Strength checks and Strength saving throws with advantage. If the duergar lacks the room to become Large, it attains the maximum size possible in the space available."}
-{:name "War Pick" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 6 (1d8 + 2) piercing damage, or 11 (2d8
-+ 2) piercing damage while enlarged."}
-{:name "Javelin" :description "Melee or Ranged Weapon Attack: +4 to hit, reach 5 ft. or range 30/120 ft., one target. Hit: 5 (1d6 +
-2) piercing damage, or 9 (2d6 + 2) piercing damage while enlarged."}
-{:name "Invisibility" :notes "Recharges after a Short or Long Rest" :description "The duergar magically turns invisible until it attacks, casts a spell, or uses its Enlarge, or until its concentration is broken, up to 1 hour (as if concentrating on a spell).
-Any equipment the duergar wears or carries is invisible with it."}
-]
+  :str 14
+  :dex 20
+  :con 14
+  :int 6
+  :wis 10
+  :cha 6
 
-}{
-:name "Air Elemental"
-:size :large
-:type :elemental
-:alignment "neutral"
-:armor-class 15
-:hit-points {:mean 90 :die-count 12 :die 10 :modifier 24}
-:speed "0 ft., fly 90 ft. (hover)"
+  :damage-resistances "lightning, thunder; bludgeoning, piercing, and slashing from nonmagical attacks"
+  :damage-immunities "poison"
+  :condition-immunities "exhaustion, grappled, paralyzed, petrified, poisoned, prone, restrained, unconscious"
+  :senses "darkvision 60 ft., passive Perception 10"
+  :languages "Auran"
+  :challenge 5
 
-:str 14
-:dex 20
-:con 14
-:int 6
-:wis 10
-:cha 6
+  :traits [{:name "Air Form" :description "The elemental can enter a hostile creature's space and stop there. It can move through a space as narrow as 1 inch wide without squeezing."}]
 
-:damage-resistances "lightning, thunder; bludgeoning, piercing, and slashing from nonmagical attacks"
-:damage-immunities "poison"
-:condition-immunities "exhaustion, grappled, paralyzed, petrified, poisoned, prone, restrained, unconscious"
-:senses "darkvision 60 ft., passive Perception 10"
-:languages "Auran"
-:challenge 5
+  :actions [{:name "Multiattack" :description "The elemental makes two slam attacks."}
+            {:name "Slam" :description "Melee Weapon Attack: +8 to hit, reach 5 ft., one target. Hit: 14 (2d8 + 5) bludgeoning damage."}
+            {:name "Whirlwind " :notes "Recharge 4–6" :description "Each creature in the elemental's space must make a DC 13 Strength saving throw. On a failure, a target takes 15 (3d8 + 2) bludgeoning damage and is flung up 20 feet away from the elemental in a random direction and knocked prone. If a thrown target strikes an object, such as a"}]}{
+  :name "Earth Elemental"
+  :size :large
+  :type :elemental
+  :alignment "neutral"
+  :armor-class 17
+  :armor-notes "natural armor"
+  :hit-points {:mean 126 :die-count 12 :die 10 :modifier 60}
+  :speed "30 ft., burrow 30 ft."
 
-:traits [{:name "Air Form" :description "The elemental can enter a hostile creature's space and stop there. It can move through a space as narrow as 1 inch wide without squeezing."}]
+  :str 20
+  :dex 8
+  :con 20
+  :int 5
+  :wis 10
+  :cha 5
 
-:actions [{:name "Multiattack" :description "The elemental makes two slam attacks."}
-{:name "Slam" :description "Melee Weapon Attack: +8 to hit, reach 5 ft., one target. Hit: 14 (2d8 + 5) bludgeoning damage."}
-{:name "Whirlwind " :notes "Recharge 4–6" :description "Each creature in the elemental's space must make a DC 13 Strength saving throw. On a failure, a target takes 15 (3d8 + 2) bludgeoning damage and is flung up 20 feet away from the elemental in a random direction and knocked prone. If a thrown target strikes an object, such as a"}]
-}{
-:name "Earth Elemental"
-:size :large
-:type :elemental
-:alignment "neutral"
-:armor-class 17
-:armor-notes "natural armor"
-:hit-points {:mean 126 :die-count 12 :die 10 :modifier 60}
-:speed "30 ft., burrow 30 ft."
+  :damage-immunities "poison"
+  :damage-vulnerabilities "thunder"
+  :damage-resistances "bludgeoning, piercing, and slashing from nonmagical attacks"
+  :condition-immunities "exhaustion, paralyzed, petrified, poisoned, unconscious"
+  :senses "darkvision 60 ft., tremorsense 60 ft., passive Perception 10"
+  :languages "Terran"
+  :challenge 5
 
-:str 20
-:dex 8
-:con 20
-:int 5
-:wis 10
-:cha 5
+  :traits [{:name "Earth Glide" :description "The elemental can burrow through nonmagical, unworked earth and stone. While doing so, the elemental doesn't disturb the material it moves through."}
+           {:name "Siege Monster" :description "The elemental deals double damage to objects and structures."}]
 
-:damage-immunities "poison"
-:damage-vulnerabilities "thunder"
-:damage-resistances "bludgeoning, piercing, and slashing from nonmagical attacks"
-:condition-immunities "exhaustion, paralyzed, petrified, poisoned, unconscious"
-:senses "darkvision 60 ft., tremorsense 60 ft., passive Perception 10"
-:languages "Terran"
-:challenge 5
+  :actions [{:name "Multiattack" :description "The elemental makes two slam attacks."}
+            {:name "Slam" :description "Melee Weapon Attack: +8 to hit, reach 10 ft., one target. Hit: 14 (2d8 + 5) bludgeoning damage."}]}{
+  :name "Fire Elemental"
+  :size :large
+  :type :elemental
+  :alignment "neutral"
+  :armor-class 13
+  :hit-points {:mean 102 :die-count 12 :die 10 :modifier 36}
+  :speed "50 ft."
 
-:traits [{:name "Earth Glide" :description "The elemental can burrow through nonmagical, unworked earth and stone. While doing so, the elemental doesn't disturb the material it moves through."}
-{:name "Siege Monster" :description "The elemental deals double damage to objects and structures."}]
+  :str 10
+  :dex 17
+  :con 16
+  :int 6
+  :wis 10
+  :cha 7
 
-:actions [{:name "Multiattack" :description "The elemental makes two slam attacks."}
-{:name "Slam" :description "Melee Weapon Attack: +8 to hit, reach 10 ft., one target. Hit: 14 (2d8 + 5) bludgeoning damage.
-"}]
+  :damage-resistances "bludgeoning, piercing, and slashing from nonmagical attacks"
+  :damage-immunities "fire, poison"
+  :condition-immunities "exhaustion, grappled, paralyzed, petrified, poisoned, prone, restrained, unconscious"
+  :senses "darkvision 60 ft., passive Perception 10"
+  :languages "Ignan"
+  :challenge 5
 
-}{
-:name "Fire Elemental"
-:size :large
-:type :elemental
-:alignment "neutral"
-:armor-class 13
-:hit-points {:mean 102 :die-count 12 :die 10 :modifier 36}
-:speed "50 ft."
+  :traits [{:name "Fire Form" :description "The elemental can move through a space as narrow as 1 inch wide without squeezing. A creature that touches the elemental or hits it with a melee attack while within 5 feet of it takes 5 (1d10) fire damage. In addition, the elemental can enter a hostile creature's space and stop there. The first time it enters a creature's space on a turn, that creature takes 5 (1d10) fire damage and catches fire; until someone takes an action to douse the fire, the creature takes 5 (1d10) fire damage at the start of each of its turns."}
+           {:name "Illumination" :description "The elemental sheds bright light in a 30- foot radius and dim light in an additional 30 feet."}
+           {:name "Water Susceptibility" :description "For every 5 feet the elemental moves in water, or for every gallon of water splashed on it, it takes 1 cold damage."}]
 
-:str 10
-:dex 17
-:con 16
-:int 6
-:wis 10
-:cha 7
+  :actions [{:name "Multiattack" :description "The elemental makes two touch attacks."}
+            {:name "Touch" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 10 (2d6 + 3) fire damage. If the target is a creature or a flammable object, it ignites. Until a creature takes an action to douse the fire, the target takes 5 (1d10) fire damage at the start of each of its turns."}]}{
+  :name "Water Elemental"
+  :size :large
+  :type :elemental
+  :alignment "neutral"
+  :armor-class 14
+  :armor-notes "natural armor"
+  :hit-points {:mean 114 :die-count 12 :die 10 :modifier 48}
+  :speed "30 ft., swim 90 ft."
 
-:damage-resistances "bludgeoning, piercing, and slashing from nonmagical attacks"
-:damage-immunities "fire, poison"
-:condition-immunities "exhaustion, grappled, paralyzed, petrified, poisoned, prone, restrained, unconscious"
-:senses "darkvision 60 ft., passive Perception 10"
-:languages "Ignan"
-:challenge 5
+  :str 18
+  :dex 14
+  :con 18
+  :int 5
+  :wis 10
+  :cha 8
 
-:traits [{:name "Fire Form" :description "The elemental can move through a space as narrow as 1 inch wide without squeezing. A creature that touches the elemental or hits it with a melee attack while within 5 feet of it takes 5 (1d10) fire damage. In addition, the elemental can enter a hostile creature's space and stop there. The first time it enters a creature's space on a turn, that creature takes 5 (1d10) fire damage and catches fire; until someone
-takes an action to douse the fire, the creature takes 5 (1d10) fire damage at the start of each of its turns."}
-{:name "Illumination" :description "The elemental sheds bright light in a 30- foot radius and dim light in an additional 30 feet."}
-{:name "Water Susceptibility" :description "For every 5 feet the elemental moves in water, or for every gallon of water splashed on it, it takes 1 cold damage."}]
+  :damage-resistances "acid; bludgeoning, piercing, and slashing from nonmagical attacks"
+  :damage-immunities "poison"
+  :condition-immunities "exhaustion, grappled, paralyzed, petrified, poisoned, prone, restrained, unconscious"
+  :senses "darkvision 60 ft., passive Perception 10"
+  :languages "Aquan"
+  :challenge 5
 
-:actions [{:name "Multiattack" :description "The elemental makes two touch attacks."}
-{:name "Touch" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 10 (2d6 + 3) fire damage. If the target is a creature or a flammable object, it ignites. Until a creature takes an action to douse the fire, the target takes 5 (1d10) fire damage at the start of each of its turns.
-"}]
+  :traits [{:name "Water Form" :description "The elemental can enter a hostile creature's space and stop there. It can move through a space as narrow as 1 inch wide without squeezing."}
+           {:name "Freeze" :description "If the elemental takes cold damage, it partially freezes; its speed is reduced by 20 feet until the end of its next turn."}]
 
-}{
-:name "Water Elemental"
-:size :large
-:type :elemental
-:alignment "neutral"
-:armor-class 14
-:armor-notes "natural armor"
-:hit-points {:mean 114 :die-count 12 :die 10 :modifier 48}
-:speed "30 ft., swim 90 ft."
+  :actions [{:name "Multiattack" :description "The elemental makes two slam attacks."}
+            {:name "Slam" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 13 (2d8 + 4) bludgeoning damage."}
+            {:name "Whelm" :notes "Recharge 4–6" :description "Each creature in the elemental's space must make a DC 15 Strength saving throw. On a failure, a target takes 13 (2d8 + 4) bludgeoning damage. If it is Large or smaller, it is also grappled (escape DC 14). Until this grapple ends, the target is restrained and unable to breathe unless it can breathe water. If the saving throw is successful, the target is pushed out of the elemental's space.
+The elemental can grapple one Large creature or up to two Medium or smaller creatures at one time. At the start of each of the elemental's turns, each target grappled by it takes 13 (2d8 + 4) bludgeoning damage. A creature within 5 feet of the elemental can pull a creature or object out of it by taking an action to make a DC 14 Strength and succeeding."}]}{
+  :name "Elf, Drow"
+  :size :medium
+  :type :humanoid
+  :subtypes #{:elf}
+  :alignment "neutral evil"
+  :armor-class 15
+  :armor-notes "(chain shirt)"
+  :hit-points {:mean 13 :die-count 3 :die 8}
+  :speed "30 ft."
 
-:str 18
-:dex 14
-:con 18
-:int 5
-:wis 10
-:cha 8
+  :str 10
+  :dex 14
+  :con 10
+  :int 11
+  :wis 11
+  :cha 12
 
-:damage-resistances "acid; bludgeoning, piercing, and slashing from nonmagical attacks"
-:damage-immunities "poison"
-:condition-immunities "exhaustion, grappled, paralyzed, petrified, poisoned, prone, restrained, unconscious"
-:senses "darkvision 60 ft., passive Perception 10"
-:languages "Aquan"
-:challenge 5
+  :skills {:perception 2, :stealth 4}
+  :senses "darkvision 120 ft., passive Perception 12"
+  :languages "Elvish, Undercommon"
+  :challenge (/ 1 4)
 
-:traits [{:name "Water Form" :description "The elemental can enter a hostile creature's space and stop there. It can move through a space as narrow as 1 inch wide without squeezing."}
-{:name "Freeze" :description "If the elemental takes cold damage, it partially freezes; its speed is reduced by 20 feet until the end of its next turn."}]
-
-:actions [{:name "Multiattack" :description "The elemental makes two slam attacks."}
-{:name "Slam" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 13 (2d8 + 4) bludgeoning damage."}
-{:name "Whelm" :notes "Recharge 4–6" :description "Each creature in the elemental's space must make a DC 15 Strength saving throw. On a failure, a target takes 13 (2d8 + 4) bludgeoning damage. If it is Large or smaller, it is also grappled (escape DC 14). Until this grapple ends, the target is restrained and unable to breathe unless it can breathe water. If the saving throw is successful, the target is pushed out of the elemental's space.
-The elemental can grapple one Large creature or up to two Medium or smaller creatures at one time. At the start of each of the elemental's turns, each target grappled by it takes 13 (2d8 + 4) bludgeoning damage. A creature within 5 feet of the elemental can pull a creature or object out of it by taking an action to make a DC 14 Strength and succeeding."}]
-
-}{
-:name "Elf, Drow"
-:size :medium
-:type :humanoid
-:subtypes #{:elf}
-:alignment "neutral evil"
-:armor-class 15
-:armor-notes "(chain shirt)"
-:hit-points {:mean 13 :die-count 3 :die 8}
-:speed "30 ft."
-
-:str 10
-:dex 14
-:con 10
-:int 11
-:wis 11
-:cha 12
-
-:skills {:perception 2, :stealth 4}
-:senses "darkvision 120 ft., passive Perception 12"
-:languages "Elvish, Undercommon"
-:challenge (/ 1 4)
-
-:traits [{:name "Fey Ancestry" :description "The drow has advantage on saving throws against being charmed, and magic can't put the drow to sleep."}
-{:name "Innate Spellcasting" :description "The drow's spellcasting ability is Charisma (spell save DC 11). It can innately cast the following spells, requiring no material components:
+  :traits [{:name "Fey Ancestry" :description "The drow has advantage on saving throws against being charmed, and magic can't put the drow to sleep."}
+           {:name "Innate Spellcasting" :description "The drow's spellcasting ability is Charisma (spell save DC 11). 
+It can innately cast the following spells, requiring no material components:
 At will: dancing lights
 1/day each: darkness, faerie fire"}
-{:name "Sunlight Sensitivity" :description "While in sunlight, the drow has disadvantage on attack rolls, as well as on Wisdom (Perception) checks that rely on sight."}]
+           {:name "Sunlight Sensitivity" :description "While in sunlight, the drow has disadvantage on attack rolls, as well as on Wisdom (Perception) checks that rely on sight."}]
 
-:actions [{:name "Shortsword" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) piercing damage."}
-{:name "Hand Crossbow" :description "Ranged Weapon Attack: +4 to hit, range 30/120 ft., one target. Hit: 5 (1d6 + 2) piercing
-damage, and the target must succeed on a DC 13 Constitution saving throw or be poisoned for 1 hour. If the saving throw fails by 5 or more, the target is also unconscious while poisoned in this way. The target wakes up if it takes damage or if another creature takes an action to shake it awake.
-"}]
+  :actions [{:name "Shortsword" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) piercing damage."}
+            {:name "Hand Crossbow" :description "Ranged Weapon Attack: +4 to hit, range 30/120 ft., one target. Hit: 5 (1d6 + 2) piercing damage, and the target must succeed on a DC 13 Constitution saving throw or be poisoned for 1 hour. If the saving throw fails by 5 or more, the target is also unconscious while poisoned in this way. The target wakes up if it takes damage or if another creature takes an action to shake it awake."}]}{
+  :name "Ettercap"
+  :size :medium
+  :type :monstrosity
+  :alignment "neutral evil"
+  :armor-class 13
+  :armor-notes "natural armor"
+  :hit-points {:mean 44 :die-count 8 :die 8 :modifier 8}
+  :speed "30 ft., climb 30 ft."
 
-}{
-:name "Ettercap"
-:size :medium
-:type :monstrosity
-:alignment "neutral evil"
-:armor-class 13
-:armor-notes "natural armor"
-:hit-points {:mean 44 :die-count 8 :die 8 :modifier 8}
-:speed "30 ft., climb 30 ft."
+  :str 14
+  :dex 15
+  :con 13
+  :int 7
+  :wis 12
+  :cha 8
 
-:str 14
-:dex 15
-:con 13
-:int 7
-:wis 12
-:cha 8
+  :skills {:perception 3, :stealth 4, :survival 3}
+  :senses "darkvision 60 ft., passive Perception 13"
+  :challenge 2
 
-:skills {:perception 3, :stealth 4, :survival 3}
-:senses "darkvision 60 ft., passive Perception 13"
-:challenge 2
+  :traits [{:name "Spider Climb" :description "The ettercap can climb difficult surfaces, including upside down on ceilings, without needing to make an ability check."}
+           {:name "Web Sense" :description "While in contact with a web, the ettercap knows the exact location of any other creature in contact with the same web."}
+           {:name "Web Walker" :description "The ettercap ignores movement restrictions caused by webbing."}]
 
-:traits [{:name "Spider Climb" :description "The ettercap can climb difficult surfaces, including upside down on ceilings, without needing to make an ability check."}
-{:name "Web Sense" :description "While in contact with a web, the ettercap knows the exact location of any other creature in contact with the same web."}
-{:name "Web Walker" :description "The ettercap ignores movement restrictions caused by webbing."}]
+  :actions [{:name "Multiattack" :description "The ettercap makes two attacks: one with its bite and one with its claws."}
+            {:name "Bite" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one creature. Hit: 6 (1d8 + 2) piercing damage plus 4 (1d8) poison damage. The target must succeed on a DC 11 Constitution saving throw or be poisoned for 1 minute. The creature can repeat the saving throw at the end of also ends if the webbing is destroyed. The webbing has AC 10, 5 hit points, vulnerability to fire damage, and immunity to bludgeoning, poison, and psychic damage."}
+            {:name "Claws" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 7 (2d4 + 2) slashing damage."}
+            {:name "Web " :notes "Recharge 5–6" :description "Ranged Weapon Attack: +4 to hit, range 30/60 ft., one Large or smaller creature. Hit: The creature is restrained by webbing. As an action, the restrained creature can make a DC 11 Strength check, escaping from the webbing on a success. The effect"}]}{
+  :name "Ettin"
+  :size :large
+  :type :giant
+  :alignment "chaotic evil"
+  :armor-class 12
+  :armor-notes "natural armor"
+  :hit-points {:mean 85 :die-count 10 :die 10 :modifier 30}
+  :speed "40 ft."
 
-:actions [{:name "Multiattack" :description "The ettercap makes two attacks: one with its bite and one with its claws."}
-{:name "Bite" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one creature. Hit: 6 (1d8 + 2) piercing damage plus 4 (1d8) poison damage. The target must succeed on a DC 11 Constitution saving throw or be poisoned for 1 minute. The creature can repeat the saving throw at the end of
-also ends if the webbing is destroyed. The webbing has AC 10, 5 hit points, vulnerability to fire damage, and immunity to bludgeoning, poison, and psychic damage.
-"}
-{:name "Claws" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 7 (2d4 + 2) slashing damage."}
-{:name "Web " :notes "Recharge 5–6" :description "Ranged Weapon Attack: +4 to hit, range 30/60 ft., one Large or smaller creature. Hit: The creature is restrained by webbing. As an action, the restrained creature can make a DC 11 Strength check, escaping from the webbing on a success. The effect"}]
+  :str 21
+  :dex 8
+  :con 17
+  :int 6
+  :wis 10
+  :cha 8
 
-}{
-:name "Ettin"
-:size :large
-:type :giant
-:alignment "chaotic evil"
-:armor-class 12
-:armor-notes "natural armor"
-:hit-points {:mean 85 :die-count 10 :die 10 :modifier 30}
-:speed "40 ft."
+  :skills {:perception 4}
+  :senses "darkvision 60 ft., passive Perception 14"
+  :languages "Giant, Orc"
+  :challenge 4
 
-:str 21
-:dex 8
-:con 17
-:int 6
-:wis 10
-:cha 8
+  :traits [{:name "Two Heads" :description "The ettin has advantage on Wisdom (Perception) checks and on saving throws against being blinded, charmed, deafened, frightened, stunned, and knocked unconscious."}
+           {:name "Wakeful" :description "When one of the ettin's heads is asleep, its other head is awake."}]
 
-:skills {:perception 4}
-:senses "darkvision 60 ft., passive Perception 14"
-:languages "Giant, Orc"
-:challenge 4
+  :actions [{:name "Multiattack" :description "The ettin makes two attacks: one with its battleaxe and one with its morningstar."}
+            {:name "Battleaxe" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 14 (2d8 + 5) slashing damage."}
+            {:name "Morningstar" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 14 (2d8 + 5) piercing damage."}]}{
+  :name "Shrieker"
+  :size :medium
+  :type :plant
+  :alignment "unaligned"
+  :armor-class 5
+  :hit-points {:mean 13 :die-count 3 :die 8}
+  :speed "0 ft."
 
-:traits [{:name "Two Heads" :description "The ettin has advantage on Wisdom (Perception) checks and on saving throws against being blinded, charmed, deafened, frightened, stunned, and knocked unconscious."}
-{:name "Wakeful" :description "When one of the ettin's heads is asleep, its other head is awake."}]
+  :str 1
+  :dex 1
+  :con 10
+  :int 1
+  :wis 3
+  :cha 1
 
-:actions [{:name "Multiattack" :description "The ettin makes two attacks: one with its battleaxe and one with its morningstar."}
-{:name "Battleaxe" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 14 (2d8 + 5) slashing damage."}
-{:name "Morningstar" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 14 (2d8 + 5) piercing damage.
-"}]
+  :condition-immunities "blinded, deafened, frightened"
+  :senses "blindsight 30 ft. (blind beyond this radius), passive Perception 6"
+  :challenge 0
 
-}{
-:name "Shrieker"
-:size :medium
-:type :plant
-:alignment "unaligned"
-:armor-class 5
-:hit-points {:mean 13 :die-count 3 :die 8}
-:speed "0 ft."
+  :traits [{:name "False Appearance" :description "While the shrieker remains motionless, it is indistinguishable from an ordinary fungus."}]
 
-:str 1
-:dex 1
-:con 10
-:int 1
-:wis 3
-:cha 1
+  :reactions [{:name "Shriek" :description "When bright light or a creature is within 30 feet of the shrieker, it emits a shriek audible within 300 feet of it. The shrieker continues to shriek until the disturbance moves out of range and for 1d4 of the shrieker's turns afterward."}]}{
+  :name "Violet Fungus"
+  :size :medium
+  :type :plant
+  :alignment "unaligned"
+  :armor-class 5
+  :hit-points {:mean 18 :die-count 4 :die 8}
+  :speed "5 ft."
 
-:condition-immunities "blinded, deafened, frightened"
-:senses "blindsight 30 ft. (blind beyond this radius), passive Perception 6"
-:challenge 0
+  :str 3
+  :dex 1
+  :con 10
+  :int 1
+  :wis 3
+  :cha 1
 
-:traits [{:name "False Appearance" :description "While the shrieker remains motionless, it is indistinguishable from an ordinary fungus."}]
+  :condition-immunities "blinded, deafened, frightened"
+  :senses "blindsight 30 ft. (blind beyond this radius), passive Perception 6"
+  :challenge (/ 1 4)
 
-:reactions [
-{:name "Shriek" :description "When bright light or a creature is within 30 feet of the shrieker, it emits a shriek audible within 300 feet of it. The shrieker continues to shriek until the disturbance moves out of range and for 1d4 of the shrieker's turns afterward.
-"}]
+  :traits [{:name "False Appearance" :description "While the violet fungus remains motionless, it is indistinguishable from an ordinary fungus."}]
 
-}{
-:name "Violet Fungus"
-:size :medium
-:type :plant
-:alignment "unaligned"
-:armor-class 5
-:hit-points {:mean 18 :die-count 4 :die 8}
-:speed "5 ft."
-
-:str 3
-:dex 1
-:con 10
-:int 1
-:wis 3
-:cha 1
-
-:condition-immunities "blinded, deafened, frightened"
-:senses "blindsight 30 ft. (blind beyond this radius), passive Perception 6"
-:challenge (/ 1 4)
-
-:traits [{:name "False Appearance" :description "While the violet fungus remains motionless, it is indistinguishable from an ordinary fungus."}]
-
-:actions [{:name "Multiattack" :description "The fungus makes 1d4 Rotting Touch attacks."}
-{:name "Rotting Touch" :description "Melee Weapon Attack: +2 to hit, reach 10ft., one creature. Hit: 4 (1d8) necrotic damage"}]
-}{
+  :actions [{:name "Multiattack" :description "The fungus makes 1d4 Rotting Touch attacks."}
+            {:name "Rotting Touch" :description "Melee Weapon Attack: +2 to hit, reach 10ft., one creature. Hit: 4 (1d8) necrotic damage"}]}{
 :name "Gargoyle"
 :size :medium
 :type :elemental
