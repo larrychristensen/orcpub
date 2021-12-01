@@ -1231,6 +1231,8 @@
                                                    (or modifier 0))))]
                                         (if mean (str " (" mean ")"))))))
      (spell-field "Speed" speed)
+     (if description
+       (str description))
      [:div.m-t-10.flex.justify-cont-s-a.m-b-10
       {:style max-width-300}
       (doall
@@ -1244,10 +1246,6 @@
         [:str :dex :con :int :wis :cha]))]
      (if (seq saving-throws)
        (spell-field "Saving Throws" (print-bonus-map saving-throws)))
-     (if description
-       [:div.m-t-20.m-b-20
-        [:div.i.f-w-b.f-s-15 "Description:"]
-        [:div (str description)]])        
      (if skills (spell-field "Skills" (print-bonus-map skills)))
      (if damage-vulnerabilities (spell-field "Damage Vulnerabilities" damage-vulnerabilities))
      (if damage-resistances (spell-field "Damage Resistances" damage-resistances))
