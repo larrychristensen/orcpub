@@ -1204,7 +1204,7 @@
   {:max-width "300px"})
 
 
-(defn monster-component [{:keys [name size type subtypes hit-points alignment armor-class armor-notes speed saving-throws skills damage-vulnerabilities damage-resistances damage-immunities condition-immunities senses languages challenge traits actions legendary-actions source page] :as monster}]
+(defn monster-component [{:keys [name description size type subtypes hit-points alignment armor-class armor-notes speed saving-throws skills damage-vulnerabilities damage-resistances damage-immunities condition-immunities senses languages challenge traits actions legendary-actions source page] :as monster}]
   (let [traits-by-type (group-by :type traits)
         traits (traits-by-type nil)
         actions (concat actions (traits-by-type :action))
@@ -1244,6 +1244,10 @@
         [:str :dex :con :int :wis :cha]))]
      (if (seq saving-throws)
        (spell-field "Saving Throws" (print-bonus-map saving-throws)))
+     (if description
+       [:div.m-t-20.m-b-20
+        [:div.i.f-w-b.f-s-15 "Description:"]
+        [:div (str description)]])        
      (if skills (spell-field "Skills" (print-bonus-map skills)))
      (if damage-vulnerabilities (spell-field "Damage Vulnerabilities" damage-vulnerabilities))
      (if damage-resistances (spell-field "Damage Resistances" damage-resistances))
@@ -1276,7 +1280,7 @@
           (map-indexed
            (fn [i {:keys [name notes description]}]
              ^{:key i}
-             [:div.m-t-10.wsp-prw (spell-field (str name notes) description)])
+             [:div.m-t-10.wsp-prw (spell-field (str name " " notes) description)])
            actions))]])
      (if legendary-actions
        [:div.m-t-20
@@ -1289,7 +1293,7 @@
             (map-indexed
              (fn [i {:keys [name notes description]}]
                ^{:key i}
-               [:div.m-t-10 (spell-field (str name notes) description)])
+               [:div.m-t-10 (spell-field (str name " " notes) description)])
              (:actions legendary-actions)))])])]))
 
 (defn monster-result [monster]
