@@ -2492,7 +2492,7 @@
 (defn add-mod-total-levels-prereq [lvl cls modifier]
   (if (sequential? modifier)
     (map
-     add-mod-total-levels-prereq
+     add-mod-total-levels-prereq lvl cls
      modifier)
     (update
      modifier
