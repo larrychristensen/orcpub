@@ -1204,7 +1204,7 @@
   {:max-width "300px"})
 
 
-(defn monster-component [{:keys [name size type subtypes hit-points alignment armor-class armor-notes speed saving-throws skills damage-vulnerabilities damage-resistances damage-immunities condition-immunities senses languages challenge traits actions legendary-actions source page] :as monster}]
+(defn monster-component [{:keys [name description size type subtypes hit-points alignment armor-class armor-notes speed saving-throws skills damage-vulnerabilities damage-resistances damage-immunities condition-immunities senses languages challenge traits actions legendary-actions source page] :as monster}]
   (let [traits-by-type (group-by :type traits)
         traits (traits-by-type nil)
         actions (concat actions (traits-by-type :action))
@@ -1274,9 +1274,9 @@
         [:div
          (doall
           (map-indexed
-           (fn [i {:keys [name description]}]
+           (fn [i {:keys [name notes description]}]
              ^{:key i}
-             [:div.m-t-10.wsp-prw (spell-field name description)])
+             [:div.m-t-10.wsp-prw (spell-field (str name " " notes) description)])
            actions))]])
      (if legendary-actions
        [:div.m-t-20
@@ -1287,10 +1287,12 @@
           [:div
            (doall
             (map-indexed
-             (fn [i {:keys [name description]}]
+             (fn [i {:keys [name notes description]}]
                ^{:key i}
-               [:div.m-t-10 (spell-field name description)])
-             (:actions legendary-actions)))])])]))
+               [:div.m-t-10 (spell-field (str name " " notes) description)])
+             (:actions legendary-actions)))])])
+     (if description
+       [:div.m-t-10 (str description)])]))
 
 (defn monster-result [monster]
   [:div.white
