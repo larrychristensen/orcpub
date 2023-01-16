@@ -32,3 +32,6 @@ env.sh
 *.crt
 *.key
 deploy/homebrew/*
+
+# As created by some LSP-protocol tooling, e.g. nvim-lsp
+.lsp
