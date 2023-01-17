@@ -15,7 +15,12 @@
   :repositories [["apache" "http://repository.apache.org/snapshots/"]
                  ["my.datomic.com" {:url "https://my.datomic.com/repo"
                                     :username [:gpg :env]
-                                    :password [:gpg :env]}]]
+                                    :password [:gpg :env]}]
+                 ; This allows us to seamlessly load jars from local disk.
+                 ["local" {:url "file:lib"
+                           :checksum :ignore
+                           :releases {:checksum :ignore}}]
+                 ]
   :mirrors {"apache" {:url "https://repository.apache.org/snapshots/"}}
 
   :dependencies [[org.clojure/clojure "1.10.0"]
@@ -66,6 +71,7 @@
 
   :plugins [[lein-figwheel "0.5.19"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
+            [lein-localrepo "0.5.4"]
             [lein-garden "0.3.0"]
             [lein-environ "1.1.0"]
             [lein-cljfmt "0.6.8"]

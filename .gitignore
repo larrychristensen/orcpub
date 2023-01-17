@@ -18,6 +18,7 @@ pom.xml
 .lein-repl-history
 .lein-plugins/
 .lein-*
+.lsp
 .idea
 orcpub.iml
 profiles.clj
