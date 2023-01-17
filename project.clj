@@ -16,6 +16,7 @@
                  ["my.datomic.com" {:url "https://my.datomic.com/repo"
                                     :username [:gpg :env]
                                     :password [:gpg :env]}]
+                 ; This allows us to seamlessly load jars from local disk.
                  ["local" {:url "file:lib"
                            :checksum :ignore
                            :releases {:checksum :ignore}}]
