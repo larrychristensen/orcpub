@@ -12,6 +12,7 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
+          distribution: 'zulu'
           java-version: 8.0.292
       - name: Load pdfbox from /lib
         run: mkdir ~/.m2/repository/ && mkdir ~/.m2/repository/org/ && cp -rv ./lib/* ~/.m2/repository
