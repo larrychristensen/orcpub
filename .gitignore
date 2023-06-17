@@ -18,6 +18,7 @@ pom.xml
 .lein-repl-history
 .lein-plugins/
 .lein-*
+.lsp
 .idea
 orcpub.iml
 profiles.clj
@@ -31,3 +32,6 @@ env.sh
 *.crt
 *.key
 deploy/homebrew/*
+
+# As created by some LSP-protocol tooling, e.g. nvim-lsp
+.lsp
