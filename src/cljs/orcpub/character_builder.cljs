@@ -1521,23 +1521,23 @@
     :ui-fns (letfn [(select-selection [v] (select-keys v [:selection]))]
               [{:key :weapons
                 :hide-homebrew? true
-                :ui-fn (fn [v] [inventory-selector [::equip5e/weapons-map] 60 (select-selection v)])}
+                :ui-fn (fn [v] [inventory-selector [::equip5e/weapons-map] 70 (select-selection v)])}
                {:key :magic-weapons
                 :hide-homebrew? true
-                :ui-fn (fn [v] [inventory-selector [::mi5e/magic-weapon-map] 60 (select-selection v)])}
+                :ui-fn (fn [v] [inventory-selector [::mi5e/magic-weapon-map] 70 (select-selection v)])}
                {:key :armor
                 :hide-homebrew? true
-                :ui-fn (fn [v] [inventory-selector [::equip5e/armor-map] 60 (select-selection v)])}
+                :ui-fn (fn [v] [inventory-selector [::equip5e/armor-map] 70 (select-selection v)])}
                {:key :magic-armor
                 :hide-homebrew? true
-                :ui-fn (fn [v] [inventory-selector [::mi5e/magic-armor-map] 60 (select-selection v)])}
+                :ui-fn (fn [v] [inventory-selector [::mi5e/magic-armor-map] 70 (select-selection v)])}
                {:key :equipment
                 :hide-homebrew? true
                 :ui-fn (fn [v]
-                         [inventory-selector [::equip5e/equipment-map] 60 (select-selection v) ::char5e/custom-equipment])}
+                         [inventory-selector [::equip5e/equipment-map] 70 (select-selection v) ::char5e/custom-equipment])}
                {:key :other-magic-items
                 :hide-homebrew? true
-                :ui-fn (fn [v] [inventory-selector [::mi5e/other-magic-items-map] 60 (select-selection v)])}
+                :ui-fn (fn [v] [inventory-selector [::mi5e/other-magic-items-map] 70 (select-selection v)])}
                {:key :treasure
                 :hide-homebrew? true
                 :ui-fn (fn [v] [inventory-selector [::equip5e/treasure-map] 100 (select-selection v) ::char5e/custom-treasure])}])}])
