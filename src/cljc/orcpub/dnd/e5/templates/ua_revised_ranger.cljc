@@ -7,7 +7,7 @@
             [orcpub.template :as t]
             [orcpub.common :as common]
             [clojure.string :as s]
-            [re-frame.core :refer [subscribe]]))
+            #_[re-frame.core :refer [subscribe]]))
 
 #_(defn favored-enemy-selection [name types]
   (t/selection-cfg

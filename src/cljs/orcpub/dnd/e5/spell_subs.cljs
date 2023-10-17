@@ -1,5 +1,5 @@
 (ns orcpub.dnd.e5.spell-subs
-  (:require [re-frame.core :refer [reg-sub reg-sub-raw dispatch subscribe]]
+  (:require [re-frame.core :refer [reg-sub]]
             [orcpub.common :as common]
             [orcpub.template :as t]
             [orcpub.modifiers :as mod]
@@ -29,9 +29,7 @@
             [orcpub.dnd.e5.template-base :as t-base]
             [reagent.ratom :as ra]
             [clojure.string :as s]
-            [cljs-http.client :as http]
-            [cljs.core.async :refer [<!]])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
+            [cljs-http.client :as http]))
 
 (reg-sub
  ::e5/plugins
@@ -69,19 +67,19 @@
    (map
     (fn [background]
       (assoc background :edit-event [::bg5e/edit-background background]))
-    (apply concat (map (comp vals ::e5/backgrounds) plugins)))))
+    (mapcat (comp vals ::e5/backgrounds) plugins))))
 
 (reg-sub
  ::langs5e/plugin-languages
  :<- [::e5/plugin-vals]
  (fn [plugins _]
-   (apply concat (map (comp vals ::e5/languages) plugins))))
+   (mapcat (comp vals ::e5/languages) plugins)))
 
 (reg-sub
  ::selections5e/plugin-selections
  :<- [::e5/plugin-vals]
  (fn [plugins _]
-   (apply concat (map (comp vals ::e5/selections) plugins))))
+   (mapcat (comp vals ::e5/selections) plugins)))
 
 (reg-sub
  ::selections5e/selection-map
@@ -113,7 +111,7 @@
                                              (:key race))
                      (spell-modifiers race (:name race)))
              :edit-event [::races5e/edit-race race]))
-    (apply concat (map (comp vals ::e5/races) plugins)))))
+    (mapcat (comp vals ::e5/races) plugins))))
 
 (reg-sub
  ::races5e/plugin-subraces
@@ -126,7 +124,7 @@
                                                         (:key subrace))
                                 (spell-modifiers subrace (:name subrace)))
              :edit-event [::races5e/edit-subrace subrace]))
-    (apply concat (map (comp vals ::e5/subraces) plugins)))))
+    (mapcat (comp vals ::e5/subraces) plugins))))
 
 (defn level-modifier [class-key {:keys [type value]}]
   (case type
@@ -300,7 +298,7 @@
    level-specs))
 
 (defn to-class-level [spell-level]
-  (- (* 2 spell-level) 1))
+  (dec (* 2 spell-level)))
 
 (defn level-selection [class-key selection-map {:keys [type num]}]
   (let [{:keys [name options]} (selection-map type)]
@@ -407,7 +405,7 @@
                                                   (:key subclass))
                :levels levels
                :edit-event [::classes5e/edit-subclass subclass])))
-    (apply concat (map (comp vals ::e5/subclasses) plugins)))))
+    (mapcat (comp vals ::e5/subclasses) plugins))))
 
 (reg-sub
  ::classes5e/plugin-classes
@@ -423,19 +421,25 @@
                :modifiers (opt5e/plugin-modifiers (:props class)
                                                   (:key class))
                :levels levels)))
-    (apply concat (map (comp vals ::e5/classes) plugins)))))
+    (mapcat (comp vals ::e5/classes) plugins))))
 
 (reg-sub
  ::feats5e/plugin-feats
  :<- [::e5/plugin-vals]
  (fn [plugins _]
-   (apply concat (map (comp vals ::e5/feats) plugins))))
+   (mapcat (comp vals ::e5/feats) plugins)))
 
 (reg-sub
  ::classes5e/plugin-invocations
  :<- [::e5/plugin-vals]
  (fn [plugins _]
-   (apply concat (map (comp vals ::e5/invocations) plugins))))
+   (mapcat (comp vals ::e5/invocations) plugins)))
+
+(reg-sub
+ ::classes5e/plugin-boons
+ :<- [::e5/plugin-vals]
+ (fn [plugins _]
+   (mapcat #(-> % ::e5/boons vals) plugins)))
 
 (def acolyte-bg
   {:name "Acolyte"
@@ -854,7 +858,7 @@
         tiefling-option-cfg]))))))
 
 
-(defn base-class-options [spell-lists spells-map plugin-subclasses-map language-map weapons-map invocations]
+(defn base-class-options [spell-lists spells-map plugin-subclasses-map language-map weapons-map invocations boons]
   [(classes5e/barbarian-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
    (classes5e/bard-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
    (classes5e/cleric-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
@@ -865,7 +869,7 @@
    (classes5e/ranger-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
    (classes5e/rogue-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
    (classes5e/sorcerer-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
-   (classes5e/warlock-option spell-lists spells-map plugin-subclasses-map language-map  weapons-map invocations)
+   (classes5e/warlock-option spell-lists spells-map plugin-subclasses-map language-map  weapons-map invocations boons)
    (classes5e/wizard-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)])
 
 (reg-sub
@@ -876,8 +880,9 @@
  :<- [::langs5e/language-map]
  :<- [::classes5e/plugin-classes]
  :<- [::classes5e/invocations]
+ :<- [::classes5e/boons]
  :<- [::mi5e/custom-and-standard-weapons-map]
- (fn [[spell-lists spells-map plugin-subclasses-map language-map plugin-classes invocations weapons-map] _]
+ (fn [[spell-lists spells-map plugin-subclasses-map language-map plugin-classes invocations boons weapons-map] _]
    (vec
     (into
      (sorted-set-by #(compare (::t/key %1) (::t/key %2)))
@@ -893,7 +898,7 @@
            weapons-map
            plugin-class))
         plugin-classes))
-      (base-class-options spell-lists spells-map plugin-subclasses-map language-map weapons-map invocations))))))
+      (base-class-options spell-lists spells-map plugin-subclasses-map language-map weapons-map invocations boons))))))
 
 (reg-sub
  ::classes5e/class-map
@@ -938,13 +943,22 @@
     plugin-invocations)))
 
 (reg-sub
+ ::classes5e/boons
+ :<- [::classes5e/plugin-boons]
+ (fn [plugin-boons]
+   (map
+    (fn [boon]
+      (assoc boon :edit-event [::classes5e/edit-boon boon]))
+    plugin-boons)))
+
+(reg-sub
  ::spells5e/plugin-spells
  :<- [::e5/plugin-vals]
  (fn [plugins _]
    (map
     (fn [spell]
       (assoc spell :edit-event [::spells5e/edit-spell spell]))
-    (apply concat (map (comp vals ::e5/spells) plugins)))))
+    (mapcat (comp vals ::e5/spells) plugins))))
 
 (reg-sub
  ::spells5e/plugin-spells-map
@@ -956,13 +970,13 @@
  ::monsters5e/plugin-monsters
  :<- [::e5/plugin-vals]
  (fn [plugins _]
-   (apply concat (map (comp vals ::e5/monsters) plugins))))
+   (mapcat (comp vals ::e5/monsters) plugins)))
 
 (reg-sub
  ::encounters5e/plugin-encounters
  :<- [::e5/plugin-vals]
  (fn [plugins _]
-   (apply concat (map (comp vals ::e5/encounters) plugins))))
+   (mapcat (comp vals ::e5/encounters) plugins)))
 
 (defn true-types [m]
   (sequence
@@ -979,7 +993,7 @@
                 condition-immunity
                 language]} props
         filtered-languages (true-types language)
-        filtered-resistances (true-types damage-vulnerability)
+        filtered-resistances (true-types damage-resistance)
         filtered-damage-immunities (true-types damage-immunity)
         filtered-vulnerabilities (true-types damage-vulnerability)
         filtered-condition-immunities (true-types condition-immunity)]
@@ -1036,13 +1050,46 @@
 (reg-sub
  ::monsters5e/sorted-monsters
  :<- [::monsters5e/monsters]
- (fn [monsters]
-   (sort-by :name monsters)))
+ :<- [::char5e/monster-sort-criteria]
+ :<- [::char5e/monster-sort-direction]
+ (fn [[monsters sort-criteria sort-direction]]
+   (let [comparator (if (= sort-direction "asc") compare #(compare %2 %1))]
+     (case sort-criteria
+       "name" (sort-by :name comparator monsters)
+       "cr" (sort-by :challenge comparator monsters)))))
+
+(defn all-subtypes-removed? [subtypes hidden-subtypes]
+  (and (seq subtypes)
+       (seq hidden-subtypes)
+       (->> subtypes
+            (remove
+              hidden-subtypes)
+            empty?)))
+
+(defn filter-monsters [monsters filter-text monster-filters]
+  (let [lower-case-filter-text (s/lower-case filter-text)]
+    (filter
+      (fn [{:keys [name type subtypes size]}]
+        (and (or (< (count filter-text) 3)
+                 (s/includes? (s/lower-case name) lower-case-filter-text))
+             (not (or (-> monster-filters :size size)
+                      (-> monster-filters :type type)
+                      (all-subtypes-removed? subtypes (:subtype monster-filters))))))
+      monsters)))
 
 (reg-sub
  ::monsters5e/filtered-monsters
- (fn [db]
-   (::monsters5e/filtered-monsters db)))
+ :<- [::monsters5e/sorted-monsters]
+ :<- [::char5e/monster-text-filter]
+ :<- [::char5e/monster-filters]
+ (fn [[sorted-monsters filter-text monster-filters]]
+   (filter-monsters sorted-monsters (or filter-text "") monster-filters)))
+
+(reg-sub
+  ::monsters5e/filtered-monster-names
+  :<- [::monsters5e/filtered-monsters]
+  (fn [filtered-monsters]
+    (set (map :name filtered-monsters))))
 
 (reg-sub
  ::spells5e/base-spells
@@ -1184,6 +1231,11 @@
    (::classes5e/invocation-builder-item db)))
 
 (reg-sub
+ ::classes5e/boon-builder-item
+ (fn [db _]
+   (::classes5e/boon-builder-item db)))
+
+(reg-sub
  ::classes5e/builder-item
  (fn [db _]
    (::classes5e/builder-item db)))
@@ -1227,7 +1279,12 @@
 (reg-sub
  ::monsters5e/challenge-ratings
  (fn [db _]
-   (into (sorted-set) (map :challenge) monsters5e/monsters)))
+   (into (sorted-set)
+         (keep
+          (fn [pair]
+            (when (pos? (second pair))
+            (first pair)))
+            monsters5e/challenge-ratings))))
 
 (reg-sub
  ::classes5e/has-prof?

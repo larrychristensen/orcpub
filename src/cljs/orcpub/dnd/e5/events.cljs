@@ -38,6 +38,7 @@
                                       background->local-store
                                       language->local-store
                                       invocation->local-store
+                                      boon->local-store
                                       selection->local-store
                                       feat->local-store
                                       race->local-store
@@ -54,6 +55,7 @@
                                       default-background
                                       default-language
                                       default-invocation
+                                      default-boon
                                       default-selection
                                       default-feat
                                       default-race
@@ -61,8 +63,8 @@
                                       default-class
                                       default-subclass]]
             [orcpub.dnd.e5.autosave-fx]
-            [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
-                                   after debug dispatch dispatch-sync subscribe ->interceptor]]
+            [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path
+                                   after dispatch subscribe ->interceptor]]
             [cljs.spec.alpha :as spec]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<! timeout]]
@@ -73,7 +75,8 @@
             [orcpub.route-map :as routes]
             [orcpub.errors :as errors]
             [clojure.set :as sets]
-            [cljsjs.filesaverjs])
+            [cljsjs.filesaverjs]
+            [clojure.pprint :as pprint])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn check-and-throw
@@ -105,6 +108,8 @@
 (def language->local-store-interceptor (after language->local-store))
 
 (def invocation->local-store-interceptor (after invocation->local-store))
+
+(def boon->local-store-interceptor (after boon->local-store))
 
 (def selection->local-store-interceptor (after selection->local-store))
 
@@ -154,6 +159,9 @@
 
 (def invocation-interceptors [(path ::class5e/invocation-builder-item)
                               invocation->local-store-interceptor])
+
+(def boon-interceptors [(path ::class5e/boon-builder-item)
+                              boon->local-store-interceptor])
 
 (def selection-interceptors [(path ::selections5e/builder-item)
                             selection->local-store-interceptor])
@@ -352,11 +360,30 @@
         race (char5e/race built-char)
         subrace (char5e/subrace built-char)
         character-name (char5e/character-name built-char)
-        image-url (char5e/image-url built-char)]
+        image-url (char5e/image-url built-char)
+        age (char5e/age built-char)
+        sex (char5e/sex built-char)
+        height (char5e/height built-char)
+        weight (char5e/weight built-char)
+        hair (char5e/hair built-char)
+        eyes (char5e/eyes built-char)
+        skin (char5e/skin built-char)
+        ;alignment (char5e/get-prop built-char ::alignment)  ;This is not available? 
+        ;background (char5e/get-prop built-char ::background)  ;This is not available? 
+        ]
     (cond-> {::char5e/character-name (or character-name "")}
       image-url (assoc ::char5e/image-url image-url)
       race (assoc ::char5e/race-name race)
       subrace (assoc ::char5e/subrace-name subrace)
+      age (assoc ::char5e/age age)
+      sex (assoc ::char5e/sex sex)
+      height (assoc ::char5e/height height)
+      weight (assoc ::char5e/weight weight)
+      hair (assoc ::char5e/hair hair)
+      eyes (assoc ::char5e/eyes eyes)
+      skin (assoc ::char5e/skin skin)
+      ;alignment (assoc ::char5e/alignment alignment) ;This is not available? 
+      ;background (assoc ::char5e/background background) ;This is not available? 
       (seq classes) (assoc ::char5e/classes (map
                                              (fn [cls-nm]
                                                (let [{:keys [class-name subclass-name class-level]}
@@ -503,6 +530,14 @@
  "You must specify 'Name', 'Option Source Name'")
 
 (reg-save-homebrew
+ "Boon"
+ ::class5e/save-boon
+ ::class5e/boon-builder-item
+ ::class5e/homebrew-boon
+ ::e5/boons
+ "You must specify 'Name', 'Option Source Name'")
+
+(reg-save-homebrew
  "Selection"
  ::selections5e/save-selection
  ::selections5e/builder-item
@@ -581,6 +616,10 @@
  ::e5/invocations)
 
 (reg-delete-homebrew
+ ::class5e/delete-boon
+ ::e5/boons)
+
+(reg-delete-homebrew
  ::selections5e/delete-selection
  ::e5/selections)
 
@@ -620,9 +659,20 @@
     :http {:method :post
            :headers (authorization-headers db)
            :url (url-for-route routes/dnd-e5-char-parties-route)
-           :transit-params {::party5e/name "New Party"
+           :transit-params {::party5e/name "A New Party"
                             ::party5e/character-ids character-ids}
            :on-success [::party5e/make-party-success]}}))
+
+(reg-event-fx
+  ::party5e/make-empty-party
+  (fn [{:keys [db]} [_]]
+    {:dispatch [:set-loading true]
+     :http {:method :post
+            :headers (authorization-headers db)
+            :url (url-for-route routes/dnd-e5-char-parties-route)
+            :transit-params {::party5e/name "A New Party"}
+            :on-success (.reload js/window.location true)
+            }}))
 
 (reg-event-fx
  ::party5e/rename-party
@@ -1103,7 +1153,7 @@
    character
    (entity/get-entity-path built-template character path)
    {::entity/key :average
-    ::entity/value (dice/die-mean (-> levels class-kw :hit-die))}))
+    ::entity/value (dice/die-mean-round-up (-> levels class-kw :hit-die))}))
 
 (reg-event-db
  :set-hit-points-to-average
@@ -1301,7 +1351,7 @@
           (s/split cookie "; "))))
 
 (defn show-generic-error []
-  [:show-error-message [:div "There was an error, please refresh your browser and try again. If the problem persists please contact " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com."]]])
+  [:show-error-message [:div "There was an error, please refresh your browser and try again."]])
 
 (reg-fx
  :http
@@ -1338,7 +1388,7 @@
                         routes/dnd-e5-char-builder-route)]}))
 
 (defn show-old-account-message []
-  [:show-login-message [:div  "There is no account for the email or username, please double-check it. Usernames and passwords are case sensitive, email addresses are not. You can also try to " [:a {:href (routes/path-for routes/register-page-route)} "register"] "." [:div.f-w-n.i.m-t-10 "Accounts from the old OrcPub have not been ported over yet, but you can create a new account in the mean time and we will link it with your old account as soon as possible if you use the same email address."]]])
+  [:show-login-message [:div  "There is no account for the email or username, please double-check it. Usernames and passwords are case sensitive, email addresses are not. You can also try to " [:a {:href (routes/path-for routes/register-page-route)} "register"] "." ]])
 
 (defn dispatch-login-failure [message]
   {:dispatch-n [[:clear-login]
@@ -1358,60 +1408,12 @@
        (= error-code errors/unverified) {:db (assoc db :temp-email (-> response :body :email))
                                          :dispatch [:route routes/verify-sent-route]}
        (= error-code errors/unverified-expired) {:dispatch [:route routes/verify-failed-route]}
-       :else (dispatch-login-failure [:div "An error occurred. If the problem persists please email " [:a {:href "mailto:redorc@orcpub.com" :target :blank} "redorc@orcpub.com"]])))))
-
-(defn fb []
-  js/FB)
-
-(defn get-fb-user [callback]
-  (if js/FB
-    (.api js/FB "/me?fields=email" callback)))
-
-(defn fb-init []
-  (try
-    ((goog.object.get js/window "fbAsyncInit"))
-    (catch :default e (prn "E" e))))
-
-(defn fb-login-callback [response]
-  (if (= "connected" (.-status response))
-    (do (dispatch [:hide-login-message])
-        (go (let [path (routes/path-for routes/fb-login-route)
-                  url (backend-url path)
-                  {:keys [status] :as response} (<! (http/post url
-                                                     {:json-params (js->clj response)}))]
-              (case status
-                200 (dispatch [:login-success true response])
-                401 (dispatch [:show-login-message "You must allow OrcPub to view your email address so we can create your account. We will not send you emails unless you later give us permission to. In Facebook, please go to 'Settings' > 'Apps', delete 'orcpub', and try again."])
-                nil))))))
-
-(reg-event-fx
- :init-fb
- (fn [_ _]
-   (fb-init)))
-
-(reg-event-db
- :set-fb-logged-in
- (fn [db [_ logged-in?]]
-   (assoc db :fb-logged-in? logged-in?)))
-
-(reg-event-fx
- :fb-logout
- (fn [{:keys [db]} _]
-   (let [facebook js/FB]
-     (if facebook
-       (try
-         (do
-           (prn "FB LOGOUT")
-           (.logout facebook (fn [])))
-         (catch js/Error e (prn "LOGOUT ERROR" e)))))
-   {:db (assoc db :fb-logged-in? false)}))
+       :else (dispatch-login-failure [:div "A login error occurred."])))))
 
 (reg-event-fx
  :logout
  (fn [cofx [_ response]]
-   {:dispatch-n [[:clear-login]
-                 [:fb-logout]
-                 [:set-fb-logged-in false]]}))
+   {:dispatch-n [[:clear-login]]}))
 
 (def login-routes
   #{routes/login-page-route
@@ -1689,6 +1691,11 @@
  routes/dnd-e5-invocation-builder-page-route)
 
 (reg-edit-homebrew
+ ::class5e/edit-boon
+ ::class5e/set-boon
+ routes/dnd-e5-boon-builder-page-route)
+
+(reg-edit-homebrew
  ::selections5e/edit-selection
  ::selections5e/set-selection
  routes/dnd-e5-selection-builder-page-route)
@@ -1763,6 +1770,16 @@
           :message-type :success)))
 
 (reg-event-db
+ :show-message-2
+; Display msg with out auto closing the msg.
+ (fn [db [_ message]]
+   (prn message)
+   (assoc db
+          :message-shown? true
+          :message message
+          :message-type :success)))
+
+(reg-event-db
  :show-warning-message
  (fn [db [_ message ttl]]
    (go (<! (timeout (or ttl 5000)))
@@ -1827,29 +1844,6 @@
   (let [result (sets/difference subtypes hidden-subtypes)]
     result))
 
-(defn all-subtypes-removed? [subtypes hidden-subtypes]
-  (and (seq subtypes)
-       (seq hidden-subtypes)
-       (->> subtypes
-            (remove
-             hidden-subtypes)
-            empty?)))
-
-(defn filter-monsters [filter-text monster-filters]
-  (let [pattern (if filter-text
-                  (re-pattern (str ".*" (s/lower-case filter-text) ".*")))]
-    (sort-by
-     :name
-     (sequence
-      (filter
-       (fn [{:keys [name type subtypes size]}]
-         (and (or (s/blank? filter-text)
-                  (re-matches pattern (s/lower-case name)))
-              (not (or (-> monster-filters :size size)
-                       (-> monster-filters :type type)
-                       (all-subtypes-removed? subtypes (:subtype monster-filters)))))))
-      @(subscribe [::monsters/sorted-monsters])))))
-
 (defn filter-by-name-xform [filter-text name-key]
   (let [pattern (re-pattern (str ".*" (s/lower-case filter-text) ".*"))]
     (filter
@@ -1870,35 +1864,35 @@
   (let [search-text (s/lower-case text)
         dice-result (dice/dice-roll-text search-text)
         kw (if search-text (common/name-to-kw search-text))
-        name-result (name-result search-text)]
-    (let [top-result (cond
-                       dice-result {:type :dice-roll
-                                    :result dice-result}
-                       (spells/spell-map kw) {:type :spell
-                                              :result (spells/spell-map kw)}
-                       (monsters/monster-map kw) {:type :monster
-                                                  :result (monsters/monster-map kw)}
-                       (mi/magic-item-map kw) {:type :magic-item
-                                                        :result (mi/magic-item-map kw)}
-                       (= "tavern name" search-text) {:type :tavern-name
-                                                      :result (char-rand5e/random-tavern-name)}
-                       name-result name-result
-                       :else nil)
-          filter-xform (filter-by-name-xform search-text :name)
-          top-spells (if (>= (count text) 3)
+        name-result (name-result search-text)
+        top-result (cond
+                     dice-result {:type :dice-roll
+                                  :result dice-result}
+                     (spells/spell-map kw) {:type :spell
+                                            :result (spells/spell-map kw)}
+                     (monsters/monster-map kw) {:type :monster
+                                                :result (monsters/monster-map kw)}
+                     (mi/magic-item-map kw) {:type :magic-item
+                                             :result (mi/magic-item-map kw)}
+                     (= "tavern name" search-text) {:type :tavern-name
+                                                    :result (char-rand5e/random-tavern-name)}
+                     name-result name-result
+                     :else nil)
+        filter-xform (filter-by-name-xform search-text :name)
+        top-spells (if (>= (count text) 3)
+                     (sequence
+                      filter-xform
+                      spells/spells))
+        top-monsters (if (>= (count text) 3)
                        (sequence
                         filter-xform
-                        spells/spells))
-          top-monsters (if (>= (count text) 3)
-                         (sequence
-                          filter-xform
-                          monsters/monsters))]
-      (cond-> {}
-        top-result (assoc :top-result top-result)
-        (seq top-spells) (update :results conj {:type :spell
-                                                :results top-spells})
-        (seq top-monsters) (update :results conj {:type :monster
-                                                  :results top-monsters})))))
+                        monsters/monsters))]
+    (cond-> {}
+      top-result (assoc :top-result top-result)
+      (seq top-spells) (update :results conj {:type :spell
+                                              :results top-spells})
+      (seq top-monsters) (update :results conj {:type :monster
+                                                :results top-monsters}))))
 
 
 (reg-event-db
@@ -1940,13 +1934,15 @@
    (assoc db ::char5e/builder-tab tab)))
 
 (reg-event-db
+  ::char5e/sort-monsters
+  (fn [db [_ sort-criteria sort-direction]]
+    (assoc db ::char5e/monster-sort-criteria sort-criteria
+              ::char5e/monster-sort-direction sort-direction)))
+
+(reg-event-db
  ::char5e/filter-monsters
  (fn [db [_ filter-text]]
-   (assoc db
-          ::char5e/monster-text-filter filter-text
-          ::monsters/filtered-monsters (if (>= (count filter-text) 3)
-                                           (filter-monsters filter-text (::char5e/monster-filter-hidden? db))
-                                           @(subscribe [::monsters/sorted-monsters])))))
+   (assoc db ::char5e/monster-text-filter filter-text)))
 
 (reg-event-db
  ::char5e/filter-spells
@@ -1979,11 +1975,7 @@
 (reg-event-db
  ::char5e/toggle-monster-filter-hidden
  (fn [db [_ filter value]]
-   (let [updated (update-in db [::char5e/monster-filter-hidden? filter value] not)]
-     (assoc updated
-            ::char5e/filtered-monsters
-            (filter-monsters (::char5e/monster-text-filter updated)
-                             (::char5e/monster-filter-hidden? updated))))))
+   (update-in db [::char5e/monster-filter-hidden? filter value] not)))
 
 (defn toggle-set [key set]
   (if (get set key)
@@ -2102,7 +2094,7 @@
 (reg-event-fx
  ::char5e/add-level
  (fn [{:keys [db]} [_ id]]
-   (update-character-fx db id #(add-level %))))
+   (update-character-fx db id add-level)))
 
 (reg-event-fx
  ::char5e/level-up
@@ -2151,9 +2143,24 @@
                     character
                     ::entity/values
                     dissoc
-                    ::spells/slots-used))
+                    ::spells/slots-used
+                    character
+                    ::char5e/current-hit-points ::char5e/max-hit-points))
                  ::units5e/long-rest
                  ::units5e/rest)))
+
+(reg-event-fx
+  ::char5e/finish-short-rest-warlock
+  (fn [{:keys [db]} [_ id]]
+    (clear-period db
+                  id
+                  (fn [character]
+                    (update
+                      character
+                      ::entity/values
+                      dissoc
+                      ::spells/slots-used))
+                  ::units5e/rest)))
 
 (reg-event-fx
  ::char5e/finish-short-rest
@@ -2417,27 +2424,27 @@
                            (or (first (drop-while #(>= % current-initiative) initiatives))
                                (first initiatives))
                            (second initiatives))
-         round (get combat :round 1)]
-     (let [next-round? (and current-initiative
-                            (> next-initiative current-initiative))
-           updated (cond-> combat
-                     true (assoc :current-initiative next-initiative)
-                     next-round? (assoc :round (inc round))
-                     next-round? update-conditions)
-           removed-conditions (if next-round?
-                                (filter
-                                 (comp seq :removed-conditions)
-                                 (flatten
-                                  (map
-                                   (fn [[monster-kw individuals]]
-                                     (map
-                                      (fn [[individual-index {:keys [removed-conditions]}]]
-                                        {:type :monster
-                                         :index individual-index
-                                         :name (get-in monster-map [monster-kw :name])
-                                         :removed-conditions (map :type removed-conditions)})
-                                      individuals))
-                                   (:monster-data updated)))))]
+         round (get combat :round 1)
+         next-round? (and current-initiative
+                          (> next-initiative current-initiative))
+         updated (cond-> combat
+                   true (assoc :current-initiative next-initiative)
+                   next-round? (assoc :round (inc round))
+                   next-round? update-conditions)
+         removed-conditions (if next-round?
+                              (filter
+                               (comp seq :removed-conditions)
+                               (flatten
+                                (map
+                                 (fn [[monster-kw individuals]]
+                                   (map
+                                    (fn [[individual-index {:keys [removed-conditions]}]]
+                                      {:type :monster
+                                       :index individual-index
+                                       :name (get-in monster-map [monster-kw :name])
+                                       :removed-conditions (map :type removed-conditions)})
+                                    individuals))
+                                 (:monster-data updated)))))]
        {:dispatch-n (cond-> [[::combat/set-combat updated]]
                       (seq removed-conditions)
                       (conj [:show-message
@@ -2447,7 +2454,7 @@
                                 (fn [i {:keys [name index removed-conditions]}]
                                   ^{:key i}
                                   [:div.m-b-5 (str name " #" (inc index) " is no longer " (common/list-print (map common/kw-to-name removed-conditions) "or") ".")])
-                                removed-conditions))]]))}))))
+                                removed-conditions))]]))})))
 
 (reg-event-db
  ::encounters/set-encounter-path-prop
@@ -2552,6 +2559,12 @@
  invocation-interceptors
  (fn [invocation [_ prop-key prop-value]]
    (assoc invocation prop-key prop-value)))
+
+(reg-event-db
+ ::class5e/set-boon-prop
+ boon-interceptors
+ (fn [boon [_ prop-key prop-value]]
+   (assoc boon prop-key prop-value)))
 
 (reg-event-db
  ::selections5e/set-selection-prop
@@ -3152,6 +3165,22 @@
      (js/saveAs blob (str "all-content.orcbrew"))
      {})))
 
+(reg-event-fx
+  ::e5/export-plugin-pretty-print
+  (fn [_ [_ name plugin]]
+    (let [blob (js/Blob.
+                 (clj->js [(with-out-str (pprint/pprint plugin))])
+                 (clj->js {:type "text/plain;charset=utf-8"}))]
+      (js/saveAs blob (str name ".orcbrew"))
+      {})))
+(reg-event-fx
+  ::e5/export-all-plugins-pretty-print
+  (fn [_ _]
+    (let [blob (js/Blob.
+                 (clj->js [(with-out-str (pprint/pprint @(subscribe [::e5/plugins])))])
+                 (clj->js {:type "text/plain;charset=utf-8"}))]
+      (js/saveAs blob (str "all-content.orcbrew"))
+      {})))
 
 (reg-event-fx
  ::e5/delete-plugin
@@ -3239,6 +3268,12 @@
    invocation))
 
 (reg-event-db
+ ::class5e/set-boon
+ boon-interceptors
+ (fn [_ [_ boon]]
+   boon))
+
+(reg-event-db
  ::selections5e/set-selection
  selection-interceptors
  (fn [_ [_ selection]]
@@ -3322,6 +3357,12 @@
  (fn [_ _]
    {:dispatch [::class5e/set-invocation
                default-invocation]}))
+
+(reg-event-fx
+ ::class5e/reset-boon
+ (fn [_ _]
+   {:dispatch [::class5e/set-boon
+               default-boon]}))
 
 (reg-event-fx
  ::selections5e/reset-selection
@@ -3582,6 +3623,12 @@
  routes/dnd-e5-selection-builder-page-route)
 
 (reg-new-homebrew
+ ::class5e/new-boon
+ ::class5e/set-boon
+ default-boon
+ routes/dnd-e5-boon-builder-page-route)
+
+(reg-new-homebrew
  ::feats5e/new-feat
  ::feats5e/set-feat
  default-feat
@@ -3745,9 +3792,24 @@
    (update db ::char5e/exclude-spell-cards-print? not)))
 
 (reg-event-db
+ ::char5e/toggle-spell-cards-by-level
+ (fn [db _]
+   (update db ::char5e/exclude-spell-cards-by-level? not)))
+
+(reg-event-db
+ ::char5e/toggle-spell-cards-by-dc-mod
+ (fn [db _]
+   (update db ::char5e/exclude-spell-cards-by-dc-mod? not)))
+
+(reg-event-db
  ::char5e/toggle-large-abilities-print
  (fn [db _]
    (update db ::char5e/print-large-abilities? not)))
+
+(reg-event-db
+ ::char5e/set-print-character-sheet-style?
+ (fn [db [_ id]]
+   (assoc-in db [::char5e/print-character-sheet-style?] id)))
 
 (reg-event-db
  ::char5e/toggle-known-spells-print
@@ -3763,6 +3825,23 @@
  ::char5e/hide-delete-confirmation
  (fn [db [_ id]]
    (assoc-in db [::char5e/delete-confirmation-shown? id] false)))
+
+(reg-event-db
+ ::char5e/show-delete-plugin-confirmation
+ (fn [db _]
+   (assoc-in db [::char5e/delete-plugin-confirmation-shown?] true)))
+
+(reg-event-db
+ ::char5e/hide-delete-plugin-confirmation
+ (fn [db _]
+   (assoc-in db [::char5e/delete-plugin-confirmation-shown?] false)))
+
+;to-do probably should reach into plugins and delete one at the time instead of brute forcing it.
+(reg-event-db
+ ::char5e/delete-all-plugins
+ (fn [db _]
+   (js/localStorage.removeItem "plugins")
+   (js/location.reload)))
 
 (reg-event-fx
  ::char5e/don-armor

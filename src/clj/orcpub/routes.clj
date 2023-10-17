@@ -1,12 +1,10 @@
 (ns orcpub.routes
-  (:require [io.pedestal.http :as http]          
+  (:require [io.pedestal.http :as http]
             [io.pedestal.http.route :as route]
             [io.pedestal.test :as test]
             [io.pedestal.http.ring-middlewares :as ring]
-            [ring.middleware.cookies :only [wrap-cookies]]
             [ring.middleware.resource :as ring-resource]
             [ring.util.response :as ring-resp]
-            [ring.middleware.etag :refer [wrap-etag]]
             [io.pedestal.http.body-params :as body-params]
             [io.pedestal.interceptor.error :as error-int]
             [io.pedestal.interceptor.chain :refer [terminate]]
@@ -16,12 +14,13 @@
             [buddy.sign.jwt :as jwt]
             [buddy.hashers :as hashers]
             [buddy.auth.middleware :refer [authentication-request]]
-            [pandect.algo.sha1 :refer [sha1]]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clj-time.core :as t :refer [hours from-now ago]]
             [clj-time.coerce :as tc :refer [from-date]]
             [clojure.string :as s]
             [clojure.spec.alpha :as spec]
+            [clojure.pprint]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.spells :as spells]
@@ -44,16 +43,12 @@
             [orcpub.oauth :as oauth]
             [hiccup.page :as page]
             [environ.core :as environ]
-            [clojure.set :as sets])
-  (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
-           
-           (org.apache.pdfbox.pdmodel PDDocument PDPage PDPageContentStream)
-           (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
-           (java.io ByteArrayOutputStream ByteArrayInputStream)
-           (org.apache.pdfbox.pdmodel.graphics.image JPEGFactory LosslessFactory)
-           (org.eclipse.jetty.server.handler.gzip GzipHandler)
-           (javax.imageio ImageIO)
-           (java.net URL))
+            [clojure.set :as sets]
+            [ring.middleware.head :as head]
+            [ring.util.codec :as codec]
+            [ring.util.request :as req])
+  (:import (org.apache.pdfbox.pdmodel PDDocument PDPage PDPageContentStream)
+           (java.io ByteArrayOutputStream ByteArrayInputStream))
   (:gen-class))
 
 (deftype FixedBuffer [^long len])
@@ -195,7 +190,7 @@
 (defn bad-credentials-response [db username ip]
   (security/add-failed-login-attempt! username ip)
   (if (security/too-many-attempts-for-username? username)
-    (login-error errors/too-many-attempts) 
+    (login-error errors/too-many-attempts)
     (let [user-for-username (find-user-by-username-or-email db username)]
       (login-error (if (:db/id user-for-username)
                      errors/bad-credentials
@@ -233,7 +228,7 @@
   (try
     (let [resp (login-response request)]
       resp)
-    (catch Throwable e (do (prn "E" e) (throw e)))))
+    (catch Throwable e (prn "E" e) (throw e))))
 
 
 (defn user-for-email [db email]
@@ -246,46 +241,8 @@
                             (s/lower-case email))]
     user))
 
-
-(defn get-or-create-oauth-user [conn db oauth-email]
-  (let [{:keys [:orcpub.user/username] :as user} (user-for-email db oauth-email)]
-    (if username
-      user
-      (let [result @(d/transact
-                     conn
-                     [{:orcpub.user/email oauth-email
-                       :orcpub.user/username oauth-email
-                       :orcpub.user/send-updates? false
-                       :orcpub.user/created (java.util.Date.)
-                       :orcpub.user/verified? true}])]
-        (user-for-email (d/db conn) oauth-email)))))
-
-(defn oauth-login [email-fn]
-  (fn [{:keys [conn db] :as request}]
-    (let [fb-email (email-fn request)
-          user (get-or-create-oauth-user conn db fb-email)]
-      (create-login-response db user))))
-
-(defn fb-login [{:keys [json-params db conn remote-addr] :as request}]
-  (if-let [access-token (-> json-params :authResponse :accessToken)]
-    (let [fb-user (oauth/get-fb-user access-token)]
-      (if-let [email (:email fb-user)]
-        (create-login-response db (get-or-create-oauth-user conn db email))
-        (login-error errors/fb-email-permission)))
-    {:status 400}))
-
-(def google-login
-  (oauth-login oauth/get-google-email))
-
-
-(defn google-oauth-code [request]
-  (ring-resp/redirect (str oauth/google-oauth-url (oauth/get-google-redirect-uri request))))
-
-(defn fb-oauth-code [request]
-  (ring-resp/redirect (str oauth/fb-oauth-url (oauth/get-fb-redirect-uri request))))
-
 (defn base-url [{:keys [scheme headers]}]
-  (str (name scheme) "://" (headers "host")))
+  (str (or (headers "x-forwarded-proto") (name scheme)) "://" (headers "host")))
 
 (defn send-verification-email [request params verification-key]
   (email/send-verification-email
@@ -296,15 +253,15 @@
 (defn do-verification [request params conn & [tx-data]]
   (let [verification-key (str (java.util.UUID/randomUUID))
         now (java.util.Date.)]
-    (do @(d/transact
-          conn
-          [(merge
-            tx-data
-            {:orcpub.user/verified? false
-             :orcpub.user/verification-key verification-key
-             :orcpub.user/verification-sent now})])
-        (send-verification-email request params verification-key)
-        {:status 200})))
+    @(d/transact
+        conn
+        [(merge
+          tx-data
+          {:orcpub.user/verified? false
+            :orcpub.user/verification-key verification-key
+            :orcpub.user/verification-sent now})])
+      (send-verification-email request params verification-key)
+      {:status 200}))
 
 (defn register [{:keys [json-params db conn] :as request}]
   (let [{:keys [username email password send-updates?]} json-params
@@ -328,7 +285,7 @@
           :orcpub.user/password (hashers/encrypt password)
           :orcpub.user/send-updates? send-updates?
           :orcpub.user/created (java.util.Date.)}))
-      (catch Throwable e (do (prn e) (throw e))))))
+      (catch Throwable e (prn e) (throw e)))))
 
 (def user-for-verification-key-query
   '[:find ?e
@@ -413,14 +370,15 @@
       (if id
         (do-send-password-reset id email conn request)
         {:status 400 :body {:error :no-account}}))
-    (catch Throwable e (do (prn e) (throw e)))))
+    (catch Throwable e (prn e) (throw e))))
 
 (defn do-password-reset [conn user-id password]
   @(d/transact
     conn
     [{:db/id user-id
       :orcpub.user/password (hashers/encrypt (s/trim password))
-      :orcpub.user/password-reset (java.util.Date.)}])
+      :orcpub.user/password-reset (java.util.Date.)
+      :orcpub.user/verified? true}])
   {:status 200})
 
 (defn reset-password [{:keys [json-params db conn cookies identity] :as request}]
@@ -432,7 +390,7 @@
         (not= password verify-password) {:status 400 :message "Passwords do not match"}
         (seq (registration/validate-password password)) {:status 400 :message "New password is invalid"}
         :else (do-password-reset conn id password)))
-    (catch Throwable t (do (prn t) (throw t)))))
+    (catch Throwable t (prn t) (throw t))))
 
 (def font-sizes
   (merge
@@ -452,7 +410,7 @@
     :weapon-name-2 8
     :weapon-name-3 8}))
 
-(defn add-spell-cards! [doc spells-known spell-save-dcs spell-attack-mods custom-spells]  (try
+(defn add-spell-cards! [doc spells-known spell-save-dcs spell-attack-mods custom-spells print-spell-card-dc-mod?]  (try
     (let [custom-spells-map (common/map-by-key custom-spells)
           spells-map (merge spells/spell-map custom-spells-map)
           flat-spells (-> spells-known vals flatten)
@@ -463,7 +421,7 @@
                               class)
                             key])
                          flat-spells)
-          parts (vec (partition-all 9 sorted-spells))]
+          parts (vec (partition-all 9 flat-spells))]
       (doseq [i (range (count parts))
               :let [part (parts i)]]
         (let [page (PDPage.)]
@@ -486,7 +444,8 @@
                                          2.5
                                          3.5
                                          spells
-                                         i))
+                                         i
+                                         print-spell-card-dc-mod?))
                   back-page (PDPage.)]
               (with-open [back-page-cs (PDPageContentStream. doc back-page)]
                 (.addPage doc back-page)
@@ -494,23 +453,31 @@
     (catch Exception e (prn "FAILED ADDING SPELLS CARDS!" e))))
 
 (defn character-pdf-2 [req]
-  (let [fields (-> req :form-params :body clojure.edn/read-string)
-        {:keys [image-url image-url-failed faction-image-url faction-image-url-failed spells-known custom-spells spell-save-dcs spell-attack-mods print-spell-cards?]} fields
+  (let [fields (-> req :form-params :body edn/read-string)
+        {:keys [image-url image-url-failed faction-image-url faction-image-url-failed spells-known custom-spells spell-save-dcs spell-attack-mods print-spell-cards? print-character-sheet-style? print-spell-card-dc-mod?]} fields
+
+        sheet6 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-6-spells.pdf")
+        sheet5 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-5-spells.pdf")
+        sheet4 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-4-spells.pdf")
+        sheet3 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-3-spells.pdf")
+        sheet2 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-2-spells.pdf")
+        sheet1 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-1-spells.pdf")
+        sheet0 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-0-spells.pdf")
         input (.openStream (io/resource (cond
-                                          (find fields :spellcasting-class-6) "fillable-char-sheet-6-spells.pdf"
-                                          (find fields :spellcasting-class-5) "fillable-char-sheet-5-spells.pdf"
-                                          (find fields :spellcasting-class-4) "fillable-char-sheet-4-spells.pdf"
-                                          (find fields :spellcasting-class-3) "fillable-char-sheet-3-spells.pdf"
-                                          (find fields :spellcasting-class-2) "fillable-char-sheet-2-spells.pdf"
-                                          (find fields :spellcasting-class-1) "fillable-char-sheet-1-spells.pdf"
-                                          :else "fillable-char-sheet-0-spells.pdf")))
+                                          (find fields :spellcasting-class-6) sheet6
+                                          (find fields :spellcasting-class-5) sheet5
+                                          (find fields :spellcasting-class-4) sheet4
+                                          (find fields :spellcasting-class-3) sheet3
+                                          (find fields :spellcasting-class-2) sheet2
+                                          (find fields :spellcasting-class-1) sheet1
+                                          :else sheet0)))
         output (ByteArrayOutputStream.)
         user-agent (get-in req [:headers "user-agent"])
         chrome? (re-matches #".*Chrome.*" user-agent)]
     (with-open [doc (PDDocument/load input)]
       (pdf/write-fields! doc fields (not chrome?) font-sizes)
       (if (and print-spell-cards? (seq spells-known))
-        (add-spell-cards! doc spells-known spell-save-dcs spell-attack-mods custom-spells))
+        (add-spell-cards! doc spells-known spell-save-dcs spell-attack-mods custom-spells print-spell-card-dc-mod?))
       (if (and image-url
                (re-matches #"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]" image-url)
                (not image-url-failed))
@@ -532,11 +499,6 @@
                  :headers {"Content-Type" "text/html"}})]
     merged))
 
-(defn empty-index [req & [response]]
-  (html-response
-   (slurp (io/resource "public/blank.html"))
-   response))
-
 (def user-by-password-reset-key-query
   '[:find ?e
     :in $ ?key
@@ -549,7 +511,7 @@
   "Dungeons & Dragons 5th Edition (D&D 5e) character builder/generator and digital character sheet far beyond any other in the multiverse.")
 
 (defn default-image-url [host]
-  (str "http://" host "/image/orcpub-box-logo.png"))
+  (str "http://" host "/image/dmv-box-logo.png"))
 
 (defn index-page-response [{:keys [headers uri] :as request}
                            {:keys [title description image-url]}
@@ -558,8 +520,7 @@
     (merge
      response
      {:status 200
-      :headers {"Content-Type" "text/html"
-                "Access-Control-Allow-Origin" "https://www.facebook.com"}
+      :headers {"Content-Type" "text/html" }
       :body
       (index-page
        {:url (str "http://" host uri)
@@ -582,7 +543,7 @@
                   :orcpub.user/password-reset-sent
                   :orcpub.user/password-reset] :as user}
           (first-user-by db user-by-password-reset-key-query key)
-          expired? (password-reset-expired? password-reset-sent) 
+          expired? (password-reset-expired? password-reset-sent)
           already-reset? (password-already-reset? password-reset password-reset-sent)]
       (cond
         expired? (redirect route-map/password-reset-expired-route)
@@ -696,12 +657,13 @@
       (let [current-character (d/pull db '[*] id)
             problems [] #_(dnd-e5-char-type-problems current-character)
             current-valid? (spec/valid? ::se/entity current-character)]
-        (if (not current-valid?)
-          (do (prn "INVALID CHARACTER FOUND, REPLACING" #_current-character)
-              (prn "INVALID CHARACTER EXPLANATION" #_(spec/explain-data ::se/entity current-character))))
+        (when-not current-valid?
+          (prn "INVALID CHARACTER FOUND, REPLACING" #_current-character)
+          (prn "INVALID CHARACTER EXPLANATION" #_(spec/explain-data ::se/entity current-character)))
         (if (seq problems)
-          {:status 400 :body problems}
-          (if (not current-valid?)
+          (throw (ex-info "Character has problems"
+                          {:error :character-problems :problems problems}))
+          (if-not current-valid?
             (let [new-character (entity/remove-ids character)
                   tx [[:db/retractEntity (:db/id current-character)]
                       (-> new-character
@@ -709,8 +671,7 @@
                                  :orcpub.entity.strict/owner username)
                           add-dnd-5e-character-tags)]
                   result @(d/transact conn tx)]
-              {:status 200
-               :body (d/pull (d/db conn) '[*] (-> result :tempids (get "tempid")))})
+              (d/pull (d/db conn) '[*] (-> result :tempids (get "tempid"))))
             (let [new-character (entity/remove-orphan-ids character)
                   current-ids (entity/db-ids current-character)
                   new-ids (entity/db-ids new-character)
@@ -724,9 +685,9 @@
                                (assoc :orcpub.entity.strict/owner username)
                                add-dnd-5e-character-tags))]
               @(d/transact conn tx)
-              {:status 200
-               :body (d/pull (d/db conn) '[*] id)}))))
-      {:status 401 :body "You do not own this character"})))
+              (d/pull (d/db conn) '[*] id)))))
+      (throw (ex-info "Not user character"
+                      {:error :not-user-character})))))
 
 (defn create-new-character [conn character username]
   (let [result @(d/transact conn
@@ -735,15 +696,14 @@
                                         ::se/owner username)
                                  add-dnd-5e-character-tags)])
         new-id (get-new-id "tempid" result)]
-    {:status 200
-     :body (d/pull (d/db conn) '[*] new-id)}))
+    (d/pull (d/db conn) '[*] new-id)))
 
 (defn clean-up-character [character]
   (if (-> character ::se/values ::char5e/xps string?)
     (update-in character
                [::se/values ::char5e/xps]
                #(try
-                  (if (not (s/blank? %))
+                  (if-not (s/blank? %)
                     (Long/parseLong %)
                     0)
                   (catch NumberFormatException e 0)))
@@ -756,11 +716,17 @@
     (try
       (if-let [data (spec/explain-data ::se/entity character)]
         {:status 400 :body data}
-        (let [clean-character (clean-up-character character)]
-          (if (:db/id clean-character)
-            (update-character db conn clean-character username)
-            (create-new-character conn clean-character username))))
-      (catch Exception e (do (prn "ERROR" e) (throw e))))))
+        (let [clean-character (clean-up-character character)
+              updated-character (if (:db/id clean-character)
+                                  (update-character db conn clean-character username)
+                                  (create-new-character conn clean-character username))]
+          {:status 200 :body updated-character}))
+      (catch clojure.lang.ExceptionInfo e
+        (let [data (ex-data e)]
+          (case (:error data)
+            :character-problems {:status 400 :body (:problems data)}
+            :not-user-character {:status 401 :body "You do not own this character"})))
+      (catch Exception e (prn "ERROR" e) (throw e)))))
 
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
   (do-save-character db conn transit-params identity))
@@ -933,6 +899,7 @@
    [route-map/dnd-e5-class-builder-page-route]
    [route-map/dnd-e5-language-builder-page-route]
    [route-map/dnd-e5-invocation-builder-page-route]
+   [route-map/dnd-e5-boon-builder-page-route]
    [route-map/dnd-e5-feat-builder-page-route]
    [route-map/dnd-e5-item-list-page-route]
    [route-map/dnd-e5-item-page-route :key ":key"]
@@ -998,8 +965,7 @@
 
 (def expanded-index-routes
   (route/expand-routes
-   (into #{} index-page-routes)))
-
+   (set index-page-routes)))
 
 (def service-error-handler
   (error-int/error-dispatch [ctx ex]
@@ -1016,11 +982,20 @@
 
 (def get-js get-file)
 
-(def get-fa get-file)
-
 (def get-image get-file)
 
 (def get-favicon get-file)
+
+(def webjars-root "META-INF/resources/webjars/")
+
+(defn get-webjar
+  "Get a resource containd within a webjar.
+   Expects route to be /assets/*"
+  [request]
+  (let [path (subs (codec/url-decode (req/path-info request)) 1)
+        new-path (s/replace-first path #"^assets/" webjars-root)]
+    (-> (ring-resp/resource-response new-path)
+        (head/head-response request))))
 
 (def routes
   (concat
@@ -1029,9 +1004,9 @@
        ^:interceptors [(body-params/body-params) service-error-handler]
        ["/js/*" {:get `get-js}]
        ["/css/*" {:get `get-css}]
-       ["/font-awesome-4.7.0/*" {:get `get-fa}]
+       ["/assets/*" {:get `get-webjar}]
        ["/image/*" {:get `get-image}]
-       ["/favicon.ico" {:get `get-favicon}]
+       ["/favicon/*" {:get `get-favicon}]
        [(route-map/path-for route-map/register-route)
         {:post `register}]
        [(route-map/path-for route-map/user-route) ^:interceptors [check-auth]
@@ -1076,14 +1051,6 @@
         {:delete `party/remove-character}]
        [(route-map/path-for route-map/login-route)
         {:post `login}]
-       ["/code/fb"
-        {:get `fb-oauth-code}]
-       ["/code/google"
-        {:get `google-oauth-code}]
-       [(route-map/path-for route-map/fb-login-route)
-        {:post `fb-login}]
-       #_[(route-map/path-for route-map/google-login-route)
-        {:get `google-login}]
        [(route-map/path-for route-map/character-pdf-route)
         {:post `character-pdf-2}]
        [(route-map/path-for route-map/verify-route)

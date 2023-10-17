@@ -5,12 +5,10 @@
             [orcpub.entity.strict :as se]))
 
 (defn create-party [{:keys [db conn identity] party :transit-params}]
-  (if (spec/valid? ::party/party party)
     (let [username (:user identity)
           result @(d/transact conn [(assoc party ::party/owner username)])
           new-id (-> result :tempids first val)]
-      {:status 200 :body (d/pull (d/db conn) '[*] new-id)})
-    {:status 400}))
+      {:status 200 :body (d/pull (d/db conn) '[*] new-id)}))
 
 (def pull-party [:db/id ::party/name {::party/character-ids [:db/id ::se/owner ::se/summary]}])
 

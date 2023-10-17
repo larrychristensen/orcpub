@@ -2,7 +2,10 @@
   (:require [hiccup.core :as hiccup]
             [postal.core :as postal]
             [environ.core :as environ]
-            [orcpub.route-map :as routes]))
+            [clojure.pprint :as pprint]
+            [clojure.string :as s]
+            [orcpub.route-map :as routes]
+            [cuerdas.core :as str]))
 
 (defn verification-email-html [first-and-last-name username verification-url]
   [:div
@@ -27,12 +30,18 @@
 (defn email-cfg []
   {:user (environ/env :email-access-key)
    :pass (environ/env :email-secret-key)
-   :host "email-smtp.us-west-2.amazonaws.com"
-   :port 587})
+   :host (environ/env :email-server-url)
+   :port (Integer/parseInt (or (environ/env :email-server-port) "587"))
+   :ssl (or (str/to-bool (environ/env :email-ssl)) nil)
+   :tls (or (str/to-bool (environ/env :email-tls)) nil)
+   })
+
+(defn emailfrom []
+  (if (not (s/blank? (environ/env :email-from-address))) (environ/env :email-from-address) (str "no-reply@orcpub.com")))
 
 (defn send-verification-email [base-url {:keys [email username first-and-last-name]} verification-key]
   (postal/send-message (email-cfg)
-                       {:from "OrcPub Team <no-reply@orcpub.com>"
+                       {:from (str "OrcPub Team <" (emailfrom) ">")
                         :to email
                         :subject "OrcPub Email Verification"
                         :body (verification-email
@@ -65,20 +74,22 @@
 
 (defn send-reset-email [base-url {:keys [email username first-and-last-name]} reset-key]
   (postal/send-message (email-cfg)
-                       {:from "OrcPub Team <no-reply@orcpub.com>"
+                       {:from (str "OrcPub Team <" (emailfrom) ">")
                         :to email
                         :subject "OrcPub Password Reset"
                         :body (reset-password-email
-                               first-and-last-name
-                               (str base-url (routes/path-for routes/reset-password-page-route) "?key=" reset-key))}))
+                                first-and-last-name
+                                (str base-url (routes/path-for routes/reset-password-page-route) "?key=" reset-key))}))
 
 (defn send-error-email [context exception]
-  (postal/send-message (email-cfg)
-                       {:from "OrcPub Errors <no-reply@orcpub.com>"
-                        :to "redorc@orcpub.com"
-                        :subject "Exception"
-                        :body [{:type "text/plain"
-                                :content (let [writer (java.io.StringWriter.)]
-                                           (do (clojure.pprint/pprint (:request context) writer)
-                                               (clojure.pprint/pprint (or (ex-data exception) exception) writer)
-                                               (str writer)))}]}))
+  (if (not-empty (environ/env :email-errors-to))
+    (postal/send-message (email-cfg)
+                         {:from (str "OrcPub Errors <" (emailfrom) ">")
+                          :to (str (environ/env :email-errors-to))
+                          :subject "Exception"
+                          :body [{:type "text/plain"
+                                  :content (let [writer (java.io.StringWriter.)]
+                                             (clojure.pprint/pprint (:request context) writer)
+                                             (clojure.pprint/pprint (or (ex-data exception) exception) writer)
+                                             (str writer))}]})))
+

@@ -36,7 +36,8 @@
   (es/make-entity
    {?armor-class (+ 10 (?ability-bonuses ::char5e/dex))
     ?base-armor-class (+ 10 (?ability-bonuses ::char5e/dex)
-                         ?natural-ac-bonus
+                         ;; Checks whether barbarian unarmored bonus exists (or is higher) than natural AC/Draconic Bloodline AC
+                         (if (> ?unarmored-ac-bonus ?natural-ac-bonus ) 0 ?natural-ac-bonus)
                          ?magical-ac-bonus)
     ?levels {}
     ?ac-bonus 0
@@ -119,7 +120,7 @@
                    {}
                    ?ability-bonuses)
     ?total-levels (apply + (map (fn [[k {l :class-level}]] l) ?levels))
-    
+
     ?class-level (fn [class-kw] (get-in ?levels [class-kw :class-level]))
     ?barbarian-level (?class-level :barbarian)
     ?bard-level (?class-level :bard)
@@ -132,7 +133,7 @@
     ?sorcerer-level (?class-level :sorcerer)
     ?warlock-level (?class-level :warlock)
     ?wizard-level (?class-level :wizard)
-    
+
     ?proficiency-bonus-increase 0
     ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2 ?proficiency-bonus-increase)
     ?default-skill-bonus {}
@@ -223,8 +224,19 @@
                               (let [definitely-finesse? (and finesse?
                                                              (::weapon5e/finesse? weapon))
                                     melee? (::weapon5e/melee? weapon)]
-                                (+ (or (::mi5e/magical-damage-bonus weapon) 0)
-                                   (?weapon-ability-damage-modifier weapon definitely-finesse? off-hand?))))
+                                (apply +
+                                       (+ (or (::mi5e/magical-damage-bonus weapon) 0)
+                                          (?weapon-ability-damage-modifier weapon definitely-finesse? off-hand?))
+                                       ;(if melee?
+                                       ;  (map
+                                       ;   #(% weapon)
+                                       ;   ?melee-damage-bonus-fns)
+                                       ;  (map
+                                       ;   #(% weapon)
+                                       ;   ?ranged-damage-bonus-fns)) ;any non-melee is assumed to be ranged/finesse/dex
+                                       (map
+                                        #(% weapon)
+                                        ?damage-bonus-fns))))
     ?best-weapon-damage-modifier (fn [weapon & [off-hand?]]
                                    (max (?weapon-damage-modifier weapon false off-hand?)
                                         (?weapon-damage-modifier weapon true off-hand?)))

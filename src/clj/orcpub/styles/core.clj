@@ -1,6 +1,5 @@
 (ns orcpub.styles.core
-     (:require [garden.def :refer [defstylesheet defstyles]]
-               [garden.stylesheet :refer [at-media at-keyframes]]
+     (:require [garden.stylesheet :refer [at-media at-keyframes]]
                [garden.units :refer [px]]
                [orcpub.constants :as const]
                [garden.selectors :as s]))
@@ -93,19 +92,23 @@
    [:.list-style-disc
     {:list-style-type :disc
      :list-style-position :inside}]
-   
+
    [:.f-w-bold
     {:font-weight :bold}]
-   
+
    [:.flex-grow-1
     {:flex-grow 1}]
 
    [:.flex-basis-50-p
     {:flex-basis "50%"}]
-   
+
    [:.i
     {:font-style :italic}]
-   
+
+   [:.wsp-prw
+    {:white-space "pre-wrap"
+     :display "block"}]
+
    [:.f-w-n
     {:font-weight :normal}]
    [:.f-w-b
@@ -134,7 +137,7 @@
     {:margin-right "20px"}]
    [:.m-r-30
     {:margin-right "30px"}]
-   
+
    [:.m-r-80
     {:margin-right "80px"}]
 
@@ -193,6 +196,8 @@
    [:.m-b-40
     {:margin-bottom "40px"}]
 
+   [:.m-l-2
+    {:margin-left "2px"}]
    [:.m-l--10
     {:margin-left "-10px"}]
    [:.m-l--5
@@ -223,7 +228,7 @@
 
    [:.orange-shadow
     {:box-shadow "0 1px 0 0 #f0a100"}]
-   
+
    [:.t-a-c
     {:text-align :center}]
    [:.t-a-l
@@ -249,6 +254,12 @@
 
    [:.w-auto
     {:width :auto}]
+   [:.w-10-p
+    {:width "10%"}]
+   [:.w-20-p
+    {:width "20%"}]
+   [:.w-30-p
+    {:width "30%"}]
    [:.w-40-p
     {:width "40%"}]
    [:.w-50-p
@@ -298,7 +309,7 @@
 
    [:.overflow-auto
     {:overflow :auto}]
-   
+
    [:.posn-rel
     {:position :relative}]
    [:.posn-abs
@@ -417,7 +428,7 @@
 
    [:.b-b-2
     {:border-bottom "2px solid"}]
-   
+
    [:.b-w-3
     {:border-width "3px"}]
    [:.b-w-5
@@ -431,6 +442,43 @@
 
    [:.hidden
     {:display :none}]
+   [:.invisible
+    {:visibility :hidden}]
+
+   [:.tooltip
+    {:position "relative"
+     :display "inline-block"
+     :border-bottom "1px dotted black"}]
+
+   [:.tooltip [:.tooltiptext
+               {:visibility "hidden"
+                :width "130px"
+                :bottom "calc(100% - -5px)"
+                :left "50%"
+                :margin-left "-60px"
+                :background-color "black"
+                :font-family "Open Sans, sans-serif"
+                :font-size "14px"
+                :font-weight "normal"
+                :color "#fff"
+                :text-align "center"
+                :padding "10px 10px"
+                :border-radius "6px"
+                :position "absolute"
+                :z-index "1"}]]
+
+   [:.tooltip:hover [:.tooltiptext
+                     {:visibility "visible"}]]
+
+   [:.image-character-thumbnail
+    {:max-height "100px"
+     :max-width "200px"
+     :border-radius "5px"}]
+   
+   [:.image-faction-thumbnail
+    {:max-height "100px"
+     :max-width "200px"
+     :border-radius "5px"}]
 
    (at-keyframes
     :fade-out
@@ -471,7 +519,7 @@
 
    [:.hover-opacity-full:hover
     {:opacity 1.0}]
-   
+
    [:.bg-light
     {:background-color "rgba(72,72,72,0.2)"}]
    [:.bg-lighter
@@ -718,27 +766,29 @@
     xs-query
     [:.user-icon
      {:display :none}]
-     [:.character-builder-header
-      #_{:margin-bottom 0}]
-     [:.list-character-summary
-      {:font-size "18px"}]
-     [:.character-summary
-      {:flex-wrap :wrap}]
-     [:.app-header
-      {:height :auto
-       :background-image :none
-       :background-color "rgba(0, 0, 0, 0.3)"
-       :min-height 0}]
-     [:.app-header-bar
-      {:min-height (px 50)
-       :backdrop-filter :none
-       :-webkit-backdrop-filter :none}]
-     [:.content
-      {:width "100%"}]
-     #_[:.options-column
-      {:width "100%"}]
-     [:.header-button-text :.header-links
-      {:display :none}])
+    [:.character-builder-header
+     #_{:margin-bottom 0}]
+    [:.list-character-summary
+     {:font-size "18px"}]
+    [:.character-summary
+     {:flex-wrap :wrap}]
+    [:.app-header
+     {:height :auto
+      :background-image :none
+      :background-color "rgba(0, 0, 0, 0.3)"
+      :min-height 0}]
+    [:.app-header-bar
+     {:min-height (px 50)
+      :backdrop-filter :none
+      :-webkit-backdrop-filter :none}]
+    [:.app-header-menu
+     {:flex-grow 1}]
+    [:.content
+     {:width "100%"}]
+    #_[:.options-column
+       {:width "100%"}]
+    [:.header-button-text :.header-links
+     {:display :none}])
 
     #_(at-media
      xs-query
@@ -820,10 +870,14 @@
 
 (def app
   (concat
-   [
-
-    [:.character-builder-header
+   [[:.character-builder-header
      {:margin-bottom "19px"}]
+
+    [:.senses
+     {:width "450px"}]
+
+    [:.notes
+     {:width "350px"}]
 
     [:.registration-content
      {:width "785px"
@@ -836,23 +890,23 @@
      {:margin "10px 0"}]
 
     #_["input::-webkit-outer-spin-button"
-     "input::-webkit-inner-spin-button"
-     {:-webkit-appearance :none
-      :margin 0}]
+       "input::-webkit-inner-spin-button"
+       {:-webkit-appearance :none
+        :margin 0}]
 
     #_["input[type=number]"
-     {:-moz-appearance :textfield}]
+       {:-moz-appearance :textfield}]
 
     [:a :a:visited
      {:color orange}]
 
     [:select
      {:font-family font-family
-      :cursor :pointer}]
+      :color "white"
+      :background-color :transparent}]
 
     [:*:focus
      {:outline 0}]
-    
 
     [:.sticky-header
      {:top 0
@@ -877,8 +931,9 @@
 
     [:.header-tab
      {:background-color "rgba(0, 0, 0, 0.5)"
-      ;;:-webkit-backdrop-filter "blur(5px)"
-      ;;:backdrop-filter "blur(5px)"
+      :-webkit-backdrop-filter "blur(3px)"
+      :backdrop-filter "blur(3px)"
+      :border-radius "5px"
       }]
 
     [:.header-tab.mobile
@@ -896,8 +951,8 @@
      {:border-bottom "1px solid rgba(255,255,255,0.5)"}]
 
     #_[:.header-tab:hover
-     [(garden.selectors/& (garden.selectors/not :.disabled))
-      {:background-color orange}]]
+       [(garden.selectors/& (garden.selectors/not :.disabled))
+        {:background-color orange}]]
 
     [:.app-header-bar
      {:min-height (px 81)
@@ -906,7 +961,7 @@
       :background-color "rgba(0, 0, 0, 0.25)"}]
 
     #_[:.options-column
-     {:width "300px"}]
+       {:width "300px"}]
 
     [:.builder-column
      {:display :none
@@ -943,7 +998,7 @@
       :border-bottom "5px solid rgba(72,72,72,0.37)"}
      [:.builder-tab-text
       {:opacity 0.2}]]
- 
+
     [:.selected-builder-tab
      {:border-bottom-color "#f1a20f"}
      [:.builder-tab-text
@@ -996,7 +1051,7 @@
 
     [:.remove-item-button
      {:color button-color
-      :font-size "16px" 
+      :font-size "16px"
       :margin-left "5px"
       :cursor :pointer}]
 
@@ -1045,12 +1100,28 @@
       :cursor :pointer
       :background-image "linear-gradient(to bottom, #f1a20f, #dbab50)"}]
 
+    [:.roll-button
+     {:color :white
+      :min-width "68px"
+      :font-weight 600
+      :font-size "14px"
+      :border :none
+      :border-radius "2px"
+      :padding "6px 6px"
+      :margin-right "2px"
+      :margin-left "2px"
+      :margin-bottom "2px"
+      :margin-top "2px"
+      :cursor :pointer
+      :background-image "linear-gradient(to bottom, #f1a20f, #dbab50)"}]
+
     [:.form-button:hover
      {:box-shadow "0 2px 6px 0 rgba(0, 0, 0, 0.5)"}]
 
     [:.form-button.disabled
      {:opacity 0.5
-      :cursor :not-allowed}]
+      :cursor :not-allowed
+      :pointer-events "none"}]
 
     [:.form-button.disabled:hover
      {:box-shadow :none}]
@@ -1150,6 +1221,11 @@
     [:.app.light-theme
      {:background-image "linear-gradient(182deg, #FFFFFF, #DDDDDD)"}
 
+     [:select
+      {:font-family font-family
+       :color "black";
+       :background-color :transparent}]
+
      [:.item-list
       {:border-top "1px solid rgba(0,0,0,0.5)"}]
 
@@ -1166,16 +1242,16 @@
       {:stroke "#363636"}]
 
      [:.input
-     {:background-color :transparent
-      :color :black
-      :border "1px solid #282828"
-      :border-radius "5px"
-      :margin-top "5px"
-      :display :block
-      :padding "10px"
-      :width "100%"
-      :box-sizing :border-box
-      :font-size "14px"}]
+      {:background-color :transparent
+       :color :black
+       :border "1px solid #282828"
+       :border-radius "5px"
+       :margin-top "5px"
+       :display :block
+       :padding "10px"
+       :width "100%"
+       :box-sizing :border-box
+       :font-size "14px"}]
 
      [:.form-button
       {:background-image "linear-gradient(to bottom, #33658A, #33658A)"}]

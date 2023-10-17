@@ -53,12 +53,12 @@
   [{:key ::character/str
     :name "Strength"
     :abbr "STR"}
-   {:key ::character/con
-    :name "Constitution"
-    :abbr "CON"}
    {:key ::character/dex
     :name "Dexterity"
     :abbr "DEX"}
+   {:key ::character/con
+    :name "Constitution"
+    :abbr "CON"}
    {:key ::character/int
     :name "Intelligence"
     :abbr "INT"}
@@ -82,6 +82,9 @@
    {:name "Deafened"
     :key :deafened
     :icon "hearing-disabled"}
+   {:name "Exhausted"
+    :key :exhausted
+    :icon "knockout"}
    {:name "Frightened"
     :key :frightened
     :icon "terror"}
@@ -397,13 +400,20 @@
    [:span.f-w-b (str name ": ")]
    [:span.f-w-n value]])
 
-(defn spell-help [{:keys [school casting-time range duration description summary source page]}]
+(defn spell-help [{:keys [school casting-time range duration components description summary source page]}]
   [:div
    [:div.m-b-5
     (spell-field "School" school)
     (spell-field "Casting Time" casting-time)
     (spell-field "Range" range)
-    (spell-field "Duration" duration)]
+    (spell-field "Duration" duration)
+    (let [{:keys [verbal somatic material material-component]} components]
+      (spell-field "Components" (str
+          (s/join ", " (remove nil?
+              [(if verbal "V")
+               (if somatic "S")
+               (if material "M")]))
+          (if material-component (str " (" material-component ")")))))]
    [:div.f-w-n (if (or description summary)
                  (doall
                   (map-indexed
@@ -513,6 +523,56 @@
        13 {3 2}
        16 {3 1}
        19 {4 1}}
+    4 {1 {1 2}
+       3 {1 1}
+       5 {1 1
+          2 2}
+       7 {2 1}
+       9 {3 2}
+       11 {3 1}
+       13 {4 1}
+       15 {4 1}
+       17 {4 1
+           5 1}
+       19 {5 1}}
+    5 {1 {1 1}
+       2 {1 2}
+       3 {2 2}
+       4 {2 2}
+       5 {3 2}
+       6 {3 2}
+       7 {4 2}
+       8 {4 2}
+       9 {5 2}
+       10 {5 2}
+       11 {5 3}
+       12 {5 3}
+       13 {5 3}
+       14 {5 3}
+       15 {5 3}
+       16 {5 3}
+       17 {5 4}
+       18 {5 4}
+       19 {5 4}
+       20 {5 4}}
+    6 {3 {1 1}
+       4 {1 2}
+       5 {2 2}
+       6 {2 2}
+       7 {3 2}
+       8 {3 2}
+       9 {4 2}
+       10 {4 2}
+       11 {5 2}
+       12 {5 2}
+       13 {5 3}
+       14 {5 3}
+       15 {5 3}
+       16 {5 3}
+       17 {5 3}
+       18 {5 3}
+       19 {5 4}
+       20 {5 4}}
     {}))
 
 (defn total-slots [level level-factor]
@@ -593,8 +653,8 @@
            all-spells (select-keys
                        (or spells (spell-lists (or spell-list-kw class-key)))
                        (keys slots))
-           acquire? (= :acquire known-mode)]
-       (let [options (flatten
+           acquire? (= :acquire known-mode)
+           options (flatten
                       (map
                        (fn [[lvl spell-keys]]
                          (let [spell-keys (vec spell-keys)
@@ -624,7 +684,7 @@
                      :class-name cls-nm
                      :min num
                      :max (if (not acquire?) num)
-                     :options options}))]))))
+                     :options options}))])))
    {}
    spells-known))
 
@@ -1645,7 +1705,27 @@
      :modifiers [(modifiers/trait-cfg
        {:name "Dueling Fighting Style"
         :page 72
-        :description "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."})]})
+        :description "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."})
+                (mods/vec-mod ?damage-bonus-fns ;vec-mod prop
+                              (fn [weapon _] (if (or (weapon ::weapons/two-handed?)
+                                                     (weapon ::weapons/ranged?)) 0 2)) ;vec-mod val ... maybe?
+                              nil ;vec-mod nm
+                              nil ;vec-mod value ... maybe?
+                              [(let [main-hand-weapon ?orcpub.dnd.e5.character/main-hand-weapon
+                                     off-hand-weapon ?orcpub.dnd.e5.character/off-hand-weapon
+                                     all-weapons-map @(subscribe [::mi/all-weapons-map])]
+                                 (and (and main-hand-weapon
+                                           (-> all-weapons-map
+                                               main-hand-weapon
+                                               ::weapons/melee?)
+                                           (not (-> all-weapons-map
+                                                    main-hand-weapon
+                                                    ::weapons/two-handed?)))
+                                      (and off-hand-weapon
+                                           (not (-> all-weapons-map  ;ensure no weapons in off hand
+                                                    off-hand-weapon
+                                                    ::weapons/type)))))])
+                 ]})
    (t/option-cfg
     {:name "Great Weapon Fighting"
      :modifiers [(modifiers/trait-cfg
@@ -1741,7 +1821,7 @@
                {:name "Two Skills"
                 :selections [(expertise-selection 2 :two-skills)]})
               (t/option-cfg
-               {:name "One Skill/Theives Tools"
+               {:name "One Skill/Thieves' Tools"
                 :selections [(expertise-selection 1 :one-skill-thieves-tools)]
                 :modifiers [(modifiers/tool-proficiency :thieves-tools)
                             (modifiers/tool-expertise :thieves-tools)]})]}))
@@ -2032,7 +2112,7 @@
                      (map (fn [sr] (assoc sr :source source)) subraces)
                      subraces))
                   [(none-option subrace-path)])
-                 
+
                  (not plugin?)
                  (conj (custom-subrace-option spell-lists spells-map language-map weapon-map subrace-path)))})))
 
@@ -2412,7 +2492,7 @@
 (defn add-mod-total-levels-prereq [lvl cls modifier]
   (if (sequential? modifier)
     (map
-     add-mod-total-levels-prereq
+     add-mod-total-levels-prereq lvl cls
      modifier)
     (update
      modifier
@@ -2528,7 +2608,7 @@
       :key (level-key i)
       :order i
       :selections (concat
-                   selections      
+                   selections
                    (some-> spellcasting-template :selections (get i)))
       :modifiers (some-> levels (get i) :modifiers)})))
 
@@ -2552,7 +2632,7 @@
                ::t/help "This option rolls virtual dice for you and sets that value for this level's hit points. It could pay off with a high roll, but you might also roll a 1."
                ::t/modifiers [(modifiers/deferred-max-hit-points)
                               (al-illegal-hit-points-mod "Rolling for hit points is not legal.")]}
-              (let [average (dice/die-mean die)]
+              (let [average (dice/die-mean-round-up die)]
                 (t/option-cfg
                  {:name "Average"
                   :key :average
@@ -2580,7 +2660,7 @@
                                (total-slots 3)
                                (get level)
                                pos?)))
-    
+
     :options (sequence
               (comp
                (filter
@@ -2885,7 +2965,7 @@
    (merge
     {:name "Race"
      :order 0
-     :help "Race determines your appearance and helps shape your culture and background. It also affects you ability scores, size, speed, languages, and many other crucial inherent traits."
+     :help "Race determines your appearance and helps shape your culture and background. It also affects your ability scores, size, speed, languages and many other crucial inherent traits."
      :tags #{:race}}
     cfg)))
 

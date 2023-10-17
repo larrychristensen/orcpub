@@ -35,6 +35,7 @@
 (def local-storage-background-key "background")
 (def local-storage-language-key "language")
 (def local-storage-invocation-key "invocation")
+(def local-storage-boon-key "boon")
 (def local-storage-selection-key "selection")
 (def local-storage-feat-key "feat")
 (def local-storage-race-key "race")
@@ -48,9 +49,8 @@
 (defn parse-route []
   (let [route (if js/window.location
                 (bidi/match-route route-map/routes js/window.location.pathname))]
-    (if route
-      route
-      default-route)))
+    (or route
+        default-route)))
 
 (def default-character (char5e/set-class t5e/character :barbarian 0 (class5e/barbarian-option nil nil nil nil nil)))
 
@@ -89,6 +89,8 @@
 
 (def default-invocation {})
 
+(def default-boon {})
+
 (def default-selection {:options []})
 
 
@@ -121,7 +123,7 @@
    :route (parse-route)
    :route-history (list default-route)
    :return-route default-route
-   :registration-form {:send-updates? true}
+   :registration-form {:send-updates? false}
    :device-type (user-agent/device-type)
    ::spells5e/builder-item default-spell
    ::monsters5e/builder-item default-monster
@@ -130,6 +132,7 @@
    ::bg5e/builder-item default-background
    ::langs5e/builder-item default-language
    ::class5e/invocation-builder-item default-invocation
+   ::class5e/boon-builder-item default-boon
    ::selections5e/builder-item default-selection
    ::feats5e/builder-item default-feat
    ::race5e/builder-item default-race
@@ -187,6 +190,10 @@
   (if js/window.localStorage
     (set-item local-storage-invocation-key (str invocation))))
 
+(defn boon->local-store [boon]
+  (if js/window.localStorage
+    (set-item local-storage-boon-key (str boon))))
+
 (defn selection->local-store [selection]
   (if js/window.localStorage
     (set-item local-storage-selection-key (str selection))))
@@ -221,9 +228,9 @@
   (if-let [stored-str (if js/window.localStorage
                         (.getItem js/window.localStorage local-storage-key))]
     (try (reader/read-string stored-str)
-         (catch js/Object e (do (prn "E" e)
-                                (js/console.warn "UNREADABLE ITEM FOUND, REMOVING.." local-storage-key stored-str)
-                                (.removeItem js/window.localStorage local-storage-key))))))
+         (catch js/Object e (prn "E" e)
+                (js/console.warn "UNREADABLE ITEM FOUND, REMOVING.." local-storage-key stored-str)
+                (.removeItem js/window.localStorage local-storage-key)))))
 
 (defn reg-local-store-cofx [key local-storage-key item-spec & [item-fn]]
   (re-frame/reg-cofx

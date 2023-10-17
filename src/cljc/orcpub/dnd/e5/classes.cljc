@@ -13,7 +13,7 @@
             [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.dnd.e5.spell-lists :as sl5e]
             [orcpub.dnd.e5.template-base :as t-base]
-            [re-frame.core :refer [reg-sub reg-sub-raw dispatch subscribe]]
+            [re-frame.core :refer [subscribe]]
             [clojure.string :as s]))
 
 (spec/def ::name (spec/and string? common/starts-with-letter?))
@@ -25,6 +25,8 @@
 (spec/def ::homebrew-subclass (spec/keys :req-un [::name ::key ::class ::option-pack]))
 
 (spec/def ::homebrew-invocation (spec/keys :req-un [::name ::key ::option-pack]))
+
+(spec/def ::homebrew-boon (spec/keys :req-un [::name ::key ::option-pack]))
 
 (defn class-level [levels class-kw]
   (get-in levels [class-kw :class-level]))
@@ -72,7 +74,7 @@
                  {:name "Rage"
                   :page 48
                   :duration units5e/minutes-1
-                  :frequency (units5e/rests (condp <= (?class-level :barbarian)
+                  :frequency (units5e/long-rests (condp <= (?class-level :barbarian)
                                               17 6
                                               12 5
                                               6 4
@@ -137,7 +139,7 @@
     :subclass-level 3
     :subclass-title "Primal Path"
     :subclass-help "Your primal path shapes the nature of your barbarian rage and gives you additional features."
-    :subclasses [{:name "Path of the Beserker"
+    :subclasses [{:name "Path of the Berserker"
                   :levels {10 {:modifiers [(mod5e/action
                                             {:name "Intimidating Presence"
                                              :level 10
@@ -920,7 +922,7 @@
                                            (t/option-cfg
                                             {:name "Swamp"
                                              :modifiers [(druid-spell 2 :darkness 3)
-                                                         (druid-spell 2 :melfs-acid-arrow 3)
+                                                         (druid-spell 2 :acid-arrow 3)
                                                          (druid-spell 3 :water-walk 5)
                                                          (druid-spell 3 :stinking-cloud 5)
                                                          (druid-spell 4 :freedom-of-movement 7)
@@ -1225,6 +1227,7 @@
    (merge
     opt5e/monk-base-cfg
     {:hit-die 8
+     :name "Monk"
      :key :monk
      :ability-increase-levels [4 8 12 16 19]
      :unarmored-abilities [::char5e/wis]
@@ -1292,7 +1295,7 @@
               3 {:modifiers [(mod5e/reaction
                               {:name "Deflect Missiles"
                                :page 78
-                               :summary (str "When hit by a ranged attack, reduce the damage by 1d10 " (common/mod-str (+ (?ability-bonuses ::char5e/dex) (?class-level :monk))) ". If you reduce it to 0, you can catch the missile and use it in a ranged attack as a monk weapon with range 20/60")})]}
+                               :summary (str "When hit by a ranged attack, reduce the damage by 1d10 " (common/mod-str (+ (?ability-bonuses ::char5e/dex) (?class-level :monk))) ". If you reduce it to 0, you can catch the missile (if you have a free hand and it's small enough to hold) and use it in a ranged attack with proficiency, as a monk weapon, for 1 ki point with range 20/60")})]}
               4 {:modifiers [(mod5e/reaction
                               {:name "Slow Fall"
                                :page 78
@@ -1348,7 +1351,7 @@
                :page 79
                :level 15
                :summary "you can't be aged magically and you need no food or water"}
-              
+
               {:name "Perfect Self"
                :page 79
                :level 20
@@ -1357,7 +1360,7 @@
                    :modifiers [(mod5e/dependent-trait
                                 {:name "Open Hand Technique"
                                  :page 79
-                                 :summary (str "when you hit with Flurry of Blows, you impose one of the effects on the target: 1) must make a DC "(?spell-save-dc ::char5e/wis) " DEX save or be knocked prone. 2) make a DC " (?spell-save-dc ::char5e/wis) " STR save or be pushed 15 ft. 3) can't take reactions until end of your next turn")})]
+                                 :summary (str "when you hit with Flurry of Blows, you impose one of the effects on the target: 1) must make a DC " (?spell-save-dc ::char5e/wis) " DEX save or be knocked prone. 2) make a DC " (?spell-save-dc ::char5e/wis) " STR save or be pushed 15 ft. 3) can't take reactions until end of your next turn")})]
                    :levels {6 {:modifiers [(mod5e/action
                                             {:name "Wholeness of Body"
                                              :page 79
@@ -1514,6 +1517,12 @@
                                                :max 1})]})]})
                   (opt5e/new-starting-equipment-selection
                    :paladin
+                   {:name "Holy Symbol"
+                    :options (map
+                              #(opt5e/starting-equipment-option % 1)
+                              equipment5e/holy-symbols)})
+                  (opt5e/new-starting-equipment-selection
+                   :paladin
                    {:name "Melee Weapon"
                     :options [(t/option-cfg
                                {:name "Five Javelins"
@@ -1650,8 +1659,8 @@
 (defn favored-enemy-option [language-map [enemy-type info]]
   (let [vec-info? (sequential? info)
         languages (if vec-info? info (:languages info))
-        name (if vec-info? (common/kw-to-name enemy-type) (:name info))]
-    (let [language-options (zipmap languages (repeat true))]
+        name (if vec-info? (common/kw-to-name enemy-type) (:name info))
+        language-options (zipmap languages (repeat true))]
       (t/option-cfg
        {:name name
         :selections (if (> (count languages) 1)
@@ -1663,7 +1672,7 @@
                     nil?
                     [(if (= 1 (count languages))
                        (mod5e/language (first languages)))
-                     (mod/set-mod ?ranger-favored-enemies enemy-type)])}))))
+                     (mod/set-mod ?ranger-favored-enemies enemy-type)])})))
 
 (defn favored-enemy-selection [language-map order]
   (t/selection-cfg
@@ -1761,6 +1770,7 @@
    (merge
     opt5e/ranger-base-cfg
     {:hit-die 10
+     :name "Ranger"
      :key :ranger
      :profs {:armor {:light false :medium false :shields false}
              :weapon {:simple false :martial false}
@@ -1772,7 +1782,7 @@
                                              (let [abilities @(subscribe [::char5e/abilities nil c])]
                                                (and (>= (::char5e/wis abilities) 13)
                                                     (>= (::char5e/dex abilities) 13)))))]
-     :ability-increase-levels [4 8 10 16 19]
+     :ability-increase-levels [4 8 12 16 19]
      :spellcaster true
      :spellcasting {:level-factor 2
                     :known-mode :schedule
@@ -1818,7 +1828,7 @@
                               {:name "Primeval Awareness"
                                :level 3
                                :page 92
-                               :summary (str "spend an X-level spell slot, for X minutes, you sense the types of creatures within 1 mile" (if (seq ?ranger-favored-terrain) (str "(6 if " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain))) ")") )})]}
+                               :summary (str "spend an X-level spell slot, for X minutes, you sense the types of creatures within 1 mile" (if (seq ?ranger-favored-terrain) (str "(6 if " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain))) ")"))})]}
               5 {:modifiers [(mod5e/num-attacks 2)]}
               6 {:selections [(favored-enemy-selection language-map 2)
                               (favored-terrain-selection 2)]}
@@ -1829,20 +1839,20 @@
                                 :frequency units5e/turns-1
                                 :level 20
                                 :page 92
-                                :summary (str "add " (common/bonus-str (?ability-bonuses ::char5e/wis)) " to an attack or damage roll") })]}}
+                                :summary (str "add " (common/bonus-str (?ability-bonuses ::char5e/wis)) " to an attack or damage roll")})]}}
      :traits [(lands-stride 8)
               {:name "Hide in Plain Sight"
                :level 10
                :page 92
-               :summary "spend 1 minute camouflaging yourself to gain +10 to Stealth checks when you don't move"}
+               :summary "You can spend 1 minute camouflaging yourself to gain +10 to Stealth checks when you don't move"}
               {:name "Vanish"
                :level 14
                :page 92
-               :summary "Hide action as a bonus action. You also can't be non-magically tracked"}
+               :summary "You can use the Hide action as a bonus action on your turn. Also, you can’t be tracked by nonmagical means, unless you choose to leave a trail."}
               {:name "Feral Senses"
                :level 18
                :page 92
-               :summary "no disadvantage on attacks against creature you can't see, you know location of invisible creatures within 30 ft."}]
+               :summary "When you attack a creature you can’t see, your inability to see it doesn’t impose disadvantage on your attack rolls against it. You are also aware of the location of any invisible creature within 30 feet of you, provided that the creature isn’t hidden from you and you aren’t blinded or deafened."}]
      :subclasses [{:name "Hunter"
                    :levels {3 {:selections [(t/selection-cfg
                                              {:name "Hunter's Prey"
@@ -1853,21 +1863,21 @@
                                                                        {:name "Colossus Slayer"
                                                                         :page 93
                                                                         :frequency units5e/turns-1
-                                                                        :summary "deal an extra d8 damage when you hit a creature that is below its HP max with a weapon attack"})]})
+                                                                        :summary "Your tenacity can wear down the most potent foes. When you hit a creature with a weapon attack, the creature takes an extra 1d8 damage if it’s below its hit point maximum. You can deal this extra damage only once per turn."})]})
                                                         (t/option-cfg
                                                          {:name "Giant Killer"
                                                           :modifiers [(mod5e/reaction
                                                                        {:name "Giant Killer"
                                                                         :page 93
                                                                         :frequency units5e/turns-1
-                                                                        :summary "attack a Large or larger creature within 5 ft that misses an attack against you"})]})
+                                                                        :summary "When a Large or larger creature within 5 feet of you hits or misses you with an attack, you can use your reaction to attack that creature immediately after its attack, provided that you can see the creature."})]})
                                                         (t/option-cfg
                                                          {:name "Horde Breaker"
                                                           :modifiers [(mod5e/trait-cfg
                                                                        {:name "Horde Breaker"
                                                                         :page 93
                                                                         :frequency units5e/turns-1
-                                                                        :summary "when you attack one creature, attack another creature within 5 feet of it with the same action"})]})]})]}
+                                                                        :summary "Once on each of your turns when you make a weapon attack, you can make another attack with the same weapon against a different creature that is within 5 feet of the original target and within range of your weapon."})]})]})]}
                             7 {:selections [(t/selection-cfg
                                              {:name "Defensive Tactics"
                                               :tags #{:class}
@@ -1876,16 +1886,22 @@
                                                           :modifiers [(mod5e/trait-cfg
                                                                        {:name "Escape the Horde"
                                                                         :frequency units5e/turns-1
-                                                                        :page 93})]})
+                                                                        :page 93
+                                                                        :summary "Opportunity attacks against you are made with disadvantage."})]})
                                                         (t/option-cfg
                                                          {:name "Multiattack Defense"
                                                           :modifiers [(mod5e/trait-cfg
                                                                        {:name "Multiattack Defense"
                                                                         :frequency units5e/turns-1
-                                                                        :page 93})]})
+                                                                        :page 93
+                                                                        :summary "When a creature hits you with an attack, you gain a +4 bonus to AC against all subsequent attacks made by that creature for the rest of the turn."})]})
                                                         (t/option-cfg
                                                          {:name "Steel Will"
-                                                          :modifiers [(mod5e/saving-throw-advantage [:frightened])]})]})]}
+                                                          :modifiers [(mod5e/saving-throw-advantage [:frightened])
+                                                                      (mod5e/trait-cfg
+                                                                       {:name "Steel Will"
+                                                                        :page 93
+                                                                        :summary "You have advantage on saving throws against being frightened."})]})]})]}
                             11 {:selections [(t/selection-cfg
                                               {:name "Multiattack"
                                                :tags #{:class}
@@ -1894,31 +1910,34 @@
                                                            :modifiers [(mod5e/action
                                                                         {:name "Volley"
                                                                          :page 93
-                                                                         :summary "make a ranged attack against any creatures within a 10 ft of a point" 
-                                                                         })]})
+                                                                         :summary "You can use your action to make a ranged attack against any number of creatures within 10 feet of a point you can see within your weapon’s range. You must have ammunition for each target, as normal, and you make a separate attack roll for each target."})]})
                                                          (t/option-cfg
                                                           {:name "Whirlwind Attack"
                                                            :modifiers [(mod5e/action
                                                                         {:name "Whirlwind Attack"
                                                                          :page 93
-                                                                         :summary "melee attack against any creatures within 5 ft. of you"})]})]})]}
+                                                                         :summary "You can use your action to make a melee attack against any number of creatures within 5 feet of you, with a separate attack roll for each target."})]})]})]}
                             15 {:selections [(t/selection-cfg
                                               {:name "Superior Hunter's Defense"
                                                :tags #{:class}
                                                :options [(t/option-cfg
                                                           {:name "Evasion"
-                                                           :modifiers [(mod5e/trait-cfg
-                                                                        (opt5e/evasion 15 93))]})
+                                                           :modifiers [(opt5e/evasion 15 93)
+                                                                       (mod5e/trait-cfg
+                                                                        {:page 93
+                                                                         :summary "When you are subjected to an effect, such as a red dragon’s fiery breath or a lightning bolt spell, that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail."})]})
                                                          (t/option-cfg
                                                           {:name "Stand Against the Tide"
                                                            :modifiers  [(mod5e/reaction
                                                                          {:name "Stand Against the Tide"
                                                                           :page 93
-                                                                          :summary "force a creature to repeat its attack on another creature when it misses you"
-                                                                          })]})
+                                                                          :summary "When a hostile creature misses you with a melee attack, you can use your reaction to force that creature to repeat the same attack against another creature (other than itself) of your choice."})]})
                                                          (t/option-cfg
                                                           {:name "Uncanny Dodge"
-                                                           :modifiers [(opt5e/uncanny-dodge-modifier 93)]})]})]}}}
+                                                           :modifiers [(opt5e/uncanny-dodge-modifier 93)
+                                                                       (mod5e/trait-cfg {:name "Uncanny Dodge"
+                                                                                         :page 93
+                                                                                         :summary "When an attacker that you can see hits you with an attack, you can use your reaction to halve the attack’s damage against you."})]})]})]}}}
                   #_{:name "Beast Master"
                      :selections [(t/selection-cfg
                                    {:name "Ranger's Companion"
@@ -1974,7 +1993,7 @@
     :weapons {:dagger 2}
     :equipment {:thieves-tools 1}
     :equipment-choices [{:name "Equipment Pack"
-                         :options {:burglers-pack 1
+                         :options {:burglars-pack 1
                                    :dungeoneers-pack 1
                                    :explorers-pack 1}}]
     :modifiers [(mod5e/dependent-trait
@@ -1988,7 +2007,7 @@
                               :name "Cunning Action"
                               :page 96
                               :frequency units5e/turns-1
-                              :summary "Dash, Disengage or Hide"
+                              :summary "as a bonus action you can Dash, Disengage or Hide"
                               })]}
              5 {:modifiers [(opt5e/uncanny-dodge-modifier 96)]}
              6 {:selections [(assoc
@@ -2029,7 +2048,7 @@
              {:level 18
               :name "Elusive"
               :page 96
-              :summary "attack rolls only have disadvantage on you if you are incapacitated"
+              :summary "no attack roll has advantage against you while you aren’t incapacitated."
               }
              {:level 20
               :name "Stroke of Luck"
@@ -2373,6 +2392,9 @@
                         {:name "Spellcasting Equipment"
                          :options {:component-pouch 1
                                    :arcane-focus 1}}]
+    :weapon-choices [{:name "Melee Weapon"
+                      :options {:quarterstaff 1
+                                :dagger 1}}]
     :equipment {:spellbook 1}
     :profs {:weapon {:dagger true :dart true :sling true :quarterstaff true :crossbow-light true}
             :save {::char5e/int true ::char5e/wis true}
@@ -2601,7 +2623,17 @@
                              melee-weapons-xform
                              weapons)})]}))
 
-(defn pact-boon-options [spell-lists spells-map]
+(defn pact-boon-options [plugin-boons spell-lists spells-map]
+ (concat
+   (map
+    (fn [{:keys [name description edit-event]}]
+      (t/option-cfg
+       {:name name
+        :modifiers [(mod5e/trait-cfg
+                     {:name (str "Pact Boon: " name)
+                      :description description})]
+        :edit-event edit-event}))
+    plugin-boons)
   [(t/option-cfg
     {:name "Pact of the Chain"
      :modifiers [(mod5e/spells-known 1 :find-familiar ::char5e/cha "Warlock")
@@ -2636,7 +2668,7 @@
      :modifiers [(mod5e/trait-cfg
                   {:name opt5e/pact-of-the-tome-name
                    :page 108
-                   :summary "you have a spellbook with 3 extra cantrips"})]})])
+                   :summary "you have a spellbook with 3 extra cantrips"})]})]))
 
 
 (defn eldritch-invocation-options [plugin-invocations spell-lists spells-map]
@@ -2949,7 +2981,7 @@ long rest."})
               false
               "uses Mystic Arcanum")}))
 
-(defn warlock-option [spell-lists spells-map plugin-subclasses-map language-map weapon-map invocations]
+(defn warlock-option [spell-lists spells-map plugin-subclasses-map language-map weapon-map invocations boons]
   (opt5e/class-option
    spell-lists
    spells-map
@@ -3001,7 +3033,7 @@ long rest."})
              3 {:selections [(t/selection-cfg
                               {:name "Pact Boon"
                                :tags #{:class}
-                               :options (pact-boon-options spell-lists spells-map)})]}
+                               :options (pact-boon-options boons spell-lists spells-map)})]}
              5 {:selections [(eldritch-invocation-selection invocations spell-lists spells-map)]}
              7 {:selections [(eldritch-invocation-selection invocations spell-lists spells-map)]}
              9 {:selections [(eldritch-invocation-selection invocations spell-lists spells-map)]}
@@ -3086,7 +3118,7 @@ long rest."})
                                                :summary (str "charm or frighten a creature within 60 ft., spell save DC " (?spell-save-dc ::char5e/cha) "WIS save")
                                                :frequency units5e/rests-1})]}}}
                  #_{:name "The Great Old One"
-                    :levels {1 {:selections [(opt5e/warlock-subclass-spell-selection [:dissonant-whispers :tashas-hideous-laughter])]}
+                    :levels {1 {:selections [(opt5e/warlock-subclass-spell-selection [:dissonant-whispers :hideous-laughter])]}
                              3 {:selections [(opt5e/warlock-subclass-spell-selection [:detect-thoughts :phantasmal-force])]}
                              5 {:selections [(opt5e/warlock-subclass-spell-selection [:clairvoyance :sending])]}
                              6 {:modifiers [(mod5e/reaction
@@ -3094,7 +3126,7 @@ long rest."})
                                               :page 110
                                               :frequency units5e/rests-1
                                               :summary "impose disadvantage on an attack roll against you, if it misses, gain advantage on your next attack roll against the attacker"})]}
-                             7 {:selections [(opt5e/warlock-subclass-spell-selection [:dominate-beast :evards-black-tentacles])]}
+                             7 {:selections [(opt5e/warlock-subclass-spell-selection [:dominate-beast :black-tentacles])]}
                              9 {:selections [(opt5e/warlock-subclass-spell-selection [:dominate-person :telekinesis])]}
                              10 {:modifiers [(mod5e/damage-resistance :psychic)]}}
                     :traits [{:name "Awakened Mind"

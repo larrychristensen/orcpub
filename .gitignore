@@ -1,4 +1,8 @@
-/resources/public/js/compiled/**
+.editorconfig
+.gitattributes
+/resources/public/css/compiled
+/resources/public/js/compiled
+/resources/*_backup.pdf
 figwheel_server.log
 pom.xml
 *jar
@@ -7,17 +11,26 @@ pom.xml
 /out/
 /target/
 /node_modules/
+.clj-kondo
+.calva
 .lein-deps-sum
 .lein-repl-history
 .lein-plugins/
 .lein-*
+.lsp
 .idea
 orcpub.iml
 profiles.clj
 env.sh
 .repl
 .nrepl-port
-/resources/*_backup.pdf
 *~
 #
 *#*
+/data
+*.crt
+*.key
+deploy/homebrew/*
+
+# As created by some LSP-protocol tooling, e.g. nvim-lsp
+.lsp

@@ -8,7 +8,7 @@
   (inc (rand-int sides)))
 
 (defn roll-n [num sides]
-  (take num (repeatedly #(die-roll sides))))
+  (repeatedly num #(die-roll sides)))
 
 (defn dice-roll [{:keys [num sides drop-num modifier]}]
   (apply +
@@ -19,11 +19,14 @@
 (defn dice-string [die die-count modifier]
   (str die "d" die-count (common/mod-str modifier)))
 
-(defn die-mean [die]
+(defn die-mean-round-down [die]
+  (int (Math/floor (/ (apply + (range 1 (inc die))) die))))
+
+(defn die-mean-round-up [die]
   (int (Math/ceil (/ (apply + (range 1 (inc die))) die))))
 
-(defn dice-mean [num sides modifier]
-  (int (Math/ceil (+ modifier (* num (/ (apply + (range 1 (inc sides))) sides))))))
+(defn dice-mean-round-down [num sides modifier]
+  (int (Math/floor (+ modifier (* num (/ (apply + (range 1 (inc sides))) sides))))))
 
 (def dice-regex #"(\d+)?d(\d+)\s?([+-])?\s?(\d+)?")
 
@@ -36,7 +39,7 @@
   (if-let [[_ num-str sides-str plus-minus-str mod-str :as match]
            (re-matches dice-regex dice-text)]
     (let [num (or (parse-int num-str) 1)
-          sides (or (parse-int sides-str) )
+          sides (parse-int sides-str)
           plus-minus (if (= "-" plus-minus-str)
                        -1
                        1)
@@ -49,6 +52,23 @@
        :mod mod
        :raw-mod raw-mod
        :plus-minus plus-minus})))
+
+(defn dice-roll-text-2 [dice-text]
+  (if-let [[_ num-str sides-str plus-minus-str mod-str :as match]
+           (re-matches dice-regex dice-text)]
+    (let [num (or (parse-int num-str) 1)
+          sides (parse-int sides-str)
+          plus-minus (if (= "-" plus-minus-str)
+                       -1
+                       +1)
+          raw-mod (or (parse-int mod-str) +0)
+          mod (* raw-mod plus-minus)
+          rolls (roll-n num sides)
+          total (apply + mod rolls)]
+      ;(prn (str "total:" total " roll:" rolls " plus-minus:" plus-minus-str " raw-mod:" raw-mod " dice-text:" dice-text))
+      (if (boolean (re-find  #"(20)" (str rolls)))
+        (str " ***  NATURAL 20  ***  " rolls " " plus-minus-str " " raw-mod " = " total)
+        (str rolls " " plus-minus-str " " raw-mod " = " total)))))
 
 (spec/def ::num pos-int?)
 (spec/def ::sides pos-int?)

@@ -44,9 +44,9 @@
   (str (if (pos? val) "+") val))
 
 (defn mod-str [val]
-  (cond (pos? val) (str " + " val)
-        (neg? val) (str " - " (int (Math/abs val)))
-        :else ""))
+  (cond (pos? val) (str "+" val)
+        (neg? val) (str "-" (int (Math/abs val)))
+        :else (str "+" val)))
 
 (defn map-vals [val-fn m]
   (reduce-kv

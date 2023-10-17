@@ -1,7 +1,6 @@
 (ns orcpub.dnd.e5.views-2
   (:require [orcpub.route-map :as routes]
-            [clojure.string :as s]
-            #?(:cljs [re-frame.core :refer [subscribe dispatch dispatch-sync]])))
+            [clojure.string :as s]))
 
 (defn style [style]
   #?(:cljs style)
@@ -36,40 +35,19 @@
     [:div
      (svg-icon-2 icon 64 "dark")
      [:div
-      [:span.splash-button-title-prefix "DnD 5e "] [:span title]]]]])
+      [:span.splash-button-title-prefix "D&D 5e "] [:span title]]]]])
 
 (defn legal-footer []
   [:div.m-l-15.m-b-10.m-t-10.t-a-l
-   [:span "© 2018 OrcPub"]
+   [:span "© 2020 OrcPub"]
    [:a.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]
    [:a.m-l-5 {:href "/privacy-policy" :target :_blank} "Privacy Policy"]])
 
 (def orange-style
   {:color :orange})
 
-(defn legal-footer-2 []
-  [:div
-   {:style (style {:display :flex
-                   :justify-content :space-between
-                   :align-items :center
-                   :flex-wrap :wrap
-                   :padding "10px"})}
-   [:div
-    [:div {:style (style {:margin-bottom "5px"})} "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
-   [:div.m-l-10 {:style (style {:margin-left "10px"})}
-    [:a {:style (style orange-style) :href "https://github.com/larrychristensen/orcpub/issues" :target :_blank} "Feedback/Bug Reports"]]
-   [:div.m-l-10.m-r-10.p-10
-    {:style (style {:margin-left "10px"
-                    :margin-right "10px"
-                    :padding "10px"})}
-    [:a {:style (style orange-style) :href "/privacy-policy" :target :_blank} "Privacy Policy"]
-    [:a.m-l-5 {:style (orange-style {:margin-left "5px"}) :href "/terms-of-use" :target :_blank} "Terms of Use"]]
-   [:div.legal-footer
-    [:p "© 2018 OrcPub" [:span {:style (style {:margin-left "20px"})} "Contact: " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"]]]
-    [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2017 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]])
-
 (defn splash-page []
-  [:div.app
+  [:div.app.h-full
    {:style (style {:display :flex
                    :flex-direction :column})}
    [:div
@@ -84,16 +62,15 @@
      [:div
       {:style (style {:display :flex
                       :justify-content :space-around})}
-      [:img
-       {:src "/image/orcpub-logo.svg"
-        :style (style {:height "70px"})}]]
+      [:img.w-30-p
+       {:src "/image/dmv-logo.svg" }]]
      [:div
       {:style (style {:text-align :center
                       :text-shadow "1px 2px 1px black"
                       :font-weight :bold
                       :font-size "14px"
                       :height "48px"})}
-      "version 2.0"]
+      "Community edition"]
      [:div
       {:style (style
                {:display :flex
@@ -114,7 +91,7 @@
        routes/dnd-e5-spell-list-page-route)
       (splash-page-button
        "Monsters"
-       "hydra"
+       "spiked-dragon-head"
        routes/dnd-e5-monster-list-page-route)
       (splash-page-button
        "Items"
@@ -134,7 +111,7 @@
        routes/dnd-e5-encounter-builder-page-route)
       (splash-page-button
        "Monster Builder"
-       "ifrit"
+       "anatomy"
        routes/dnd-e5-monster-builder-page-route)
       (splash-page-button
        "Spell Builder"
@@ -160,4 +137,4 @@
     {:style (style {:font-size "12px"
                     :color :white
                     :padding "10px"})}
-    (legal-footer-2)]])
+    ]])

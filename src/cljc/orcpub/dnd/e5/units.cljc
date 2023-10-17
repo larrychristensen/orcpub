@@ -71,3 +71,8 @@
   (units ::long-rest amount))
 
 (def long-rests-1 (long-rests 1))
+
+(defn short-rests [amount]
+  (units ::short-rest amount))
+
+(def short-rests-1 (short-rests 1))

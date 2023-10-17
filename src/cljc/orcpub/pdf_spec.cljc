@@ -29,8 +29,10 @@
    " / "
    (map
     (fn [cls-key]
-      (let [{:keys [class-name class-level subclass]} (levels cls-key)]
-        (str class-name " (" class-level ")")))
+      (let [{:keys [class-name class-level subclass-name]} (levels cls-key)]
+        (if (empty? subclass-name)
+          (str class-name " (" class-level ")")
+          (str class-name " [" subclass-name "] (" class-level ")"))))
     classes)))
 
 (defn ability-related-bonuses [suffix vals]
@@ -87,7 +89,7 @@
 
 (defn vec-trait [nm items]
   (if (seq items) (str nm ": " (s/join ", " items))))
- 
+
 (defn keyword-vec-trait [nm keywords]
   (vec-trait nm (map name keywords)))
 
@@ -105,13 +107,11 @@
         damage-immunities (char5e/damage-immunities built-char)
         condition-immunities (char5e/condition-immunities built-char)
         immunities (char5e/immunities built-char)
-        number-of-attacks (char5e/number-of-attacks built-char)
         crit-values (char5e/critical-hit-values built-char)]
     (s/join
      "\n"
      (remove nil?
              [(if (and darkvision (pos? darkvision)) (str "Darkvision: " darkvision " ft."))
-              (if (> number-of-attacks 1) (str "Number of Attacks: " number-of-attacks))
               (if (> (count crit-values) 1) (str "Critical Hits: " (char5e/crit-values-str built-char)))
               (vec-trait "Damage Resistances" (resistance-strings damage-resistances))
               (vec-trait "Damage Immunities" (resistance-strings damage-immunities))
@@ -119,21 +119,22 @@
               (vec-trait "Immunities" (resistance-strings immunities))]))))
 
 (defn traits-fields [built-char]
-  (let [bonus-actions (sort-by :name (es/entity-val built-char :bonus-actions))
-        actions (sort-by :name (es/entity-val built-char :actions))
-        reactions (sort-by :name (es/entity-val built-char :reactions))
-        traits (sort-by :name (es/entity-val built-char :traits))
+  (let [traits-by-type (group-by :type (es/entity-val built-char :traits))
+        bonus-actions (sort-by :name (concat (es/entity-val built-char :bonus-actions)
+                                             (traits-by-type :b-action)))
+        actions (sort-by :name (concat (es/entity-val built-char :actions)
+                                       (traits-by-type :action)))
+        reactions (sort-by :name (concat (es/entity-val built-char :reactions)
+                                         (traits-by-type :reaction)))
+        traits (sort-by :name (traits-by-type nil))
         traits-str (traits-string traits)
         actions? (or (seq bonus-actions)
                      (seq actions)
                      (seq reactions)
                      (seq traits))
-        header (features-and-traits-header built-char)]
-    {:features-and-traits (if (not (s/blank? header))
-                            (str header
-                                 "\n\n"
-                                 (if actions? "(additional features & traits on last page)")))
-     :features-and-traits-2 (str
+        header (features-and-traits-header built-char)
+        ]
+    {:features-and-traits-2 (str header "\n\n"
                              (if actions?
                                (s/join
                                 "\n\n"
@@ -161,8 +162,8 @@
         armor (es/entity-val built-char :armor)
         magic-armor (es/entity-val built-char :magic-armor)
         magic-items (es/entity-val built-char :magic-items)
-        weapons (es/entity-val built-char :weapons)
-        magic-weapons (es/entity-val built-char :magic-weapons)
+        weapons (sort (es/entity-val built-char :weapons))
+        magic-weapons (sort (es/entity-val built-char :magic-weapons))
         custom-equipment (into {}
                                (map
                                 (juxt ::char-equip5e/name identity)
@@ -174,24 +175,28 @@
         all-equipment (merge equipment custom-equipment custom-treasure magic-items armor magic-armor)
         treasure (es/entity-val built-char :treasure)
         treasure-map (into {} (map (fn [[kw {qty ::char-equip5e/quantity}]] [kw qty]) treasure))
-        unequipped-items (filter
+        unequipped-items  (filter
                           (fn [[kw {:keys [::char-equip5e/equipped? ::char-equip5e/quantity]}]]
                             (and (not equipped?)
                                  (pos? quantity)))
-                          (merge all-equipment weapons magic-weapons))]
+                          (merge all-equipment weapons magic-weapons magic-items))]
     (merge
      (select-keys treasure-map coin-keys)
-     {:equipment (s/join
-                  "; "
-                  (map
+     {:features-and-traits (s/join
+                  "\n"
+                  (sort
+                   (map
                    (fn [[kw {count ::char-equip5e/quantity}]]
-                     (str (disp5e/equipment-name mi5e/all-equipment-map kw) " (" count ")"))
+                     (if (> count 1)
+                       (str (disp5e/equipment-name mi5e/all-equipment-map kw) " x" count )
+                       (str (disp5e/equipment-name mi5e/all-equipment-map kw))
+                       )
+                     )
                    (filter
                     (fn [[kw {:keys [::char-equip5e/equipped? ::char-equip5e/quantity]}]] (and equipped? (pos? quantity)))
-                    (concat
-                     all-equipment))))
+                    (concat all-equipment)))))
       :treasure (s/join
-                  "; "
+                  "\n"
                   (map
                    (fn [[kw {count ::char-equip5e/quantity}]]
                      (str (disp5e/equipment-name mi5e/all-equipment-map kw) " (" count ")"))
@@ -287,6 +292,7 @@
                             print-prepared-spells?
                             prepares-spells
                             prepared-spells-by-class]
+  
   (let [flat-spells (char5e/flat-spells spells-known)
         spells-map @(subscribe [::spells/spells-map])
         plugin-spells-map @(subscribe [::spells/plugin-spells-map])
@@ -374,14 +380,17 @@
        spell-pages)))))
 
 (defn spellcasting-fields [built-char print-prepared-spells?]
-  (let [spells-known (char5e/spells-known built-char)
-        spell-attack-modifier-fn (char5e/spell-attack-modifier-fn built-char)
+  (let [spell-attack-modifier-fn (char5e/spell-attack-modifier-fn built-char)
         spell-save-dc-fn (char5e/spell-save-dc-fn built-char)
         spell-slots (char5e/spell-slots built-char)
         prepares-spells (char5e/prepares-spells built-char)
-        prepared-spells-by-class (char5e/prepared-spells-by-class built-char)]
-    
-    (spell-page-fields spells-known
+        prepared-spells-by-class (char5e/prepared-spells-by-class built-char)
+        sorted-spells-known (into {}
+                                  (map (fn [[id datum]]
+                                         [id (into (sorted-map) datum)]))
+                                  (char5e/spells-known built-char))]
+
+    (spell-page-fields sorted-spells-known
                        spell-slots
                        spell-save-dc-fn
                        spell-attack-modifier-fn
@@ -442,16 +451,20 @@
                           (= type :ammunition))
                         all-weapons))
         first-3-weapons (take 3 weapon-fields)
-        rest-weapons (drop 3 weapon-fields)]
+        rest-weapons (drop 3 weapon-fields)
+        number-of-attacks (char5e/number-of-attacks built-char)
+        ]
+
     (apply merge
-     {:attacks-and-spellcasting (s/join "\n"
+     {:attacks-and-spellcasting (str "Number of Attacks: " number-of-attacks "\n"
+                                     (s/join "\n"
                                         (concat (map
                                                  attack-string
                                                  (es/entity-val built-char :attacks))
                                                 (map
                                                  (fn [{:keys [name attack-bonus damage]}]
-                                                   (str "- " name ". " (common/bonus-str attack-bonus) ", " damage))
-                                                 rest-weapons)))}
+                                                   (str name ". " (common/bonus-str attack-bonus) ", " damage))
+                                                 rest-weapons))))}
      (map-indexed
       (fn [i {:keys [name attack-bonus damage]}]
         {(keyword (str "weapon-name-" (inc i))) name
@@ -488,7 +501,9 @@
                  {:keys [print-character-sheet?
                          print-spell-cards?
                          print-prepared-spells?
-                         print-large-abilities?] :as options}]
+                         print-large-abilities?
+                         print-character-sheet-style?
+                         print-spell-card-dc-mod?] :as options}]
   (let [race (char5e/race built-char)
         subrace (char5e/subrace built-char)
         abilities (abilities-spec
@@ -515,11 +530,16 @@
         levels (char5e/levels built-char)
         classes (char5e/classes built-char)
         character-name (char5e/character-name built-char)
-        total-hit-dice (s/join
-                        " / "
-                        (map
-                         (fn [{:keys [class-level hit-die]}] (str class-level "d" hit-die))
-                         (vals levels)))
+        con-mod (es/entity-val built-char :con-mod)
+        total-hit-dice (->> levels
+                            vals
+                            (reduce
+                              (fn [levels-per-die level]
+                                (update levels-per-die (:hit-die level) (fnil #(+ % (:class-level level)) 0)))
+                              {})
+                            (sort-by key)
+                            (map #(str (val %) "x(1d" (key %) "+" con-mod ")"))
+                            (s/join "\n"))
         speed (speed built-char)]
     (merge
      {:race (str race (if subrace (str "/" subrace)))
@@ -528,10 +548,11 @@
       :background (char5e/background built-char)
       :prof-bonus (common/bonus-str (es/entity-val built-char :prof-bonus))
       :ac current-ac
-      :hd-total total-hit-dice
+      :hd total-hit-dice
       :initiative (common/bonus-str (es/entity-val built-char :initiative))
       :speed speed
       :hp-max (es/entity-val built-char :max-hit-points)
+      :hp-current (char5e/current-hit-points built-char)
       :passive (es/entity-val built-char :passive-perception)
       :other-profs (other-profs-field built-char)
       :personality-traits (s/join "\n\n" [(char5e/personality-trait-1 built-char) (char5e/personality-trait-2 built-char)])
@@ -555,7 +576,10 @@
       :faction-image-url-failed (char5e/faction-image-url-failed built-char)
       :faction-name (char5e/faction-name built-char)
       :print-character-sheet? print-character-sheet?
-      :print-spell-cards? print-spell-cards?}
+      :print-spell-cards? print-spell-cards?
+      :print-character-sheet-style? print-character-sheet-style?
+      :print-spell-card-dc-mod? print-spell-card-dc-mod?
+      }
      (attacks-and-spellcasting-fields built-char)
      (skill-fields built-char)
      abilities

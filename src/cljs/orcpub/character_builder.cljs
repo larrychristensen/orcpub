@@ -33,23 +33,20 @@
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.events :as events5e]
-            [orcpub.dnd.e5.db :as db5e]
+            [orcpub.dnd.e5.db :as db]
             [orcpub.dnd.e5.views :as views5e]
             [orcpub.route-map :as routes]
             [orcpub.pdf-spec :as pdf-spec]
             [orcpub.user-agent :as user-agent]
-            [orcpub.dnd.e5.db :as db]
 
             [clojure.spec.alpha :as spec]
             [clojure.spec.test.alpha :as stest]
-            [cljs.core.async :refer [<!]]
             [clojure.core.match :refer [match]]
 
             [reagent.core :as r]
-            [re-frame.core :refer [subscribe dispatch dispatch-sync]])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
-
-(def print-disabled? false)
+            [re-frame.core :refer [subscribe dispatch dispatch-sync]]))
+;console-print
+(def print-disabled? true)
 
 (def print-enabled? (and (not print-disabled?)
                          js/window.location
@@ -259,7 +256,7 @@
   (let [options (::t/options selection)
         selected-classes @(subscribe [::char5e/levels])
         unselected-classes (remove
-                            (into #{} (keys selected-classes))
+                            (set (keys selected-classes))
                             (map ::t/key options))
         unselected-classes-set (set unselected-classes)
         remaining-classes (filter
@@ -442,7 +439,7 @@
   (let [{:keys [::t/key]} selection
         selected-items @(subscribe [:entity-option key])
         item-map @(subscribe item-map-sub)
-        selected-keys (into #{} (map ::entity/key selected-items))
+        selected-keys (set (map ::entity/key selected-items))
         options (entity/selection-options selection)
         magic-weapons (= key :magic-weapons)]
     [:div
@@ -586,6 +583,13 @@
 
 (def toggle-homebrew (memoize toggle-homebrew-fn))
 
+(defn tooltip [text content]
+  (if @(subscribe [:mobile?])
+    content
+    [:div.tooltip
+     content
+     [:span.tooltiptext text]]))
+
 (defn selection-section-base []
   (let [expanded? (r/atom false)]
     (fn [{:keys [title path parent-title name icon help max min remaining body hide-lock? hide-homebrew?]}]
@@ -603,14 +607,22 @@
           (if (and path help)
             [show-info-button expanded?])
           (if (not hide-lock?)
-            [:i.fa.f-s-16.m-l-10.m-r-5.pointer
-             {:class-name (if locked? "fa-lock" "fa-unlock-alt opacity-5 hover-opacity-full")
-              :on-click (toggle-locked path)}])
+            [tooltip
+             (if locked?
+               "Locked to prevent changes - click to unlock"
+               "Unlocked - click to lock the section to prevent changes")
+             [:i.fa.f-s-16.m-l-10.m-r-5.pointer
+              {:class-name (if locked? "fa-lock" "fa-unlock-alt opacity-5 hover-opacity-full")
+               :on-click (toggle-locked path)}]])
           (if (not hide-homebrew?)
             [:span.pointer
              {:class-name (if (not homebrew?) "opacity-5 hover-opacity-full")
               :on-click (toggle-homebrew path)}
-             (views5e/svg-icon "beer-stein" 18)])]
+             [tooltip
+              (if-not homebrew?
+                (str "Homebrew is off for " title " - enabling this option allows you select options you would not normally have (turns on homebrew rules)")
+                (str "Homebrew is on for " title " - you can select anything and make it homebrew"))
+              (views5e/svg-icon "beer-stein" 18)]])]
          (if (and help path @expanded?)
            [help-section help])
          (if (int? min)
@@ -814,7 +826,7 @@
                                      (<= min num-increased max))
                                0
                                (- min num-increased))
-               allowed-abilities (into #{} (map ::t/key options))
+               allowed-abilities (set (map ::t/key options))
                ancestors-title (views-aux/ancestor-names-string built-template path)]
            ^{:key i}
            [:div
@@ -1090,7 +1102,7 @@
 
 (def point-buy-starting-abilities-fn #(set-abilities! (char5e/abilities 8 8 8 8 8 8)))
 
-(def reroll-abilities-fn #(reroll-abilities))
+(def reroll-abilities-fn reroll-abilities)
 
 (def standard-abilities-fn #(set-abilities! (char5e/abilities 15 14 13 12 10 8)))
 
@@ -1168,8 +1180,8 @@
         selected-skills (get-in character path)
         selected-count (count selected-skills)
         remaining (- max selected-count)
-        available-skills (into #{} (map ::t/key options))
-        selected-skill-keys (into #{} (map ::entity/key selected-skills))]
+        available-skills (set (map ::t/key options))
+        selected-skill-keys (set (map ::entity/key selected-skills))]
     (doall
      (map
       (fn [{:keys [name key ability icon description]}]
@@ -1212,7 +1224,8 @@
    [:th.p-5 "Base"]
    [:th.p-5 "Con"]
    [:th.p-5 "Misc"]
-   [:th.p-5 "Total"]])
+   [:th.p-5 "Total"]
+   [:th.p-5 ""]])
 
 (defn hp-selection-name-level [selection]
   (let [[_ class-kw _ level-kw _] (::entity/path selection)
@@ -1312,7 +1325,8 @@
                  [:td.p-5 first-class-hit-die]
                  [:td.p-5 con-bonus-str]
                  [:td.p-5 (common/bonus-str (+ misc-bonus cls-level-bonus))]
-                 [:td.p-5 (+ (:hit-die first-class) level-bonus)]])
+                 [:td.p-5 (+ (:hit-die first-class) level-bonus)]
+                 [:td.p5]])
               (doall
                (map-indexed
                 (fn [j level-value]
@@ -1330,14 +1344,20 @@
                               :value (:value level-value)}]]
                    [:td.p-5 con-bonus-str]
                    [:td.p-5 (common/bonus-str (+ misc-bonus cls-level-bonus))]
-                   [:td.p-5 (+ (:value level-value) level-bonus)]])
+                   [:td.p-5 (+ (:value level-value) level-bonus)]
+                   [:td.p-5 [:button.roll-button
+                             {:on-click (fn [e]
+                                          (let [value (js/parseInt (dice/die-roll (-> levels cls :hit-die)))]
+                                            (dispatch [:set-level-hit-points built-template character level-value value])))}
+                             "d" (-> levels cls :hit-die)]]])
                 level-values))
               [:tr
                [:td.p-5 "Total"]
                [:td.p-5 total-base-hps]
                [:td.p-5 (common/bonus-str total-con-bonus)]
                [:td.p-5 (common/bonus-str total-misc-bonus)]
-               [:td.p-5 (+ total-base-hps total-con-bonus total-misc-bonus)]]]]]))
+               [:td.p-5 (+ total-base-hps total-con-bonus total-misc-bonus)]
+               [:td.p-5]]]]]))
        classes))
      (if (> (count classes) 1)
        [:div.m-t-20
@@ -1350,7 +1370,8 @@
            [:td.p-5 total-base-hps]
            [:td.p-5 (common/bonus-str total-con-bonus)]
            [:td.p-5 (common/bonus-str total-misc-bonus)]
-           [:td.p-5 total-hps]]]]])]))
+           [:td.p-5 total-hps]
+           [:td.p-5]]]]])]))
 
 (defn remaining-adjustments-fn [built-template character]
   #(Math/abs (entity/count-remaining built-template character %)))
@@ -1453,7 +1474,7 @@
 
 (defn add-subclass-component []
   (info-block [:span
-               [:span (str srd-prefix "Don't see a class or class here that you want to use?")]
+               [:span (str srd-prefix "Don't see a class or subclass here that you want to use?")]
                [:div.m-t-5
                 [:span.pointer.underline.orange
                  {:on-click #(dispatch [:route routes/dnd-e5-class-builder-page-route])}
@@ -1468,6 +1489,12 @@
     :icon "woman-elf-face"
     :tags #{:race :subrace}
     :components [add-race-component]}
+   {:name "Class / Level"
+    :icon "mounted-knight"
+    :tags #{:class :subclass}
+    :ui-fns [{:key :class :title "Class / Level" :ui-fn class-levels-selector}
+             {:key :hit-points :group? true :ui-fn hit-points-editor}]
+    :components [add-subclass-component]}
    {:name "Ability Scores / Feats"
     :icon "strong"
     :tags #{:ability-scores :feats}
@@ -1478,45 +1505,39 @@
     :icon "ages"
     :tags #{:background}
     :components [add-background-component]}
-   {:name "Class / Level"
-    :icon "mounted-knight"
-    :tags #{:class :subclass}
-    :ui-fns [{:key :class :title "Class / Level" :ui-fn class-levels-selector}
-             {:key :hit-points :group? true :ui-fn hit-points-editor}]
-    :components [add-subclass-component]}
-   {:name "Spells"
-    :icon "spell-book"
-    :tags #{:spells}
-    :components [known-mode-info
-                 add-spell-component]}
    {:name "Proficiencies"
     :icon "juggler"
     :tags #{:profs}
     ;;:ui-fns [{:key :skill-proficiency :ui-fn skills-selector}]
     }
+   {:name "Spells"
+    :icon "spell-book"
+    :tags #{:spells}
+    :components [known-mode-info
+                 add-spell-component]}
    {:name "Equipment"
     :icon "backpack"
     :tags #{:equipment :starting-equipment}
     :ui-fns (letfn [(select-selection [v] (select-keys v [:selection]))]
               [{:key :weapons
                 :hide-homebrew? true
-                :ui-fn (fn [v] [inventory-selector [::equip5e/weapons-map] 60 (select-selection v)])}
+                :ui-fn (fn [v] [inventory-selector [::equip5e/weapons-map] 70 (select-selection v)])}
                {:key :magic-weapons
                 :hide-homebrew? true
-                :ui-fn (fn [v] [inventory-selector [::mi5e/magic-weapon-map] 60 (select-selection v)])}
+                :ui-fn (fn [v] [inventory-selector [::mi5e/magic-weapon-map] 70 (select-selection v)])}
                {:key :armor
                 :hide-homebrew? true
-                :ui-fn (fn [v] [inventory-selector [::equip5e/armor-map] 60 (select-selection v)])}
+                :ui-fn (fn [v] [inventory-selector [::equip5e/armor-map] 70 (select-selection v)])}
                {:key :magic-armor
                 :hide-homebrew? true
-                :ui-fn (fn [v] [inventory-selector [::mi5e/magic-armor-map] 60 (select-selection v)])}
+                :ui-fn (fn [v] [inventory-selector [::mi5e/magic-armor-map] 70 (select-selection v)])}
                {:key :equipment
                 :hide-homebrew? true
                 :ui-fn (fn [v]
-                         [inventory-selector [::equip5e/equipment-map] 60 (select-selection v) ::char5e/custom-equipment])}
+                         [inventory-selector [::equip5e/equipment-map] 70 (select-selection v) ::char5e/custom-equipment])}
                {:key :other-magic-items
                 :hide-homebrew? true
-                :ui-fn (fn [v] [inventory-selector [::mi5e/other-magic-items-map] 60 (select-selection v)])}
+                :ui-fn (fn [v] [inventory-selector [::mi5e/other-magic-items-map] 70 (select-selection v)])}
                {:key :treasure
                 :hide-homebrew? true
                 :ui-fn (fn [v] [inventory-selector [::equip5e/treasure-map] 100 (select-selection v) ::char5e/custom-treasure])}])}])
@@ -1542,7 +1563,7 @@
                 name])
              [:div.t-a-c
               (views5e/svg-icon icon 32)]]
-            (if (not (= total-remaining 0))
+            (if (not (zero? total-remaining))
               [:div.flex.justify-cont-end.m-t--10.p-l-20 (remaining-indicator total-remaining 12 11)])]))
        pages))]))
 
@@ -1803,10 +1824,9 @@
       [character-textarea entity-values ::char5e/flaws]]
      [:div.flex.align-items-c.w-100-p.m-t-30
       (if image-url
-        [:img.m-r-10 {:src image-url
+        [:img.m-r-10.image-character-thumbnail {:src image-url
                       :on-error (image-error :failed-loading-image image-url)
-                      :on-load (if image-url-failed image-loaded)
-               :style image-style}])
+                      :on-load (if image-url-failed image-loaded)}])
       [:div.flex-grow-1
        [:span.personality-label.f-s-18 "Image URL"]
        [character-input entity-values ::char5e/image-url nil set-image-url]
@@ -1817,11 +1837,10 @@
       [character-input entity-values ::char5e/faction-name]]
      [:div.flex.align-items-c.w-100-p.m-t-30
       (if faction-image-url
-        [:img.m-r-10 {:src faction-image-url
+        [:img.m-r-10.image-faction-thumbnail {:src faction-image-url
                       :on-error (image-error :failed-loading-faction-image faction-image-url)
                       :on-load (if faction-image-url-failed
-                                 faction-image-loaded)
-               :style image-style}])
+                                 faction-image-loaded)}])
       [:div.flex-grow-1
        [:span.personality-label.f-s-18 "Faction Image URL"]
        [character-input entity-values ::char5e/faction-image-url nil set-faction-image-url]
@@ -1883,7 +1902,7 @@
 (defn al-legality []
   (let [expanded? (r/atom false)]
     (fn [al-illegal-reasons used-resources]
-      (let [num-resources (count (into #{} (map :resource-key used-resources)))
+      (let [num-resources (count (set (map :resource-key used-resources)))
             multiple-resources? (> num-resources 1)
             has-homebrew? @(subscribe [:has-homebrew?])
             mobile? @(subscribe [:mobile?])
@@ -2011,12 +2030,12 @@
                              @(subscribe [::char5e/character-changed? character-id])
                              (not= db/default-character character))]
     (if print-enabled? (print-char built-char))
+    (if (not character-changed?) (js/window.scrollTo 0,0)) ;//Force a scroll to top of page only if we are not editing.
     [views5e/content-page
      "Character Builder"
      (remove
       nil?
       [(if character-id [views5e/share-link character-id])
-       (if character-id [views5e/character-page-fb-button character-id])
        {:title "Random"
         :icon "random"
         :on-click (confirm-handler
@@ -2046,7 +2065,7 @@
                  "Update Existing Character"
                  "Save New Character")
         :icon "save"
-        :style (if character-changed? unsaved-button-style) 
+        :style (if character-changed? unsaved-button-style)
         :on-click save-character}
        (if (:db/id character)
          {:title "View"

@@ -118,6 +118,7 @@
    {:name "Quarterstaff",
     ::damage-type :bludgeoning,
     ::type :simple,
+    ::subtype :staff
     ::damage-die 6,
     ::damage-die-count 1,
     ::versatile {::damage-die 8, ::damage-die-count 1},
@@ -130,7 +131,8 @@
     ::type :simple,
     ::damage-die-count 1,
     ::melee? true,
-    :key :sickle
+    :key :sickle,
+    ::light? true,
     ::link "https://en.wikipedia.org/wiki/Sickle"}
    {::melee? true,
     ::versatile {::damage-die 8, ::damage-die-count 1},
@@ -221,7 +223,8 @@
     ::subtype :sword
     ::damage-die-count 1,
     ::versatile {::damage-die 10, ::damage-die-count 1},
-    ::melee? true,
+    ::melee? true
+    ::finesse? false
     :key :longsword
     ::link "https://en.wikipedia.org/wiki/Sword"}
    {:name "Maul",
@@ -350,15 +353,6 @@
     ::range {::min 100, ::max 400},
     :key :crossbow-heavy
     ::ammunition? true
-    ::two-handed? true}
-   {:name "Thunder Cannon",
-    ::damage-type :piercing,
-    ::damage-die 6,
-    ::type ::special
-    ::damage-die-count 2,
-    ::ranged? true,
-    ::range {::min 150, ::max 500},
-    :key :thunder-cannon
     ::two-handed? true}
    {:name "Longbow",
     ::damage-type :piercing,

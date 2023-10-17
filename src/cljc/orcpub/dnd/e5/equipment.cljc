@@ -52,8 +52,8 @@
     :key :herbalism-kit}
    {:name "Navigator's Tools"
     :key :navigators-tools}
-   {:name "Poisoner's Tools"
-    :key :poisoners-tools}
+   {:name "Poisoner's Kit"
+    :key :poisoners-kit}
    {:name "Thieves' Tools"
     :key :thieves-tools}])
 
@@ -243,7 +243,7 @@
   (into
    []
    common/add-keys-xform
-   [{:name "Burgler's Pack"
+   [{:name "Burglar's Pack"
      :items {:backpack 1
              :ball-bearings 1
              :string 1

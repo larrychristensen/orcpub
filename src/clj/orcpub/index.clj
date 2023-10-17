@@ -1,7 +1,8 @@
 (ns orcpub.index
   (:require [hiccup.page :refer [html5 include-css include-js]]
             [orcpub.oauth :as oauth]
-            [orcpub.dnd.e5.views-2 :as views-2]))
+            [orcpub.dnd.e5.views-2 :as views-2]
+            [orcpub.favicon :as fi]))
 
 (defn meta-tag [property content]
   (if content
@@ -16,18 +17,24 @@
                           fb-type]}
                   & [splash?]]
   (html5
-   {:lang :en
-    :style "height:100%"}
+   {:lang :en}
    [:head
     (meta-tag "og:url" url)
     (meta-tag "og:type" fb-type)
     (meta-tag "og:title" title)
     (meta-tag "og:description" description)
     (meta-tag "og:image" image)
-    (meta-tag "google-signin-client_id" "86323071944-te5j96nbke0duomgm24j2on4rs4p7ob9.apps.googleusercontent.com")
     [:meta {:charset "UTF-8"}]
     [:meta {:name "viewport"
-            :content "width=device-width, initial-scale=1"}]
+            :content "width=device-width, initial-scale=1.0, minimum-scale=1.0"}]
+    (fi/install :png-prefix "favicon-"
+                :img "/favicon"
+                :xml "/favicon"
+                :ver "1")
+    (include-css "/css/cookiestyles.css")
+    [:script
+     "document.documentElement.style.setProperty('--innerHeight', `${window.innerHeight}px`);
+     window.addEventListener('resize', () => document.documentElement.style.setProperty('--innerHeight', `${window.innerHeight}px`));"]
     [:style
      "
 .splash-page-content {}
@@ -40,9 +47,15 @@
 .splash-button .splash-button-content {height: 60px; width: 60px; font-size: 10px}
 .legal-footer-parent {display: none}}
 
-#app {height:100%;background-image: linear-gradient(182deg, #313A4D, #080A0D)}
+body {background-color: #080A0D}
 
-.app {background-image: linear-gradient(182deg, #313A4D, #080A0D);height:100%;overflow-y:scroll;-webkit-overflow-scrolling :touch;font-family:Open Sans, sans-serif}
+#app {background-image: linear-gradient(182deg, #313A4D, #080A0D);background-attachment: fixed}
+
+.app {height:100%;font-family:Open Sans, sans-serif}
+
+.h-full {height: 100vh;height: var(--innerHeight, 100vh)}
+
+.min-h-full {min-height: 100vh;min-height: var(--innerHeight, 100vh)}
 
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -95,46 +108,34 @@ table {
 	border-spacing: 0;
 }
 
-html, body, #app {
-    height: 100%;
+html {
+	min-height: 100%;
 }"]
-    [:title title]
-    [:script
-     (format
-      "   window.fbAsyncInit = function() {
-	  FB.init({
-	  appId      : '%s',
-	  xfbml      : true,
-          cookie     : true,
-	  version    : 'v2.9'
-	  });
-	  FB.AppEvents.logPageView();
-	  };
-
-	  (function(d, s, id){
-	  var js, fjs = d.getElementsByTagName(s)[0];
-	  if (d.getElementById(id)) {return;}
-	  js = d.createElement(s); js.id = id;
-	  js.src = \"//connect.facebook.net/en_US/sdk.js\";
-	  fjs.parentNode.insertBefore(js, fjs);
-	  }(document, 'script', 'facebook-jssdk'));"
-      (oauth/app-id url))]]
-   [:body {:style "margin:0;height:100%;line-height:1"}
+    [:title title]]
+   [:body {:style "margin:0;line-height:1"}
     [:div#app
      (if splash?
        (views-2/splash-page)
-       [:div {:style "display:flex;justify-content:space-around"}
+       [:div.h-full {:style "display:flex;justify-content:space-around"}
         [:img {:src "/image/spiral.gif"
                :style "height:200px;width:200px;margin-top:200px"}]])]
     (include-css "/css/compiled/styles.css")
     (include-js "/js/compiled/orcpub.js")
-    (include-css "/font-awesome-4.7.0/css/font-awesome.min.css")
+    (include-js "/js/cookies.js")
+    (include-css "/assets/font-awesome/5.13.1/css/all.min.css")
     (include-css "https://fonts.googleapis.com/css?family=Open+Sans")
+    [:script " window.start.init({Palette:\"palette7\",Mode:\"banner bottom\",})"]    
     [:script
-     "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-	  ga('create', 'UA-69209720-3', 'auto');
-	  ga('send', 'pageview');"]]))
+     "let plugins = localStorage.getItem ('plugins');
+     if(plugins === null || plugins === '{}')
+     {
+       fetch('https://' + window.location.host + '/homebrew.orcbrew')
+         .then(resp => resp.text())
+         .then(text => {
+           if(!text.toUpperCase().includes('NOT FOUND')){
+             localStorage.setItem('plugins',text);
+             window.location.reload(false);
+           }
+       });
+     }
+    "]]))

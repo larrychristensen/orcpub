@@ -1,8 +1,8 @@
 (ns orcpub.system
   (:require [com.stuartsierra.component :as component]       
-            [reloaded.repl :refer [init start stop go reset]] 
-            [io.pedestal.http :as http]                      
-            [orcpub.pedestal :as pedestal]                                       
+            [reloaded.repl :as rrepl]
+            [io.pedestal.http :as http]
+            [orcpub.pedestal :as pedestal]                         
             [orcpub.routes :as routes]
             [orcpub.datomic :as datomic]
             [environ.core :as environ])
@@ -22,7 +22,7 @@
   {::http/routes routes/routes
    ::http/type :jetty
    ::http/port (let [port-str (System/getenv "PORT")]
-                 (if port-str (Integer/parseInt port-str)))
+                 (when port-str (Integer/parseInt port-str)))
    ::http/join false
    ::http/resource-path "/public"
    ::http/container-options {:context-configurator (fn [c]
@@ -35,16 +35,16 @@
     :conn
     (datomic/new-datomic
       (if-let [datomic-url (:datomic-url environ/env)]
-        (str datomic-url "?aws_access_key_id=" (environ/env :datomic-access-key) "&aws_secret_key=" (environ/env :datomic-secret-key))
+        (str datomic-url)
         (when true #_(= :dev env)
           (println "WARN: no :datomic-url environment variable set; using local dev")
-          "datomic:free://localhost:4334/orcpub")))
+          "datomic:free://localhost:4334/orcpub?password=datomic")))
 
     :service-map
     (cond-> (merge
               {:env env}
               prod-service-map
-              (if (= :dev env) dev-service-map-overrides))
+              (when (= :dev env) dev-service-map-overrides))
       true http/default-interceptors
       (= :dev env) http/dev-interceptors)
 
@@ -53,4 +53,4 @@
       (pedestal/new-pedestal)
       [:service-map :conn])))
 
-(reloaded.repl/set-init! #(system :prod))
+(rrepl/set-init! #(system :prod))

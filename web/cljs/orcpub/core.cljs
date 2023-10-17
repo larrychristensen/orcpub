@@ -1,5 +1,4 @@
 (ns orcpub.core
-  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [orcpub.character-builder :as ch]
             [orcpub.dnd.e5.subs]
             [orcpub.dnd.e5.equipment-subs]
@@ -8,7 +7,6 @@
             [orcpub.dnd.e5.views-2 :as views-2]
             [orcpub.route-map :as routes]
             [cljs-http.client :as http]
-            [cljs.core.async :refer [<!]]
             [clojure.string :as s]
             [re-frame.core :refer [dispatch dispatch-sync subscribe]]
             [reagent.core :as r]
@@ -46,6 +44,7 @@
    routes/dnd-e5-feat-builder-page-route views/feat-builder-page
    routes/dnd-e5-language-builder-page-route views/language-builder-page
    routes/dnd-e5-invocation-builder-page-route views/invocation-builder-page
+   routes/dnd-e5-boon-builder-page-route views/boon-builder-page
    routes/dnd-e5-selection-builder-page-route views/selection-builder-page
    routes/dnd-e5-item-list-page-route views/item-list
    routes/dnd-e5-char-page-route views/character-page
@@ -87,7 +86,7 @@
 
 (defonce history (doto (make-history)
                    (goog.events/listen EventType.NAVIGATE
-                                       #(handle-url-change %))
+                                       handle-url-change)
                    (.setEnabled true)))
 
 (defn query-map [query-str]

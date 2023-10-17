@@ -319,22 +319,6 @@
  (fn [db [_ name]]
    (get-in db [:expanded-items name])))
 
-(defn get-fb-login-status [callback]
-  (try
-    (if (and js/FB
-             (.-getLoginStatus js/FB))
-      (.getLoginStatus js/FB callback))
-    (catch js/Object e (js/console.log "FAILED GETTING FB LOGIN STATUE" e))))
-
-(reg-sub-raw
- :fb-logged-in?
- (fn [app-db _]
-   (get-fb-login-status
-    (fn [response]
-      (dispatch [:set-fb-logged-in (= "connected" (.-status response))])))
-   (ra/make-reaction
-    (fn [] (get @app-db :fb-logged-in? false)))))
-
 (defn auth-headers [db]
   (let [token (-> db :user-data :token)]
     (if token
@@ -349,7 +333,7 @@
                                      {:headers (auth-headers @app-db)}))]
           (dispatch [:set-loading false])
           (case (:status response)
-            200 (dispatch [::char5e/set-characters (-> response :body)])
+            200 (dispatch [::char5e/set-characters (:body response)])
             401 (if (not login-optional?)
                   (dispatch [:route-to-login]))
             500 (dispatch (events/show-generic-error)))))
@@ -364,7 +348,7 @@
                                      {:headers (auth-headers @app-db)}))]
           (dispatch [:set-loading false])
           (case (:status response)
-            200 (dispatch [::party5e/set-parties (-> response :body)])
+            200 (dispatch [::party5e/set-parties (:body response)])
             401 (if (not login-optional?)
                   (dispatch [:route-to-login]))
             500 (dispatch (events/show-generic-error)))))
@@ -390,7 +374,7 @@
  :following-users
  :<- [:user]
  (fn [user _]
-   (into #{} (:following user))))
+   (set (:following user))))
 
 (reg-sub
  ::char5e/character-map
@@ -431,7 +415,7 @@
               (case (:status response)
                 200 (dispatch [::char5e/set-character
                                int-id
-                               (char5e/from-strict (-> response :body))])
+                               (char5e/from-strict (:body response))])
                 401 (dispatch [:route-to-login])
                 500 (dispatch (events/show-generic-error))))))
       (ra/make-reaction
@@ -553,44 +537,50 @@
    ::char5e/current-hit-points char5e/current-hit-points
    ::char5e/hit-point-level-bonus char5e/hit-point-level-bonus
    ::char5e/class-hit-point-level-bonus char5e/class-hit-point-level-bonus
-   ::char5e/initiative char5e/initiative 
-   ::char5e/passive-perception char5e/passive-perception 
-   ::char5e/character-name char5e/character-name 
-   ::char5e/proficiency-bonus char5e/proficiency-bonus 
-   ::char5e/save-bonuses char5e/save-bonuses 
-   ::char5e/saving-throws char5e/saving-throws 
-   ::char5e/race char5e/race 
+   ::char5e/initiative char5e/initiative
+   ::char5e/passive-perception char5e/passive-perception
+   ::char5e/character-name char5e/character-name
+   ::char5e/proficiency-bonus char5e/proficiency-bonus
+   ::char5e/save-bonuses char5e/save-bonuses
+   ::char5e/saving-throws char5e/saving-throws
+   ::char5e/race char5e/race
    ::char5e/subrace char5e/subrace
+   ::char5e/age char5e/age
    ::char5e/sex char5e/sex
-   ::char5e/alignment char5e/alignment 
-   ::char5e/background char5e/background 
-   ::char5e/classes char5e/classes 
-   ::char5e/levels char5e/levels 
-   ::char5e/darkvision char5e/darkvision 
-   ::char5e/skill-profs char5e/skill-proficiencies 
+   ::char5e/height char5e/height
+   ::char5e/weight char5e/weight
+   ::char5e/hair char5e/hair
+   ::char5e/eyes char5e/eyes
+   ::char5e/skin char5e/skin
+   ::char5e/alignment char5e/alignment
+   ::char5e/background char5e/background
+   ::char5e/classes char5e/classes
+   ::char5e/levels char5e/levels
+   ::char5e/darkvision char5e/darkvision
+   ::char5e/skill-profs char5e/skill-proficiencies
    ::char5e/skill-bonuses char5e/skill-bonuses
    ::char5e/skill-expertise char5e/skill-expertise
    ::char5e/tool-profs char5e/tool-proficiencies
    ::char5e/tool-expertise char5e/tool-expertise
-   ::char5e/tool-bonus-fn char5e/tool-bonus-fn 
-   ::char5e/weapon-profs char5e/weapon-proficiencies 
-   ::char5e/armor-profs char5e/armor-proficiencies 
+   ::char5e/tool-bonus-fn char5e/tool-bonus-fn
+   ::char5e/weapon-profs char5e/weapon-proficiencies
+   ::char5e/armor-profs char5e/armor-proficiencies
    ::char5e/resistances char5e/damage-resistances
    ::char5e/damage-vulnerabilities char5e/damage-vulnerabilities
-   ::char5e/damage-immunities char5e/damage-immunities 
-   ::char5e/immunities char5e/immunities 
-   ::char5e/condition-immunities char5e/condition-immunities 
-   ::char5e/languages char5e/languages 
+   ::char5e/damage-immunities char5e/damage-immunities
+   ::char5e/immunities char5e/immunities
+   ::char5e/condition-immunities char5e/condition-immunities
+   ::char5e/languages char5e/languages
    ::char5e/abilities char5e/ability-values
    ::char5e/race-ability-increases char5e/race-ability-increases
    ::char5e/subrace-ability-increases char5e/subrace-ability-increases
    ::char5e/ability-increases char5e/ability-increases
-   ::char5e/ability-bonuses char5e/ability-bonuses 
-   ::char5e/armor-class char5e/base-armor-class 
-   ::char5e/armor-class-with-armor char5e/armor-class-with-armor 
-   ::char5e/armor char5e/normal-armor-inventory 
-   ::char5e/magic-armor char5e/magic-armor-inventory 
-   ::char5e/all-armor-inventory char5e/all-armor-inventory 
+   ::char5e/ability-bonuses char5e/ability-bonuses
+   ::char5e/armor-class char5e/base-armor-class
+   ::char5e/armor-class-with-armor char5e/armor-class-with-armor
+   ::char5e/armor char5e/normal-armor-inventory
+   ::char5e/magic-armor char5e/magic-armor-inventory
+   ::char5e/all-armor-inventory char5e/all-armor-inventory
    ::char5e/spells-known char5e/spells-known
    ::char5e/spells-known-modes char5e/spells-known-modes
    ::char5e/spell-slots char5e/spell-slots
@@ -600,7 +590,7 @@
    ::char5e/spell-modifiers char5e/spell-modifiers
    ::char5e/spell-slot-factors char5e/spell-slot-factors
    ::char5e/total-spellcaster-levels char5e/total-spellcaster-levels
-   ::char5e/weapons char5e/normal-weapons-inventory 
+   ::char5e/weapons char5e/normal-weapons-inventory
    ::char5e/magic-weapons char5e/magic-weapons-inventory
    ::char5e/equipment char5e/normal-equipment-inventory
    ::char5e/custom-equipment char5e/custom-equipment
@@ -824,17 +814,17 @@
 (reg-sub
  ::char5e/monster-types
  (fn [_ _]
-   (into #{} (map :type monsters5e/monsters))))
+   (set (map :type monsters5e/monsters))))
 
 (reg-sub
  ::char5e/monster-subtypes
  (fn [_ _]
-   (into #{} (mapcat :subtypes monsters5e/monsters))))
+   (set (mapcat :subtypes monsters5e/monsters))))
 
 (reg-sub
  ::char5e/monster-sizes
  (fn [_ _]
-   (into #{} (map :size monsters5e/monsters))))
+   (set (map :size monsters5e/monsters))))
 
 (reg-sub
  ::char5e/spell-text-filter
@@ -874,9 +864,25 @@
        sorted-items)))
 
 (reg-sub
+  ::char5e/monster-sort-criteria
+  (fn [db _]
+    (get db ::char5e/monster-sort-criteria "name")))
+
+(reg-sub
+  ::char5e/monster-sort-direction
+  (fn [db _]
+    (get db ::char5e/monster-sort-direction "asc")))
+
+(reg-sub
+  ::char5e/monster-filters
+  (fn [db _]
+    (get db ::char5e/monster-filter-hidden?)))
+
+(reg-sub
  ::char5e/monster-filter-hidden?
- (fn [db [_ filter value]]
-   (get-in db [::char5e/monster-filter-hidden? filter value])))
+ :<- [::char5e/monster-filters]
+ (fn [monster-filters [_ filter value]]
+   (get-in monster-filters [filter value] false)))
 
 (reg-sub
  ::char5e/spell-prepared?
@@ -1191,6 +1197,12 @@
    (-> db ::char5e/exclude-spell-cards-print? not)))
 
 (reg-sub
+ ::char5e/print-spell-card-dc-mod?
+ (fn [db _]
+   (-> db ::char5e/exclude-spell-cards-by-dc-mod? not)))
+
+
+(reg-sub
  ::char5e/print-character-sheet?
  (fn [db _]
    (-> db ::char5e/exclude-character-sheet-print? not)))
@@ -1206,9 +1218,19 @@
    (get db ::char5e/print-large-abilities?)))
 
 (reg-sub
+ ::char5e/print-character-sheet-style?
+ (fn [db [_ id]]
+   (get db ::char5e/print-character-sheet-style?)))
+
+(reg-sub
  ::char5e/delete-confirmation-shown?
  (fn [db [_ id]]
    (get-in db [::char5e/delete-confirmation-shown? id])))
+
+(reg-sub
+ ::char5e/delete-plugin-confirmation-shown?
+ (fn [db _]
+   (get-in db [::char5e/delete-plugin-confirmation-shown?])))
 
 (reg-sub
  ::char5e/newb-char-data

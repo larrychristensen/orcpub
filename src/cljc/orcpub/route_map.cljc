@@ -42,6 +42,7 @@
 (def dnd-e5-class-builder-page-route :class-builder-5e-page)
 (def dnd-e5-language-builder-page-route :language-builder-5e-page)
 (def dnd-e5-invocation-builder-page-route :invocation-builder-5e-page)
+(def dnd-e5-boon-builder-page-route :boon-builder-5e-page)
 (def dnd-e5-feat-builder-page-route :feat-builder-5e-page)
 (def dnd-e5-selection-builder-page-route :selection-builder-5e-page)
 
@@ -63,19 +64,24 @@
 (def dnd-e5-my-content-route :my-content-5e-page)
 
 (def dnd-e5-my-content-routes #{dnd-e5-my-content-route
-                                dnd-e5-spell-builder-page-route
-                                dnd-e5-monster-builder-page-route
                                 dnd-e5-feat-builder-page-route
                                 dnd-e5-background-builder-page-route
-                                dnd-e5-encounter-builder-page-route
-                                dnd-e5-combat-tracker-page-route
                                 dnd-e5-race-builder-page-route
                                 dnd-e5-subrace-builder-page-route
                                 dnd-e5-subclass-builder-page-route
                                 dnd-e5-class-builder-page-route
                                 dnd-e5-language-builder-page-route
                                 dnd-e5-invocation-builder-page-route
+                                dnd-e5-boon-builder-page-route
                                 dnd-e5-selection-builder-page-route})
+
+(def dnd-e5-my-encounters-route :my-content-5e-page)
+
+(def dnd-e5-my-encounters-routes #{dnd-e5-combat-tracker-page-route
+                                   dnd-e5-encounter-builder-page-route }  )
+
+
+
 
 (def register-route :register)
 (def register-page-route :register-page)
@@ -86,8 +92,6 @@
 (def re-verify-route :re-verify)
 (def verify-sent-route :verify-sent)
 (def login-route :login)
-(def fb-login-route :fb-login)
-(def google-login-route :google-login)
 (def login-page-route :login-page)
 (def follow-user-route :follow-user)
 (def character-pdf-route :character-pdf)
@@ -115,8 +119,6 @@
                   "re-verify" re-verify-route
                   "register" register-route
                   "login" login-route
-                  "fb-login" fb-login-route
-                  "google-login" google-login-route
                   "user" user-route
                   
                   "character.pdf" character-pdf-route
@@ -171,6 +173,7 @@
                               "class-builder" dnd-e5-class-builder-page-route
                               "language-builder" dnd-e5-language-builder-page-route
                               "invocation-builder" dnd-e5-invocation-builder-page-route
+                              "boon-builder" dnd-e5-boon-builder-page-route
                               "feat-builder" dnd-e5-feat-builder-page-route
                               "spell-builder" dnd-e5-spell-builder-page-route
                               "selection-builder" dnd-e5-selection-builder-page-route
@@ -187,4 +190,4 @@
   (apply bidi/path-for routes args))
 
 (defn match-route [path]
-  (->> path (bidi/match-route routes)))
+  (bidi/match-route routes path))

@@ -1,0 +1,50 @@
+---
+version: '3'
+services:
+  orcpub:
+    build:
+      context: .
+      dockerfile: docker/orcpub/Dockerfile
+    environment:
+      PORT: 8890
+      EMAIL_SERVER_URL: ''
+      EMAIL_ACCESS_KEY: ''
+      EMAIL_SECRET_KEY: ''
+      EMAIL_SERVER_PORT: 587
+      # Email address to send from, will default to 'no-reply@orcpub.com'
+      EMAIL_FROM_ADDRESS: ''
+      # Email address to send errors to
+      EMAIL_ERRORS_TO: ''
+      EMAIL_SSL: 'TRUE'
+      EMAIL_TLS: 'FALSE'
+      # Datomic connection string - Make sure the <change this> matches the DATOMIC_PASSWORD below 
+      DATOMIC_URL: datomic:free://datomic:4334/orcpub?password=<change this>
+      # The secret used to hash your password in the browser, 20+ characters recommended
+      SIGNATURE: '<change me to something unique>'
+    depends_on:
+      - datomic
+    restart: always
+  datomic:
+    build:
+      context: .
+      dockerfile: docker/datomic/Dockerfile
+    environment:
+      ADMIN_PASSWORD: <change this as well!>
+      # Must match the <change this> in the DATOMIC_URL above.
+      DATOMIC_PASSWORD: <change this>
+    volumes:
+      - ./data:/data
+      - ./logs:/logs
+    restart: always
+  web:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./deploy/snakeoil.crt:/etc/nginx/snakeoil.crt
+      - ./deploy/snakeoil.key:/etc/nginx/snakeoil.key
+    depends_on:
+      - orcpub
+    restart: always

@@ -1,6 +1,7 @@
 (ns orcpub.datomic
   (:require [com.stuartsierra.component :as component]
-            [datomic.api :as d]))
+            [datomic.api :as d]
+            [orcpub.db.schema :as schema]))
 
 (defrecord DatomicComponent [uri conn]
   component/Lifecycle
@@ -8,7 +9,10 @@
     (if (:conn this)
       this
       (do
-        (assoc this :conn (d/connect uri)))))
+        (d/create-database uri)
+        (let [connection (d/connect uri)]
+          (d/transact connection schema/all-schemas)
+          (assoc this :conn connection)))))
   (stop [this]
     (assoc this :conn nil)))
 
